@@ -9,7 +9,6 @@ import SocialSource from './components/Sidebar/Pages/Dashboard/Analytics/SocialS
 import LastTransaction from './components/Sidebar/Pages/Dashboard/Analytics/LastTransaction';
 import Agent from './components/Sidebar/Pages/Dashboard/Agent/Agent';
 import PropertyGrid from './components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid';
-import PropertyList from './components/Sidebar/Pages/Property/PropertyList/PropertyList';
 import PropertyDetails from './components/Sidebar/Pages/Property/PropertyDetails/PropertyDetails';
 import AddProperty from './components/Sidebar/Pages/Property/AddProperty/AddProperty';
 import Login from './components/auth/login';
@@ -20,7 +19,7 @@ import ConfirmPassword from './components/auth/ConfirmPassword';
 
 function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start with false so login page shows first
+  const [isAuthenticated, setIsAuthenticated] = useState(false); 
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -69,7 +68,6 @@ function App() {
                   
                   <Route path="/dashboard/agent" element={<Agent />} />
                   <Route path="/property/property-grid" element={<PropertyGrid />} />
-                  <Route path="/property/property-list" element={<PropertyList />} />
                   <Route path="/property/property-details" element={<PropertyDetails />} />
                   <Route path="/property/add-property" element={<AddProperty />} />
                   

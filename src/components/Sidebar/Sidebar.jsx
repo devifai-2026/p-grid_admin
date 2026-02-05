@@ -46,10 +46,6 @@ const Sidebar = ({ collapsed }) => {
           title: 'Property Grid',
           link: '/property/property-grid'
         },
-        {
-          title: 'Property List',
-          link: '/property/property-list'
-        },
          {
           title: 'Property Details',
           link: '/property/property-details'

@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FiTrendingUp, FiPercent } from 'react-icons/fi';
 import { FaRupeeSign } from 'react-icons/fa';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const AgentCard = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 600,
+      once: true,
+    });
+  }, []);
+
   const stats = [
     {
       title: 'Earn of the Month',
@@ -35,14 +44,20 @@ const AgentCard = () => {
   ];
 
   return (
-    <div className=" ">
+    <div className="">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow duration-200">
+          <div 
+            key={index} 
+            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+            data-aos="fade-up"
+            data-aos-delay={index * 100}
+          >
             <div className="flex justify-between items-start">
-              {/* Left side - Text content */}
               <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">{stat.title}</div>
+                <div className="text-sm text-gray-500 mb-1">
+                  {stat.title}
+                </div>
                 <div className={`text-2xl font-bold ${stat.change === 'positive' ? 'text-green-600' : 'text-gray-800'}`}>
                   {stat.value}
                 </div>
@@ -54,8 +69,7 @@ const AgentCard = () => {
                 )}
               </div>
               
-              {/* Right side - Icon */}
-              <div className={`p-2 rounded-lg ${stat.color}`}>
+              <div className={`p-2 rounded-lg ${stat.color} transition-transform duration-300 hover:scale-110`}>
                 {stat.icon}
               </div>
             </div>
