@@ -11,11 +11,18 @@ import Agent from './components/Sidebar/Pages/Dashboard/Agent/Agent';
 import PropertyGrid from './components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid';
 import PropertyDetails from './components/Sidebar/Pages/Property/PropertyDetails/PropertyDetails';
 import AddProperty from './components/Sidebar/Pages/Property/AddProperty/AddProperty';
+// import GridView from './components/Sidebar/Pages/Agents/GridView/GridView';
+// import AgentDetails from './components/Sidebar/Pages/Agents/AgentDetails/AgentDetails';
+// import AddAgent from './components/Sidebar/Pages/Agents/AddAgent/AddAgent';
+
 import Login from './components/auth/login';
 import SignUp from './components/auth/SignUp';
 import ResetEmail from './components/auth/ResetEmail';
 import ResetOtp from './components/auth/ResetOtp';
 import ConfirmPassword from './components/auth/ConfirmPassword';
+import GridView from './components/Sidebar/Pages/Customers/GridView/GridView';
+import CustomerDetails from './components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails';
+import AddCustomer from './components/Sidebar/Pages/Customers/AddCustomer/AddCustomer';
 
 function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -55,6 +62,7 @@ function App() {
                 <BreadCrumbs />
                 
                 <Routes>
+                  {/* Dashboard Routes */}
                   <Route path="/dashboard/analytics" element={
                     <>
                       <AnalyticsCards />
@@ -67,13 +75,25 @@ function App() {
                   } />
                   
                   <Route path="/dashboard/agent" element={<Agent />} />
+                  
+                  {/* Property Routes */}
                   <Route path="/property/property-grid" element={<PropertyGrid />} />
                   <Route path="/property/property-details" element={<PropertyDetails />} />
                   <Route path="/property/add-property" element={<AddProperty />} />
                   
+                  {/* Agent Routes */}
+                  {/* <Route path="/agents/grid-view" element={<GridView />} />
+                  <Route path="/agents/agent-details" element={<AgentDetails />} />
+                  <Route path="/agents/add-agent" element={<AddAgent />} />
+                  <Route path="/agents" element={<Navigate to="/agents/grid-view" />} /> */}
+                  
+                  {/* Customer Routes */}
+                  <Route path="/customers/grid-view" element={<GridView />} />
+                  <Route path="/customers/customer-details" element={<CustomerDetails />} />
+                  <Route path="/customers/add-customer" element={<AddCustomer />} />
+                  <Route path="/customers" element={<Navigate to="/customers/grid-view" />} />
+                  
                   {/* Other Routes */}
-                  <Route path="/agents" element={<div>Agents Page</div>} />
-                  <Route path="/customers" element={<div>Customers Page</div>} />
                   <Route path="/orders" element={<div>Orders Page</div>} />
                   <Route path="/transactions" element={<div>Transactions Page</div>} />
                   <Route path="/reviews" element={<div>Reviews Page</div>} />

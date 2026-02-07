@@ -58,8 +58,22 @@ const Sidebar = ({ collapsed }) => {
        
       ]
     },
-    { title: 'Agents', icon: <MdRealEstateAgent className="w-6 h-6" />, link: '/agents' },
-    { title: 'Customers', icon: <FiUsers className="w-6 h-6" />, link: '/customers' },
+    // { title: 'Agents',
+    //   icon: <MdRealEstateAgent className="w-6 h-6" />,
+    //         submenus: [
+    //           { title: 'Grid View', link: '/agents/grid-view' },
+    //           { title: 'Agent Details', link: '/agents/agent-details' },
+    //           { title: 'Add Agent', link: '/agents/add-agent' },
+    //         ]
+    // },
+       { title: 'Customers',
+      icon: <FiUsers className="w-6 h-6" />,
+            submenus: [
+              { title: 'Grid View', link: '/customers/grid-view' },
+              { title: 'Customer Details', link: '/customers/customer-details' },
+              { title: 'Add Customer', link: '/customers/add-customer' },
+            ]
+    },
     { title: 'Orders', icon: <FiPackage className="w-6 h-6" />, link: '/orders' },
     { title: 'Transactions', icon: <FiCreditCard className="w-6 h-6" />, link: '/transactions' },
     { title: 'Reviews', icon: <FiStar className="w-6 h-6" />, link: '/reviews' },
