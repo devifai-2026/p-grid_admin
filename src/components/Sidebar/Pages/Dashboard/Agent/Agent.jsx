@@ -6,10 +6,9 @@ const Agent = () => {
 
 
   return (
-    <div className="">
-    
-      <AgentCard></AgentCard>
-      <SalesDetail></SalesDetail>
+    <div className="flex flex-col gap-6">
+      <AgentCard />
+      <SalesDetail />
     </div>
   );
 };

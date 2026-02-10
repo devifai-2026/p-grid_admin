@@ -34,7 +34,7 @@ const SocialSource = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Section - Social Source Header & Total Buyer */}
         <div className="col-span-1">
           <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -97,7 +97,7 @@ const SocialSource = () => {
         </div>
 
         {/* Middle Section - Most Sales Location */}
-        <div className="col-span-2">
+        <div className="col-span-1 lg:col-span-2">
           <div className="bg-white rounded-2xl shadow-sm p-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">

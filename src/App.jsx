@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Header';
@@ -16,10 +16,30 @@ import SignUp from './components/auth/SignUp';
 import ResetEmail from './components/auth/ResetEmail';
 import ResetOtp from './components/auth/ResetOtp';
 import ConfirmPassword from './components/auth/ConfirmPassword';
+import GridView from './components/Sidebar/Pages/Customers/GridView/GridView';
+import CustomerDetails from './components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails';
+import AddCustomer from './components/Sidebar/Pages/Customers/AddCustomer/AddCustomer';
 
-function App() {
+const App = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); 
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024; // lg breakpoint
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(false); // Reset collapsed state on mobile
+        setShowMobileSidebar(false); // Hide sidebar by default on mobile
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -29,32 +49,63 @@ function App() {
     setIsAuthenticated(false);
   };
 
+  const toggleSidebar = () => {
+    if (isMobile) {
+        setShowMobileSidebar(!showMobileSidebar);
+    } else {
+        setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 font-sans">
         {isAuthenticated ? (
           // Show dashboard when authenticated
-          <div className="flex">
-            {/* Sidebar */}
-            <div 
-              className={`${sidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0`}
-              style={{ height: '100vh', overflowY: 'auto' }}
-            >
-              <Sidebar collapsed={sidebarCollapsed} />
-            </div>
+          <div className="flex h-screen overflow-hidden">
+            {/* Sidebar Desktop */}
+            {!isMobile && (
+                <div 
+                  className={`${sidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300 ease-in-out h-full overflow-y-auto border-r border-gray-200`}
+                >
+                  <Sidebar collapsed={sidebarCollapsed} />
+                </div>
+            )}
+
+            {/* Sidebar Mobile Overlay */}
+            {isMobile && (
+                <>
+                    {/* Backdrop */}
+                    {showMobileSidebar && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                            onClick={() => setShowMobileSidebar(false)}
+                        />
+                    )}
+                    {/* Sidebar Drawer */}
+                    <div 
+                        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform transition-transform duration-300 ease-in-out ${
+                            showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
+                        } lg:hidden`}
+                    >
+                        <Sidebar collapsed={false} />
+                    </div>
+                </>
+            )}
             
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col" style={{ height: '100vh' }}>
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
               {/* Main Header */}
-              <div className="flex-shrink-0">
-                <Header toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onLogout={handleLogout} />
+              <div className="flex-shrink-0 z-30 bg-white">
+                <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
               </div>
               
               {/* Scrollable Content Area */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
                 <BreadCrumbs />
                 
                 <Routes>
+                  {/* Dashboard Routes */}
                   <Route path="/dashboard/analytics" element={
                     <>
                       <AnalyticsCards />
@@ -67,13 +118,25 @@ function App() {
                   } />
                   
                   <Route path="/dashboard/agent" element={<Agent />} />
+                  
+                  {/* Property Routes */}
                   <Route path="/property/property-grid" element={<PropertyGrid />} />
                   <Route path="/property/property-details" element={<PropertyDetails />} />
                   <Route path="/property/add-property" element={<AddProperty />} />
                   
+                  {/* Agent Routes */}
+                  {/* <Route path="/agents/grid-view" element={<GridView />} />
+                  <Route path="/agents/agent-details" element={<AgentDetails />} />
+                  <Route path="/agents/add-agent" element={<AddAgent />} />
+                  <Route path="/agents" element={<Navigate to="/agents/grid-view" />} /> */}
+                  
+                  {/* Customer Routes */}
+                  <Route path="/customers/grid-view" element={<GridView />} />
+                  <Route path="/customers/customer-details" element={<CustomerDetails />} />
+                  <Route path="/customers/add-customer" element={<AddCustomer />} />
+                  <Route path="/customers" element={<Navigate to="/customers/grid-view" />} />
+                  
                   {/* Other Routes */}
-                  <Route path="/agents" element={<div>Agents Page</div>} />
-                  <Route path="/customers" element={<div>Customers Page</div>} />
                   <Route path="/orders" element={<div>Orders Page</div>} />
                   <Route path="/transactions" element={<div>Transactions Page</div>} />
                   <Route path="/reviews" element={<div>Reviews Page</div>} />
