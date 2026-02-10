@@ -1,10 +1,12 @@
-import  { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BsBookmark } from 'react-icons/bs';
 import { FaBath, FaBed, FaRuler } from 'react-icons/fa';
-import { FiMapPin,  FiHeart, FiSearch } from 'react-icons/fi';
+import { FiMapPin, FiHeart, FiSearch, FiFilter, FiX } from 'react-icons/fi';
 import { MdOutlineRoofing } from 'react-icons/md';
 
 const PropertyGrid = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([6000, 100000]);
   const [selectedFilters, setSelectedFilters] = useState({
     forRent: false,
@@ -19,6 +21,15 @@ const PropertyGrid = () => {
     restaurant: false,
     fitnessClub: false
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+        setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const properties = [
     {
@@ -171,9 +182,37 @@ const PropertyGrid = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen flex">
+    <div className="bg-gray-50 min-h-screen flex flex-col lg:flex-row relative">
+      {/* Mobile Header & Filter Toggle */}
+      <div className="lg:hidden p-4 bg-white border-b border-gray-200 sticky top-0 z-30 flex justify-between items-center shadow-sm">
+        <h2 className="text-lg font-bold text-gray-800">Properties</h2>
+        <button 
+            onClick={() => setShowFilters(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+        >
+            <FiFilter /> Filters
+        </button>
+      </div>
+
+      {/* Mobile Backdrop */}
+      {isMobile && showFilters && (
+        <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowFilters(false)}
+        />
+      )}
+
       {/* Left Sidebar - Filters */}
-      <div className="w-64 bg-white p-2 border-r border-gray-200 overflow-y-auto">
+      <div 
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white p-4 border-r border-gray-200 overflow-y-auto transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:w-64 lg:block lg:z-auto ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="flex justify-between items-center mb-6 lg:hidden">
+            <h3 className="text-lg font-bold text-gray-800">Filters</h3>
+            <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
+                <FiX size={20} />
+            </button>
+        </div>
+
         <h3 className="text-sm font-semibold text-gray-700 mb-6">Type Of Place</h3>
 
         {/* Custom Price Range */}

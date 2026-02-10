@@ -450,21 +450,21 @@ const AddAgent = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-4 pb-8">
-                <button
-                  type="submit"
-                  className="px-8 py-3 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold transition-colors flex items-center gap-2"
-                >
-                  <FaUser size={16} />
-                  Create Agent
-                </button>
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pb-8">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-8 py-3 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                  className="w-full sm:w-auto justify-center px-8 py-3 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
                 >
                   <MdCancel size={16} />
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto justify-center px-8 py-3 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                >
+                  <FaUser size={16} />
+                  Create Agent
                 </button>
               </div>
             </form>

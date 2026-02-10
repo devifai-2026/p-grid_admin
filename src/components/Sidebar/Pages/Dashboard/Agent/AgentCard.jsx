@@ -44,16 +44,15 @@ const AgentCard = () => {
   ];
 
   return (
-    <div className="">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div 
             key={index} 
-            className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+            className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
             data-aos="fade-up"
             data-aos-delay={index * 100}
           >
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
                 <div className="text-sm text-gray-500 mb-1">
                   {stat.title}
@@ -69,14 +68,13 @@ const AgentCard = () => {
                 )}
               </div>
               
-              <div className={`p-2 rounded-lg ${stat.color} transition-transform duration-300 hover:scale-110`}>
+              <div className={`p-2 rounded-lg ${stat.color} transition-transform duration-300 hover:scale-110 flex-shrink-0`}>
                 {stat.icon}
               </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
   );
 };
 

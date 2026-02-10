@@ -92,12 +92,12 @@ const SalesDetail = () => {
   const COLORS = ['#6366f1', '#f3f4f6'];
 
   return (
-    <div className="bg-gray-50 mt-5 min-h-screen">
+    <div className="w-full">
   
 
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Left Column */}
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-1 lg:col-span-2 space-y-6">
           {/* Sales Funnel */}
           <div className="bg-white rounded-2xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
@@ -131,7 +131,7 @@ const SalesDetail = () => {
             </ResponsiveContainer>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               <div className="text-center">
                 <p className="text-gray-500 text-sm mb-1">Visitors</p>
                 <p className="text-xl font-bold text-gray-800">123.7k</p>
@@ -165,7 +165,7 @@ const SalesDetail = () => {
             </div>
 
             {/* Time Period Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6 p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 p-6">
               <div>
                 <p className="text-gray-500 text-sm mb-1">Today</p>
                 <p className="text-2xl font-bold text-gray-800">$8,839</p>
@@ -214,7 +214,7 @@ const SalesDetail = () => {
           </div>
 
           {/* Bottom Row */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Collection of Rent */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <div className="flex justify-between items-center mb-6">
@@ -345,7 +345,7 @@ const SalesDetail = () => {
               <p className="text-gray-700 font-medium mb-4">Revenue Sources</p>
               
               {/* Source Items */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
@@ -466,8 +466,8 @@ const SalesDetail = () => {
 
             {/* Income Stats */}
             <h2 className='text-xs text-gray-600 mb-2'>Income Statistics</h2>
-            <div className=" flex items-center justify-between">
-              <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center justify-between w-full sm:w-auto">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <span className="text-lg"><TfiWallet /></span>
@@ -479,7 +479,7 @@ const SalesDetail = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between w-full sm:w-auto">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <span className="text-lg"><TfiWallet /></span>
@@ -490,8 +490,6 @@ const SalesDetail = () => {
                   </div>
                 </div>
               </div>
-
-           
             </div>
           </div>
 

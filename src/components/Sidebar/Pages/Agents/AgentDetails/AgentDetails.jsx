@@ -219,30 +219,30 @@ const AgentDetails = () => {
         {/* Agent Header Card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Left: Agent Info */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-sm border border-slate-200 -mt-32 relative z-10">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex items-start gap-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 -mt-20 md:-mt-32 relative z-10">
+            <div className="flex flex-col md:flex-row items-start justify-between mb-8 gap-4">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full">
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop"
                   alt="Michael A. Miner"
-                  className="w-28 h-28 rounded-full object-cover border-4 border-indigo-100"
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-indigo-100"
                 />
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Michael A. Miner</h1>
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Michael A. Miner</h1>
                   <p className="text-slate-500 mb-4">michaelminer@dayrep.com</p>
-                  <div className="flex items-center gap-3 mb-4">
-                    <button className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
+                  <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-4">
+                    <button className="flex-1 md:flex-none justify-center px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
                       <AiOutlineMessage size={16} />
                       Message
                     </button>
-                    <button className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
+                    <button className="flex-1 md:flex-none justify-center px-6 py-2 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
                       <MdPeople size={16} />
                       Work With Michael
                     </button>
                   </div>
                 </div>
               </div>
-              <button className="p-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 rounded-full transition-colors">
+              <button className="absolute top-4 right-4 md:static p-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 rounded-full transition-colors">
                 <MdSettings size={24} />
               </button>
             </div>
@@ -381,7 +381,7 @@ const AgentDetails = () => {
           <div className="border-b border-slate-200 flex">
             <button
               onClick={() => setActiveTab('about')}
-              className={`px-8 py-4 font-semibold transition-colors ${
+              className={`flex-1 md:flex-none px-4 md:px-8 py-4 font-semibold transition-colors text-center ${
                 activeTab === 'about'
                   ? 'text-indigo-600 border-b-2 border-indigo-600'
                   : 'text-slate-600 hover:text-slate-900'
@@ -391,7 +391,7 @@ const AgentDetails = () => {
             </button>
             <button
               onClick={() => setActiveTab('properties')}
-              className={`px-8 py-4 font-semibold transition-colors ${
+              className={`flex-1 md:flex-none px-4 md:px-8 py-4 font-semibold transition-colors text-center ${
                 activeTab === 'properties'
                   ? 'text-indigo-600 border-b-2 border-indigo-600'
                   : 'text-slate-600 hover:text-slate-900'
@@ -445,7 +445,7 @@ const AgentDetails = () => {
                   {/* Property Status Charts */}
                   <div>
                     <h4 className="font-bold text-slate-900 mb-6">Property Status :</h4>
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       {/* Total Listing */}
                       <div className="flex flex-col items-center">
                         <div className="relative w-24 h-24 mb-3">

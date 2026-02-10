@@ -109,7 +109,7 @@ const LastTransaction = () => {
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Latest Transaction</h2>
         
         {/* Time Range Dropdown */}

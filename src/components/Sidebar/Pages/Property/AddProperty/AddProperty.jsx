@@ -406,7 +406,7 @@ const AddProperty = () => {
           </div>
 
           {/* Property Information Form */}
-          <div className="bg-white rounded-2xl shadow-sm p-8">
+          <div className="bg-white rounded-2xl shadow-sm p-2 md:p-4">
             <h2 className="text-lg font-bold text-gray-800 mb-8 flex items-center gap-2">
               <IoHomeOutline className="w-5 h-5 text-indigo-600" />
               Property Information
@@ -814,7 +814,7 @@ const AddProperty = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition flex items-center gap-2 ${
+                  className={`px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition flex items-center gap-2 text-nowrap ${
                     isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >

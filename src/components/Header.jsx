@@ -34,7 +34,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="px-8 py-4 flex items-center justify-between">
+      <div className="px-4 md:px-8 py-4 flex items-center justify-between">
         
         {/* Left Section - Menu & Search */}
         <div className="flex items-center gap-6 flex-1">
@@ -59,7 +59,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
         </div>
 
         {/* Right Section - Icons & Profile */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 md:gap-6">
           
           {/* Dark Mode Button */}
           <button
@@ -72,7 +72,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
 
           {/* Fullscreen Button */}
           <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
+            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
             title="Fullscreen"
           >
             <FiMaximize2 size={20} />
@@ -95,7 +95,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
 
           {/* Settings Button */}
           <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
+            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
             title="Settings"
           >
             <FiSettings size={20} />
