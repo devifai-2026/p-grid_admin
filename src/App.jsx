@@ -25,6 +25,7 @@ import GridView from "./components/Sidebar/Pages/Customers/GridView/GridView";
 import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails";
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
+import Users from "./components/Sidebar/Pages/Users/Users";
 
 const App = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -177,6 +178,7 @@ const App = () => {
                   />
 
                   {/* Other Routes */}
+                  <Route path="/users" element={<Users />} />
                   <Route path="/orders" element={<div>Orders Page</div>} />
                   <Route
                     path="/transactions"

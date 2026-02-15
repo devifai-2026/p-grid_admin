@@ -103,7 +103,7 @@ const Login = ({ onLogin }) => {
 
   const handleUseAdminCredentials = () => {
     setFormData({
-      mobileNumber: "9999999999",
+      mobileNumber: "7550969931",
       otp: "1111",
     });
     setShowOtpField(true);
