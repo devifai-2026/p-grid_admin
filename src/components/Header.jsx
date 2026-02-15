@@ -14,15 +14,43 @@ import {
 } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthApi } from "../helpers/API/Auth/authAPIs";
+import Notifications from "./Notifications/Notifications";
 
 const Header = ({ toggleSidebar, onLogout }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(3);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "New Inquiry Recieved",
+      message: "John Doe has sent an inquiry for Property #1234.",
+      time: "2m ago",
+      read: false,
+      type: "alert",
+    },
+    {
+      id: 2,
+      title: "Payment Successful",
+      message: "Subscription renewal payment was successful.",
+      time: "1h ago",
+      read: false,
+      type: "success",
+    },
+    {
+      id: 3,
+      title: "System Update",
+      message: "System maintenance scheduled for tonight at 2 AM.",
+      time: "5h ago",
+      read: true,
+      type: "info",
+    },
+  ]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userName, setUserName] = useState("Admin");
   const [userRole, setUserRole] = useState("Staff");
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const notificationRef = useRef(null);
   const { logout } = useAuthApi();
 
   // Load user data
@@ -41,6 +69,12 @@ const Header = ({ toggleSidebar, onLogout }) => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setIsNotificationsOpen(false);
       }
     };
 
@@ -65,6 +99,18 @@ const Header = ({ toggleSidebar, onLogout }) => {
     return name.slice(0, 2).toUpperCase();
   };
 
+  const handleMarkAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between">
@@ -79,7 +125,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
           </button>
 
           {/* Search Bar */}
-          <div className="relative hidden md:block max-w-xs flex-1">
+          {/* <div className="relative hidden md:block max-w-xs flex-1">
             <FiSearch
               className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
               size={18}
@@ -89,50 +135,62 @@ const Header = ({ toggleSidebar, onLogout }) => {
               placeholder="Search..."
               className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:bg-white transition"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Right Section - Icons & Profile */}
         <div className="flex items-center gap-2 md:gap-6">
           {/* Dark Mode Button */}
-          <button
+          {/* <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
             title="Toggle Dark Mode"
           >
             <FiMoon size={20} />
-          </button>
+          </button> */}
 
           {/* Fullscreen Button */}
-          <button
+          {/* <button
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
             title="Fullscreen"
           >
             <FiMaximize2 size={20} />
-          </button>
+          </button> */}
 
           {/* Notifications Button */}
-          <div className="relative">
+          <div className="relative" ref={notificationRef}>
             <button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
               className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 relative"
               title="Notifications"
             >
               <FiBell size={20} />
-              {notifications > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {notifications}
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  {unreadCount}
                 </span>
               )}
             </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationsOpen && (
+              <Notifications
+                notifications={notifications}
+                onClose={() => setIsNotificationsOpen(false)}
+                onMarkAsRead={handleMarkAsRead}
+                onClearAll={handleClearAll}
+                className="right-0 mt-2 top-full"
+              />
+            )}
           </div>
 
           {/* Settings Button */}
-          <button
+          {/* <button
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
             title="Settings"
           >
             <FiSettings size={20} />
-          </button>
+          </button> */}
 
           {/* Profile Avatar with Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -173,7 +231,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
                     <FiUser className="w-5 h-5" />
                     <span>My Profile</span>
                   </Link>
-
+                  {/* 
                   <a
                     href="#"
                     className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50"
@@ -196,7 +254,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
                   >
                     <FiLock className="w-5 h-5" />
                     <span>Lock screen</span>
-                  </a>
+                  </a> */}
 
                   <div className="border-t border-gray-100 my-2"></div>
 
