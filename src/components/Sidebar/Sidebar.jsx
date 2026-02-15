@@ -112,19 +112,25 @@ const Sidebar = ({ collapsed }) => {
   };
 
   return (
-    <aside className="bg-slate-900 shadow-xl min-h-screen border-r border-slate-800 transition-all duration-300">
+    <aside
+      className="shadow-xl min-h-screen border-r transition-all duration-300"
+      style={{ backgroundColor: '#6c0000ff', borderColor: '#F1F3F5' }}
+    >
       <div
-        className={`${collapsed ? "px-2" : "px-6"} py-6 border-b border-slate-800 mb-4`}
+        className={`${collapsed ? "px-2" : "px-6"} py-6 border-b mb-4`}
+        style={{ borderColor: 'rgba(255,255,255,0.15)' }}
       >
         <h2
-          className={`text-white font-bold tracking-wide ${collapsed ? "text-xl text-center" : "text-2xl text-left"} transition-all duration-300`}
+          className={`font-bold tracking-wide ${collapsed ? "text-xl text-center" : "text-2xl text-left"} transition-all duration-300`}
+          style={{ color: '#FFF' }}
         >
           {collapsed ? "PLA" : "Pre Lease"}
         </h2>
       </div>
       <nav className="p-3">
         <h2
-          className={`text-slate-500 text-xs font-bold uppercase tracking-wider mb-4 ${collapsed ? "hidden" : "block px-3"}`}
+          className={`text-xs font-bold uppercase tracking-wider mb-4 ${collapsed ? "hidden" : "block px-3"}`}
+          style={{ color: 'rgba(255,255,255,0.5)' }}
         >
           Menu
         </h2>
@@ -138,15 +144,16 @@ const Sidebar = ({ collapsed }) => {
                   <div className="group">
                     <button
                       onClick={() => toggleExpand(item.title)}
-                      className={`flex items-center p-3 rounded-xl w-full ${collapsed ? "justify-center" : "justify-between"} 
-                    ${hasActiveSub ? "text-[#EE2529] bg-slate-800/50" : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"} 
+                      className={`flex items-center p-3 rounded-xl w-full ${collapsed ? "justify-center" : "justify-between"}
+                    ${hasActiveSub ? "bg-white/10" : "hover:bg-white/10"}
                     transition-all duration-200 cursor-pointer`}
+                      style={{ color: hasActiveSub ? '#FFF' : 'rgba(255,255,255,0.7)' }}
                     >
                       <div
                         className={`flex items-center ${collapsed ? "justify-center" : ""}`}
                       >
                         <span
-                          className={`${hasActiveSub ? "text-[#EE2529]" : "text-slate-400 group-hover:text-[#EE2529]"} transition-colors`}
+                          className={`${hasActiveSub ? "text-white" : "text-white/70 group-hover:text-white"} transition-colors`}
                         >
                           {item.icon}
                         </span>
@@ -157,7 +164,7 @@ const Sidebar = ({ collapsed }) => {
                         )}
                       </div>
                       {!collapsed && (
-                        <span className="text-slate-500">
+                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>
                           {isExpanded(item.title) ? (
                             <FiChevronDown size={14} />
                           ) : (
@@ -170,16 +177,17 @@ const Sidebar = ({ collapsed }) => {
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded(item.title) ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
                       >
-                        <div className="ml-4 pl-4 border-l border-slate-700/50 space-y-1 my-1">
+                        <div className="ml-4 pl-4 space-y-1 my-1" style={{ borderLeft: '1px solid rgba(255,255,255,0.15)' }}>
                           {item.submenus.map((sub, subIndex) => (
                             <Link
                               key={subIndex}
                               to={sub.link}
                               className={`flex items-center py-2 px-3 text-sm rounded-lg transition-all duration-200 ${
                                 isActive(sub.link)
-                                  ? "bg-[#EE2529]/10 text-[#EE2529] font-medium"
-                                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                                  ? "bg-white/20 text-white font-medium"
+                                  : "hover:bg-white/10"
                               }`}
+                              style={!isActive(sub.link) ? { color: 'rgba(255,255,255,0.7)' } : undefined}
                             >
                               {/* {sub.icon && <span className="mr-3 text-opacity-70">{sub.icon}</span>} */}
                               <span>{sub.title}</span>
@@ -196,13 +204,14 @@ const Sidebar = ({ collapsed }) => {
                       collapsed ? "justify-center" : ""
                     } ${
                       isActive(item.link)
-                        ? "bg-[#EE2529] text-white shadow-md shadow-[#EE2529]/20"
-                        : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                        ? "bg-white/20 text-white shadow-md"
+                        : "hover:bg-white/10"
                     }`}
+                    style={!isActive(item.link) ? { color: 'rgba(255,255,255,0.7)' } : undefined}
                     title={collapsed ? item.title : ""}
                   >
                     <span
-                      className={`${isActive(item.link) ? "text-white" : "text-slate-400 group-hover:text-[#EE2529]"} transition-colors`}
+                      className={`${isActive(item.link) ? "text-white" : "text-white/70 group-hover:text-white"} transition-colors`}
                     >
                       {item.icon}
                     </span>
