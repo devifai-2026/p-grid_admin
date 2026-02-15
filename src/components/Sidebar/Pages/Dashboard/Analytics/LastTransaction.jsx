@@ -55,7 +55,7 @@ const LastTransaction = () => {
       id: '#205', 
       buyerName: 'Sarah M. Brooks',
       buyerInitial: 'SB',
-      buyerColor: 'bg-indigo-100 text-indigo-600',
+      buyerColor: 'bg-red-100 text-[#EE2529]',
       invoice: 'IN-4563', 
       date: 'Oct 8, 2025', 
       amount: '42,561', 

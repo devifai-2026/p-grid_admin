@@ -151,7 +151,7 @@ const AddCustomer = () => {
                     <p className="text-xs text-slate-600 font-medium">Own Property</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-indigo-600">
+                    <p className="text-lg font-bold text-[#EE2529]">
                       {formData.investProperty || '$142,465'}
                     </p>
                     <p className="text-xs text-slate-600 font-medium">Invest</p>
@@ -197,7 +197,7 @@ const AddCustomer = () => {
                   onDrop={handleDrop}
                   className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
                     dragActive
-                      ? 'border-indigo-500 bg-indigo-50'
+                      ? 'border-[#EE2529] bg-red-50'
                       : 'border-slate-300 bg-slate-50 hover:border-slate-400'
                   }`}
                 >
@@ -211,8 +211,8 @@ const AddCustomer = () => {
                   
                   <label htmlFor="imageInput" className="cursor-pointer">
                     <div className="flex flex-col items-center gap-4">
-                      <div className="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <FaCloudUploadAlt className="w-7 h-7 text-indigo-600" />
+                      <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center">
+                        <FaCloudUploadAlt className="w-7 h-7 text-[#EE2529]" />
                       </div>
                       <div>
                         <p className="text-lg text-slate-700 font-semibold mb-1">
@@ -251,7 +251,7 @@ const AddCustomer = () => {
                       placeholder="Full Name"
                       value={formData.customerName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -264,7 +264,7 @@ const AddCustomer = () => {
                       placeholder="Enter Email"
                       value={formData.customerEmail}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                 </div>
@@ -281,7 +281,7 @@ const AddCustomer = () => {
                       placeholder="Enter Number"
                       value={formData.customerNumber}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -294,7 +294,7 @@ const AddCustomer = () => {
                       placeholder="Enter View Properties"
                       value={formData.viewProperties}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                 </div>
@@ -311,7 +311,7 @@ const AddCustomer = () => {
                       placeholder="Enter Own Properties"
                       value={formData.ownProperties}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -326,7 +326,7 @@ const AddCustomer = () => {
                         placeholder="000"
                         value={formData.investProperty}
                         onChange={handleInputChange}
-                        className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                        className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                       />
                     </div>
                   </div>
@@ -343,7 +343,7 @@ const AddCustomer = () => {
                     value={formData.customerAddress}
                     onChange={handleInputChange}
                     rows="4"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400 resize-none"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400 resize-none"
                   ></textarea>
                 </div>
 
@@ -359,7 +359,7 @@ const AddCustomer = () => {
                       placeholder="Zip-Code"
                       value={formData.zipCode}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -372,7 +372,7 @@ const AddCustomer = () => {
                       placeholder="City"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -385,7 +385,7 @@ const AddCustomer = () => {
                       placeholder="Country"
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                 </div>
@@ -402,7 +402,7 @@ const AddCustomer = () => {
                       placeholder="Enter URL"
                       value={formData.facebookUrl}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -415,7 +415,7 @@ const AddCustomer = () => {
                       placeholder="Enter URL"
                       value={formData.instagramUrl}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                   <div>
@@ -428,7 +428,7 @@ const AddCustomer = () => {
                       placeholder="Enter URL"
                       value={formData.twitterUrl}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
                     />
                   </div>
                 </div>
@@ -442,7 +442,7 @@ const AddCustomer = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-900 bg-white"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all text-slate-900 bg-white"
                   >
                     <option value="">Select Status</option>
                     <option value="available">Available</option>
@@ -456,7 +456,7 @@ const AddCustomer = () => {
               <div className="flex gap-4 justify-end">
                 <button
                   type="button"
-                  className="px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-colors"
+                  className="px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] rounded-lg font-semibold hover:bg-red-50 transition-colors"
                 >
                   Create Customer
                 </button>

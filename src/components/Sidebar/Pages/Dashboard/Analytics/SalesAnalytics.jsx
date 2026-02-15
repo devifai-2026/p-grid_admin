@@ -352,10 +352,10 @@ const SalesAnalytic = () => {
 
         {/* Right section - Balance Card */}
         <div className="space-y-8">
-          <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg p-4 text-white mb-8 gradient-animate hover-lift">
+          <div className="bg-gradient-to-br from-[#EE2529] to-[#D32F2F] rounded-lg p-4 text-white mb-8 gradient-animate hover-lift">
             {/* Main Balance */}
             <div className="mb-8 animate-on-scroll fade-down">
-              <p className="text-indigo-200 text-sm mb-2">My Balance</p>
+              <p className="text-red-200 text-sm mb-2">My Balance</p>
               <h2 className="text-4xl font-bold mb-1 hover:scale-105 transition-transform duration-300">$117,000.43</h2>
             </div>
 
@@ -365,11 +365,11 @@ const SalesAnalytic = () => {
                 {/* Income */}
                 <div className="animate-on-scroll fade-right" style={{animationDelay: '0.3s'}}>
                   <div className="flex items-center gap-3 hover:translate-x-2 transition-transform duration-300">
-                    <div className="bg-indigo-500 rounded-lg p-2 pulse-animate">
+                    <div className="bg-[#EE2529] rounded-lg p-2 pulse-animate">
                       <FiArrowDown className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-indigo-200 text-xs">Income</p>
+                      <p className="text-red-200 text-xs">Income</p>
                       <p className="font-bold">$13,321.12</p>
                     </div>
                   </div>
@@ -382,7 +382,7 @@ const SalesAnalytic = () => {
                       <FiArrowUp className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-indigo-200 text-xs">Expense</p>
+                      <p className="text-red-200 text-xs">Expense</p>
                       <p className="font-bold">$7,566.11</p>
                     </div>
                   </div>
@@ -394,7 +394,7 @@ const SalesAnalytic = () => {
                 <div className="rounded-lg h-32 mb-6 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-4xl mb-2">💰</div>
-                    <p className="text-indigo-200 text-xs">Money Illustration</p>
+                    <p className="text-red-200 text-xs">Money Illustration</p>
                   </div>
                 </div>
               </div>
@@ -405,7 +405,7 @@ const SalesAnalytic = () => {
               <button className="bg-orange-400 hover:bg-orange-500 text-white font-semibold transition-all py-1 px-3 hover:scale-105 active:scale-95 hover:shadow-lg">
                 Send
               </button>
-              <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-1 px-3 transition-all border border-indigo-400 hover:scale-105 active:scale-95 hover:shadow-lg">
+              <button className="bg-[#EE2529] hover:bg-[#EE2529] text-white font-semibold py-1 px-3 transition-all border border-red-400 hover:scale-105 active:scale-95 hover:shadow-lg">
                 Receive
               </button>
             </div>
@@ -417,15 +417,15 @@ const SalesAnalytic = () => {
             <div className="bg-white rounded-2xl p-4 space-y-5 hover-lift animate-on-scroll fade-left" style={{animationDelay: '0.3s'}}>
               <div className="flex flex-col items-center justify-between mb-4 space-y-4">
                 <h3 className="text-gray-700 font-semibold">Property</h3>
-                <div className="bg-indigo-100 p-3 rounded-lg hover:scale-110 transition-transform duration-300">
-                  <HiOutlineHome className="w-6 h-6 text-indigo-600" />
+                <div className="bg-red-100 p-3 rounded-lg hover:scale-110 transition-transform duration-300">
+                  <HiOutlineHome className="w-6 h-6 text-[#EE2529]" />
                 </div>
               </div>
               <p className="text-xl font-bold text-gray-800 mb-1 text-center hover:scale-105 transition-transform duration-300">15,780</p>
               <p className="text-sm text-gray-500 mb-3 text-center">60% Target</p>
               <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-indigo-600 h-2 rounded-full progress-bar animate-on-scroll slide-in"
+                  className="bg-[#EE2529] h-2 rounded-full progress-bar animate-on-scroll slide-in"
                   style={{ width: '60%', animationDelay: '0.5s' }}
                 ></div>
               </div>

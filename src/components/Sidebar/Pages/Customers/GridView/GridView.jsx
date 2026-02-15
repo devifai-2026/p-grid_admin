@@ -183,7 +183,7 @@ const GridView = () => {
                   <p className="text-xs text-slate-600 font-medium">Own Property</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-indigo-600">{agent.investProperty}</p>
+                  <p className="text-xl font-bold text-[#EE2529]">{agent.investProperty}</p>
                   <p className="text-xs text-slate-600 font-medium">Invest On</p>
                 </div>
               </div>
@@ -212,7 +212,7 @@ const GridView = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                <button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                <button className="flex-1 bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-3 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
                   <MdChatBubbleOutline className="w-4 h-4" />
                   Open Chat
                 </button>

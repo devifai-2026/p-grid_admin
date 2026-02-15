@@ -256,7 +256,7 @@ const AddProperty = () => {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <FiHome className="w-5 h-5 text-indigo-600" />
+              <FiHome className="w-5 h-5 text-[#EE2529]" />
               Property Preview
             </h3>
             
@@ -335,13 +335,13 @@ const AddProperty = () => {
                 <button 
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className={`flex-1 px-3 py-2 border border-indigo-600 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-50 transition flex items-center justify-center gap-2 text-nowrap ${
+                  className={`flex-1 px-3 py-2 border border-[#EE2529] text-[#EE2529] rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center gap-2 text-nowrap ${
                     isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#EE2529]"></div>
                       Processing...
                     </>
                   ) : (
@@ -368,7 +368,7 @@ const AddProperty = () => {
           {/* Add Property Photo Section */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
             <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <FiUploadCloud className="w-5 h-5 text-indigo-600" />
+              <FiUploadCloud className="w-5 h-5 text-[#EE2529]" />
               Add Property Photo
             </h2>
 
@@ -386,12 +386,12 @@ const AddProperty = () => {
               className={`border-2 border-dashed rounded-2xl p-12 text-center transition cursor-pointer ${
                 errors.image 
                   ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-300 hover:border-indigo-500 hover:bg-indigo-50'
+                  : 'border-gray-300 hover:border-[#EE2529] hover:bg-red-50'
               }`}
               onClick={() => document.getElementById('imageInput').click()}
             >
               <div className="flex flex-col items-center gap-3">
-                <FiUploadCloud className="w-12 h-12 text-indigo-600" />
+                <FiUploadCloud className="w-12 h-12 text-[#EE2529]" />
                 <p className="text-gray-600 font-medium">Drop your images here, or click to browse</p>
                 <p className="text-gray-500 text-sm">(1600 x 1200 (4:3) recommended. PNG, JPG and GIF files are allowed)</p>
               </div>
@@ -408,7 +408,7 @@ const AddProperty = () => {
           {/* Property Information Form */}
           <div className="bg-white rounded-2xl shadow-sm p-2 md:p-4">
             <h2 className="text-lg font-bold text-gray-800 mb-8 flex items-center gap-2">
-              <IoHomeOutline className="w-5 h-5 text-indigo-600" />
+              <IoHomeOutline className="w-5 h-5 text-[#EE2529]" />
               Property Information
             </h2>
 
@@ -430,7 +430,7 @@ const AddProperty = () => {
                     className={`w-full px-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                       errors.name 
                         ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-indigo-600'
+                        : 'border-gray-300 focus:ring-[#EE2529]'
                     }`}
                   />
                   {errors.name && (
@@ -451,7 +451,7 @@ const AddProperty = () => {
                       name="category"
                       value={formData.category}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 appearance-none"
+                      className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#EE2529] appearance-none"
                     >
                       <option value="Villas">Villas</option>
                       <option value="Apartments">Apartments</option>
@@ -493,7 +493,7 @@ const AddProperty = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.price 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                   </div>
@@ -515,7 +515,7 @@ const AddProperty = () => {
                       name="propertyFor"
                       value={formData.propertyFor}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 appearance-none"
+                      className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#EE2529] appearance-none"
                     >
                       <option value="Sale">Sale</option>
                       <option value="Rent">Rent</option>
@@ -549,7 +549,7 @@ const AddProperty = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.bedrooms 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                   </div>
@@ -584,7 +584,7 @@ const AddProperty = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.bathrooms 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                   </div>
@@ -617,7 +617,7 @@ const AddProperty = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.squareFoot 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                   </div>
@@ -649,7 +649,7 @@ const AddProperty = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.floor 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                   </div>
@@ -679,7 +679,7 @@ const AddProperty = () => {
                     className={`w-full pl-3 pr-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 resize-none ${
                       errors.address 
                         ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-indigo-600'
+                        : 'border-gray-300 focus:ring-[#EE2529]'
                     }`}
                   />
                   <div className="absolute left-4 top-3 text-gray-600">
@@ -713,7 +713,7 @@ const AddProperty = () => {
                       className={`w-full px-4 py-3 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 ${
                         errors.zipCode 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     />
                     <div className="absolute right-4 top-3.5 text-gray-600">
@@ -742,7 +742,7 @@ const AddProperty = () => {
                       className={`w-full px-4 py-3 pl-12 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 appearance-none ${
                         errors.city 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     >
                       <option value="">Select city</option>
@@ -782,7 +782,7 @@ const AddProperty = () => {
                       className={`w-full px-4 py-3 pl-12 border rounded-lg text-gray-600 focus:outline-none focus:ring-2 appearance-none ${
                         errors.country 
                           ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-indigo-600'
+                          : 'border-gray-300 focus:ring-[#EE2529]'
                       }`}
                     >
                       <option value="">Select country</option>
@@ -814,13 +814,13 @@ const AddProperty = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-8 py-3 border-2 border-indigo-600 text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition flex items-center gap-2 text-nowrap ${
+                  className={`px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] rounded-lg font-semibold hover:bg-red-50 transition flex items-center gap-2 text-nowrap ${
                     isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#EE2529]"></div>
                       Creating...
                     </>
                   ) : (

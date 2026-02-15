@@ -206,7 +206,7 @@ const AgentDetails = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Hero Banner */}
-      <div className="relative h-64 bg-gradient-to-r from-blue-600 to-indigo-600 overflow-hidden">
+      <div className="relative h-64 bg-gradient-to-r from-blue-600 to-[#EE2529] overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=400&fit=crop"
           alt="Property"
@@ -225,24 +225,24 @@ const AgentDetails = () => {
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop"
                   alt="Michael A. Miner"
-                  className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-indigo-100"
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-red-100"
                 />
                 <div className="flex-1">
                   <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Michael A. Miner</h1>
                   <p className="text-slate-500 mb-4">michaelminer@dayrep.com</p>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-4">
-                    <button className="flex-1 md:flex-none justify-center px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
+                    <button className="flex-1 md:flex-none justify-center px-6 py-2 bg-[#EE2529] hover:bg-[#D32F2F] text-white rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
                       <AiOutlineMessage size={16} />
                       Message
                     </button>
-                    <button className="flex-1 md:flex-none justify-center px-6 py-2 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
+                    <button className="flex-1 md:flex-none justify-center px-6 py-2 border-2 border-[#EE2529] text-[#EE2529] hover:bg-red-50 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2">
                       <MdPeople size={16} />
                       Work With Michael
                     </button>
                   </div>
                 </div>
               </div>
-              <button className="absolute top-4 right-4 md:static p-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 rounded-full transition-colors">
+              <button className="absolute top-4 right-4 md:static p-3 bg-red-100 hover:bg-red-200 text-[#EE2529] rounded-full transition-colors">
                 <MdSettings size={24} />
               </button>
             </div>
@@ -250,11 +250,11 @@ const AgentDetails = () => {
             {/* Agent Details */}
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-3 text-slate-700">
-                <MdLocationOn size={20} className="text-indigo-600 flex-shrink-0" />
+                <MdLocationOn size={20} className="text-[#EE2529] flex-shrink-0" />
                 <span>Lincoln Drive Harrisburg, PA 17101 U.S.A</span>
               </div>
               <div className="flex items-center gap-3 text-slate-700">
-                <FaPhone size={20} className="text-indigo-600 flex-shrink-0" />
+                <FaPhone size={20} className="text-[#EE2529] flex-shrink-0" />
                 <span>+123 864-357-7713</span>
               </div>
               <div className="flex items-center gap-3">
@@ -383,7 +383,7 @@ const AgentDetails = () => {
               onClick={() => setActiveTab('about')}
               className={`flex-1 md:flex-none px-4 md:px-8 py-4 font-semibold transition-colors text-center ${
                 activeTab === 'about'
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
+                  ? 'text-[#EE2529] border-b-2 border-[#EE2529]'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -393,7 +393,7 @@ const AgentDetails = () => {
               onClick={() => setActiveTab('properties')}
               className={`flex-1 md:flex-none px-4 md:px-8 py-4 font-semibold transition-colors text-center ${
                 activeTab === 'properties'
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
+                  ? 'text-[#EE2529] border-b-2 border-[#EE2529]'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -437,7 +437,7 @@ const AgentDetails = () => {
                         <span className="font-semibold text-slate-900">: Lincoln Drive Harrisburg</span>
                       </div>
                     </div>
-                    <a href="#" className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm inline-block mt-4">
+                    <a href="#" className="text-[#EE2529] hover:text-[#D32F2F] font-semibold text-sm inline-block mt-4">
                       View More →
                     </a>
                   </div>
@@ -560,7 +560,7 @@ const AgentDetails = () => {
                             alt={prop.title}
                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                           />
-                          <div className="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
+                          <div className="absolute top-4 right-4 bg-[#EE2529] text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
                             {prop.icon} Featured
                           </div>
                         </div>
@@ -585,7 +585,7 @@ const AgentDetails = () => {
                     <div className="lg:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                       <div className="flex items-center justify-between mb-6">
                         <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                          <FaGlobeAmericas className="text-indigo-600" />
+                          <FaGlobeAmericas className="text-[#EE2529]" />
                           Worldwide Property Locations
                         </h4>
                         <div className="flex items-center gap-4 text-sm text-slate-600">
