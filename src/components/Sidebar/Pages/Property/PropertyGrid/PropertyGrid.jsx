@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BsBookmark } from "react-icons/bs";
 import { FaBath, FaBed, FaRuler } from "react-icons/fa";
 import { FiMapPin, FiHeart, FiSearch, FiFilter, FiX } from "react-icons/fi";
@@ -6,6 +7,7 @@ import { MdOutlineRoofing } from "react-icons/md";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 
 const PropertyGrid = () => {
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([6000, 10000000]);
@@ -440,11 +442,15 @@ const PropertyGrid = () => {
 
                     {/* Actions */}
                     <div className="flex gap-3">
-                      <button className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-[11px] font-bold py-2.5 rounded-lg transition-all uppercase tracking-widest">
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/property/property-details/${property.propertyId}`,
+                          )
+                        }
+                        className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-[11px] font-bold py-2.5 rounded-none transition-all uppercase tracking-widest"
+                      >
                         View
-                      </button>
-                      <button className="flex-1 bg-[#EE2529] hover:bg-[#D32F2F] text-white text-[11px] font-bold py-2.5 rounded-lg transition-all uppercase tracking-widest shadow-md shadow-red-100">
-                        Enquire
                       </button>
                     </div>
                   </div>
