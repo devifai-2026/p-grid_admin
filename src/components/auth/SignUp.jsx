@@ -380,8 +380,8 @@ const SignUp = () => {
                       >
                         <option value="Admin">Admin</option>
                         <option value="Sales Manager">Sales Manager</option>
-                        <option value="Sales Executive Client Dealer">Sales Executive(Client Dealer)</option>
-                        <option value="Sales Executive Property Manager">Sales Executive(Property Manager)</option>
+                        <option value="Sales Executive - Client Dealer">Sales Executive(Client Dealer)</option>
+                        <option value="Sales Executive - Property Manager">Sales Executive(Property Manager)</option>
                       </select>
                     </div>
                   </div>
