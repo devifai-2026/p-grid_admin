@@ -142,6 +142,12 @@ const Users = () => {
   };
 
   const handleDeleteUser = (userId) => {
+    const userToDelete = users.find((u) => u.userId === userId);
+    if (userToDelete?.role === "Super Admin") {
+      alert("Super Admin accounts cannot be deleted.");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this user?")) {
       apiCall.delete({
         route: `/admin/users/${userId}`,

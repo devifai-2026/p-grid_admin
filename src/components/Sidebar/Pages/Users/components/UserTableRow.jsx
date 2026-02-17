@@ -60,15 +60,16 @@ const UserTableRow = ({
             >
               <FiEdit2 className="w-4 h-4" />
             </button>
-            {user.userId !== currentUser?.userId && (
-              <button
-                onClick={() => onDelete(user.userId)}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Delete"
-              >
-                <FiTrash2 className="w-4 h-4" />
-              </button>
-            )}
+            {user.userId !== currentUser?.userId &&
+              user.role !== "Super Admin" && (
+                <button
+                  onClick={() => onDelete(user.userId)}
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                </button>
+              )}
           </div>
         </td>
       )}
