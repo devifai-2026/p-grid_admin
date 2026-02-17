@@ -77,7 +77,7 @@ const Sidebar = ({ collapsed }) => {
       icon: <FiUser className="w-5 h-5" />,
       link: "/users",
     },
-    ...(user?.role === "Sales Manager" || user?.role === "Sales Executive"
+    ...(user?.role?.includes("Sales") || user?.role === "Sales Manager"
       ? [
           {
             title: "Enquiry",

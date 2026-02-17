@@ -87,7 +87,8 @@ const AppRoutes = () => {
           <Route
             path="/enquiry"
             element={
-              ["Sales Manager", "Sales Executive"].includes(user?.role) ? (
+              user?.role?.includes("Sales") ||
+              user?.role === "Sales Manager" ? (
                 <Enquiry />
               ) : (
                 <Navigate to="/dashboard/analytics" replace />
