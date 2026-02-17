@@ -24,7 +24,7 @@ const SignUp = () => {
     email: "",
     mobileNumber: "",
     reraNumber: "",
-    roleName: "Broker",
+    roleName: "Admin",
     otp: "",
     verificationId: "",
   });
@@ -378,9 +378,10 @@ const SignUp = () => {
                         }
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] bg-white appearance-none"
                       >
-                        <option value="Broker">Broker</option>
-                        <option value="Owner">Owner</option>
-                        <option value="Investor">Investor</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Sales Manager">Sales Manager</option>
+                        <option value="Sales Executive Client Dealer">Sales Executive(Client Dealer)</option>
+                        <option value="Sales Executive Property Manager">Sales Executive(Property Manager)</option>
                       </select>
                     </div>
                   </div>

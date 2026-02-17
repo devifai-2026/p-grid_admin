@@ -111,7 +111,7 @@ const Login = ({ onLogin }) => {
           if (onLogin) {
             onLogin(res.data);
           }
-
+console.log(res.data)
           // Redirect after short delay for animation
           setTimeout(() => {
             navigate("/dashboard/analytics");
