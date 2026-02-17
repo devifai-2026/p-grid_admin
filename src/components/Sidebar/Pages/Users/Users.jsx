@@ -180,6 +180,11 @@ const Users = () => {
 
     const payload = { ...formData };
 
+    // If a Sales Manager is adding a Sales Executive, automatically assign themselves as the manager
+    if (isSalesManager && formData.roleName.startsWith("Sales Executive")) {
+      payload.salesManagerId = currentUser?.userId;
+    }
+
     if (editingId) {
       apiCall.put({
         route: `/admin/users/${editingId}`,

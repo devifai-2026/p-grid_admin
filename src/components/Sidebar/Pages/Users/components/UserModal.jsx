@@ -101,7 +101,7 @@ const UserModal = ({
               name="roleName"
               value={formData.roleName}
               onChange={handleInputChange}
-              disabled={isSalesManager || !!editingId} // Locked for Sales Manager OR if editing existing user
+              disabled={!!editingId} // Locked for Sales Manager OR if editing existing user
               className={`w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm ${isSalesManager || !!editingId ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
             >
               <option value="Admin">Admin</option>
