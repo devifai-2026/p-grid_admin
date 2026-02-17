@@ -154,6 +154,8 @@ const Users = () => {
         onSuccess: () => {
           // Explicitly trigger refetch
           setRefreshKey((prev) => prev + 1);
+          // Manually remove from state for immediate UI feedback
+          setUsers((prev) => prev.filter((u) => u.userId !== userId));
         },
         onError: (err) => {
           alert(err.message || "Failed to delete user");
