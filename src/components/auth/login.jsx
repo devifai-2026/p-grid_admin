@@ -56,7 +56,7 @@ const Login = ({ onLogin }) => {
           if (formData.otp === "1111") {
             // keep it
           } else {
-             alert("OTP sent to your mobile number");
+            alert("OTP sent to your mobile number");
           }
         } else {
           setError(res.message || "Failed to send OTP");
@@ -84,8 +84,8 @@ const Login = ({ onLogin }) => {
     }
 
     if (!formData.verificationId) {
-       setError("Verification ID missing. Please resend OTP.");
-       return;
+      setError("Verification ID missing. Please resend OTP.");
+      return;
     }
 
     setIsSubmitting(true);
@@ -100,7 +100,10 @@ const Login = ({ onLogin }) => {
         setIsSubmitting(false);
         if (res.success) {
           console.log("Login successful:", res.data);
-
+          if (res.data.role === "Owner" || res.data.role === "Broker" || res.data.role === "Inverstor") {
+            setError("You are not authorized to login, only Admin, Sales Manager, Sales Executive and Super Admin can login");
+            return;
+          }
           // Add pulse animation to button
           const loginBtn = e.target.querySelector('button[type="submit"]');
           if (loginBtn) {
@@ -111,7 +114,6 @@ const Login = ({ onLogin }) => {
           if (onLogin) {
             onLogin(res.data);
           }
-
           // Redirect after short delay for animation
           setTimeout(() => {
             navigate("/dashboard/analytics");
@@ -136,7 +138,7 @@ const Login = ({ onLogin }) => {
   const handleUseAdminCredentials = () => {
     setFormData({
       mobileNumber: "7550969931",
-      otp: "1111",
+      otp: "111111",
       verificationId: "", // Reset verification ID to force new generation
     });
     setShowOtpField(false); // Force creating new OTP flow
