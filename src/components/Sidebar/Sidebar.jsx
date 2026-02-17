@@ -77,6 +77,15 @@ const Sidebar = ({ collapsed }) => {
       icon: <FiUser className="w-5 h-5" />,
       link: "/users",
     },
+    ...(user?.role === "Sales Manager" || user?.role === "Sales Executive"
+      ? [
+          {
+            title: "Enquiry",
+            icon: <FiMessageSquare className="w-5 h-5" />,
+            link: "/enquiry",
+          },
+        ]
+      : []),
     {
       title: "All Notifications",
       icon: <FiBell className="w-5 h-5" />,

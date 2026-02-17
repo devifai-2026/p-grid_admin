@@ -21,6 +21,7 @@ import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCus
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
 import Users from "./components/Sidebar/Pages/Users/Users";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
+import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -30,7 +31,7 @@ import ResetOtp from "./components/auth/ResetOtp";
 import ConfirmPassword from "./components/auth/ConfirmPassword";
 
 const AppRoutes = () => {
-  const { login, isLoggedIn } = useAuth();
+  const { login, isLoggedIn, user } = useAuth();
 
   return (
     <Routes>
@@ -83,6 +84,16 @@ const AppRoutes = () => {
 
           {/* Others */}
           <Route path="/users" element={<Users />} />
+          <Route
+            path="/enquiry"
+            element={
+              ["Sales Manager", "Sales Executive"].includes(user?.role) ? (
+                <Enquiry />
+              ) : (
+                <Navigate to="/dashboard/analytics" replace />
+              )
+            }
+          />
           <Route path="/profile" element={<Profile />} />
 
           {/* Placeholder Routes */}
