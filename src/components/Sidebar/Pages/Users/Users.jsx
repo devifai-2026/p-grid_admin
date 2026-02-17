@@ -548,13 +548,10 @@ const Users = () => {
                   disabled={isSalesManager} // Sales Manager locked to Sales Executive
                   className={`w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm ${isSalesManager ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
                 >
-                  <option value="Sales Executive">Sales Executive</option>
-                  {isAdminOrSuperAdmin && (
-                    <>
-                      <option value="Sales Manager">Sales Manager</option>
-                      <option value="Admin">Admin</option>
-                    </>
-                  )}
+                  <option value="Admin">Admin</option>
+                  <option value="Sales Manager">Sales Manager</option>
+                  <option value="Sales Executive - Client Dealer">Sales Executive(Client Dealer)</option>
+                  <option value="Sales Executive - Property Manager">Sales Executive(Property Manager)</option>
                 </select>
               </div>
 
