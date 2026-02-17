@@ -20,6 +20,7 @@ import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetail
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
 import Users from "./components/Sidebar/Pages/Users/Users";
+import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -85,11 +86,7 @@ const AppRoutes = () => {
           <Route path="/profile" element={<Profile />} />
 
           {/* Placeholder Routes */}
-          <Route path="/orders" element={<div>Orders Page</div>} />
-          <Route path="/transactions" element={<div>Transactions Page</div>} />
-          <Route path="/reviews" element={<div>Reviews Page</div>} />
-          <Route path="/messages" element={<div>Messages Page</div>} />
-          <Route path="/inbox" element={<div>Inbox Page</div>} />
+          <Route path="/notifications" element={<AllNotifications />} />
 
           {/* Redirects */}
           <Route

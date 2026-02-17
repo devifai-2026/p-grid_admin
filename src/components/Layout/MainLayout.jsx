@@ -43,7 +43,7 @@ const MainLayout = () => {
       {/* Sidebar Desktop */}
       {!isMobile && (
         <div
-          className={`${sidebarCollapsed ? "w-20" : "w-64"} flex-shrink-0 transition-all duration-300 ease-in-out h-full overflow-y-auto border-r border-gray-200`}
+          className={`${sidebarCollapsed ? "w-20" : "w-64"} flex-shrink-0 transition-all duration-300 ease-in-out h-full overflow-y-auto overflow-x-hidden border-r border-gray-200`}
         >
           <Sidebar collapsed={sidebarCollapsed} />
         </div>

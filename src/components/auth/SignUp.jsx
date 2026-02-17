@@ -24,8 +24,9 @@ const SignUp = () => {
     email: "",
     mobileNumber: "",
     reraNumber: "",
-    roleName: "Admin",
+    roleName: "Broker",
     otp: "",
+    verificationId: "",
   });
 
   // Initialize AOS
@@ -52,8 +53,31 @@ const SignUp = () => {
       return;
     }
     setError("");
-    setShowOtpField(true);
-    alert("OTP sent to your mobile number (Use 1111 for demo)");
+    
+    setIsSubmitting(true);
+    apiCall.post({
+      route: "/send-otp",
+      payload: {
+        mobileNumber: formData.mobileNumber,
+      },
+      onSuccess: (res) => {
+        setIsSubmitting(false);
+        if (res.success) {
+          setFormData((prev) => ({
+            ...prev,
+            verificationId: res.data.verificationId,
+          }));
+          setShowOtpField(true);
+          alert("OTP sent to your mobile number");
+        } else {
+          setError(res.message || "Failed to send OTP");
+        }
+      },
+      onError: (err) => {
+        setIsSubmitting(false);
+        setError(err.message || "Failed to send OTP");
+      },
+    });
   };
 
   const handleSubmit = (e) => {
@@ -65,14 +89,19 @@ const SignUp = () => {
       return;
     }
 
-    if (formData.otp.length !== 4) {
-      setError("Please enter the 4-digit OTP");
+    if (formData.otp.length !== 6) {
+      setError("Please enter the 6-digit OTP");
       return;
+    }
+
+    if (!formData.verificationId) {
+       setError("Verification ID missing. Please resend OTP.");
+       return;
     }
 
     setIsSubmitting(true);
     apiCall.post({
-      route: "/admin/signup",
+      route: "/signup",
       payload: formData,
       onSuccess: (res) => {
         setIsSubmitting(false);
@@ -349,9 +378,9 @@ const SignUp = () => {
                         }
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] bg-white appearance-none"
                       >
-                        <option value="Admin">Admin</option>
-                        <option value="Sales Executive">Sales Executive</option>
-                        <option value="Sales Manager">Sales Manager</option>
+                        <option value="Broker">Broker</option>
+                        <option value="Owner">Owner</option>
+                        <option value="Investor">Investor</option>
                       </select>
                     </div>
                   </div>
@@ -385,11 +414,11 @@ const SignUp = () => {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            otp: e.target.value.replace(/\D/g, "").slice(0, 4),
+                            otp: e.target.value.replace(/\D/g, "").slice(0, 6),
                           })
                         }
                         className="w-full pl-10 pr-4 py-3 border-2 border-[#EE2529] rounded-lg focus:outline-none font-bold tracking-[0.5em]"
-                        placeholder="4 DIGITS"
+                        placeholder="6 DIGITS"
                         required
                         autoFocus
                       />

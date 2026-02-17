@@ -1,5 +1,5 @@
 export const getHeaders = () => {
-  const headers = { "Content-Type": "application/json" };
+  const headers = {};
 
   try {
     const userStr = localStorage.getItem("user");

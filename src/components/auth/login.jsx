@@ -13,6 +13,7 @@ const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     mobileNumber: "",
     otp: "",
+    verificationId: "",
   });
 
   // Initialize AOS
@@ -37,10 +38,35 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    // Simulate OTP sending
-    console.log(`Sending OTP to ${formData.mobileNumber}`);
-    setShowOtpField(true);
-    alert("OTP sent to your mobile number (Use 1111 for demo)");
+    setIsSubmitting(true);
+    apiCall.post({
+      route: "/send-otp", // Corrected route
+      payload: {
+        mobileNumber: formData.mobileNumber,
+      },
+      onSuccess: (res) => {
+        setIsSubmitting(false);
+        if (res.success) {
+          setFormData((prev) => ({
+            ...prev,
+            verificationId: res.data.verificationId,
+          }));
+          setShowOtpField(true);
+          // Auto-fill OTP if it was pre-filled (e.g. demo credentials)
+          if (formData.otp === "1111") {
+            // keep it
+          } else {
+             alert("OTP sent to your mobile number");
+          }
+        } else {
+          setError(res.message || "Failed to send OTP");
+        }
+      },
+      onError: (err) => {
+        setIsSubmitting(false);
+        setError(err.message || "Failed to send OTP");
+      },
+    });
   };
 
   const handleSubmit = (e) => {
@@ -52,17 +78,23 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    if (formData.otp.length !== 4) {
-      setError("Please enter a 4-digit OTP");
+    if (formData.otp.length !== 6) {
+      setError("Please enter a 6-digit OTP");
       return;
+    }
+
+    if (!formData.verificationId) {
+       setError("Verification ID missing. Please resend OTP.");
+       return;
     }
 
     setIsSubmitting(true);
     apiCall.post({
-      route: "/login",
+      route: "/login", // Corrected route
       payload: {
         mobileNumber: formData.mobileNumber,
         otp: formData.otp,
+        verificationId: formData.verificationId,
       },
       onSuccess: (res) => {
         setIsSubmitting(false);
@@ -105,8 +137,9 @@ const Login = ({ onLogin }) => {
     setFormData({
       mobileNumber: "7550969931",
       otp: "1111",
+      verificationId: "", // Reset verification ID to force new generation
     });
-    setShowOtpField(true);
+    setShowOtpField(false); // Force creating new OTP flow
 
     // Animate the form fields
     document.querySelectorAll("input").forEach((input, index) => {
@@ -287,11 +320,11 @@ const Login = ({ onLogin }) => {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            otp: e.target.value.replace(/\D/g, "").slice(0, 4),
+                            otp: e.target.value.replace(/\D/g, "").slice(0, 6),
                           })
                         }
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all duration-300 hover:border-[#EE2529] font-bold tracking-widest"
-                        placeholder="4 digit OTP"
+                        placeholder="6 digit OTP"
                         required
                         autoFocus
                       />

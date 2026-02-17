@@ -11,6 +11,7 @@ import {
   FiHome,
   FiLayout,
   FiUser,
+  FiBell,
 } from "react-icons/fi";
 import { MdDashboard, MdAnalytics, MdRealEstateAgent } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
@@ -77,29 +78,9 @@ const Sidebar = ({ collapsed }) => {
       link: "/users",
     },
     {
-      title: "Orders",
-      icon: <FiPackage className="w-5 h-5" />,
-      link: "/orders",
-    },
-    {
-      title: "Transactions",
-      icon: <FiCreditCard className="w-5 h-5" />,
-      link: "/transactions",
-    },
-    {
-      title: "Reviews",
-      icon: <FiStar className="w-5 h-5" />,
-      link: "/reviews",
-    },
-    {
-      title: "Messages",
-      icon: <FiMessageSquare className="w-5 h-5" />,
-      link: "/messages",
-    },
-    {
-      title: "Inbox",
-      icon: <FiMail className="w-5 h-5" />,
-      link: "/inbox",
+      title: "All Notifications",
+      icon: <FiBell className="w-5 h-5" />,
+      link: "/notifications",
     },
   ];
 
@@ -153,7 +134,7 @@ const Sidebar = ({ collapsed }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-6 space-y-2 px-3 pb-24 custom-scrollbar">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 space-y-2 px-3 pb-24 custom-scrollbar">
         {!collapsed && (
           <div className="px-3 mb-2">
             <p className="text-xs font-bold text-red-400 uppercase tracking-widest">
@@ -271,7 +252,7 @@ const Sidebar = ({ collapsed }) => {
 
       {/* Footer / User Profile Summary */}
       {!collapsed && (
-        <div className="absolute bottom-0 w-full p-4 border-t border-red-100 bg-white/50 backdrop-blur-sm">
+        <div className="absolute bottom-0 w-full p-4 ">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-rose-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
               {user?.name
