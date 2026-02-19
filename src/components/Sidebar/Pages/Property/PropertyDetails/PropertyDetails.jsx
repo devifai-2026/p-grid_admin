@@ -46,6 +46,7 @@ import {
   FaQuestionCircle,
 } from "react-icons/fa";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
+import { useUserStorage } from "../../../../../helpers/useUserStorage";
 
 // --- Helper Components ---
 
@@ -95,12 +96,121 @@ const TabButton = ({ id, label, icon: Icon, active, onClick }) => (
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useUserStorage();
   const [property, setProperty] = useState(null);
   const [propertyList, setPropertyList] = useState([]); // For displaying list when no ID
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("property");
   const [activeFaq, setActiveFaq] = useState(null);
+
+  // Assignment States
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assignableUsers, setAssignableUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  const isAdminOrSuperAdmin = ["Admin", "Super Admin"].includes(user?.role);
+  const isSalesManager = user?.role === "Sales Manager";
+  const canAssignProperty = isAdminOrSuperAdmin || isSalesManager;
   console.log(property);
+  const handleVerify = (e, propertyId) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to verify this property?"))
+      return;
+
+    apiCall.post({
+      route: `/admin/properties/${propertyId}/verify`,
+      onSuccess: (res) => {
+        if (res.success) {
+          alert("Property verified successfully!");
+          // Refresh the list
+          if (!id || id === "undefined" || id === "null") {
+            setPropertyList((prev) =>
+              prev.map((p) =>
+                p.propertyId === propertyId
+                  ? { ...p, isVerified: "partial" }
+                  : p,
+              ),
+            );
+          } else {
+            setProperty((prev) => ({ ...prev, isVerified: "partial" }));
+          }
+        }
+      },
+      onError: (err) => {
+        alert(err.message || "Failed to verify property");
+      },
+    });
+  };
+
+  const fetchAssignableUsers = () => {
+    apiCall.get({
+      route: "/admin/users?limit=100",
+      onSuccess: (res) => {
+        if (res.success) {
+          const salesRoles = [
+            "Sales Manager",
+            "Sales Executive - Property Manager",
+          ];
+          const filtered = (res.data || []).filter((u) =>
+            salesRoles.includes(u.role),
+          );
+          setAssignableUsers(filtered);
+        }
+      },
+      onError: (err) => {
+        console.error("Error fetching users:", err);
+      },
+    });
+  };
+
+  const handleAssignSubmit = () => {
+    if (!selectedUserId) {
+      alert("Please select a user to assign the property to.");
+      return;
+    }
+
+    setAssignLoading(true);
+    apiCall.put({
+      route: `/admin/properties/${id}/assign`,
+      payload: { userId: selectedUserId },
+      onSuccess: (res) => {
+        setAssignLoading(false);
+        if (res.success) {
+          alert("Property assigned successfully!");
+          setIsAssignModalOpen(false);
+          // Update local state
+          const assignedUser = assignableUsers.find(
+            (u) => u.userId === selectedUserId,
+          );
+          if (assignedUser && property) {
+            setProperty((prev) => ({
+              ...prev,
+              salesId: selectedUserId,
+              salesAgent: {
+                firstName:
+                  assignedUser.firstName || assignedUser.name.split(" ")[0],
+                lastName:
+                  assignedUser.lastName ||
+                  assignedUser.name.split(" ").slice(1).join(" "),
+              },
+            }));
+          }
+        }
+      },
+      onError: (err) => {
+        setAssignLoading(false);
+        alert(err.message || "Failed to assign property");
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (isAssignModalOpen) {
+      fetchAssignableUsers();
+    }
+  }, [isAssignModalOpen]);
+
   useEffect(() => {
     console.log("PropertyDetails mounted. ID:", id);
     if (id && id !== "undefined" && id !== "null") {
@@ -123,8 +233,17 @@ const PropertyDetails = () => {
       // Logic for NO ID: Fetch list of properties
       console.log("No ID provided. Fetching property list...");
       setLoading(true);
+
+      const salesRoles = [
+        "Sales Manager",
+        "Sales Executive",
+        "Sales Executive - Property Manager",
+        "Sales Executive - Client Dealer",
+      ];
+      const isSalesRelated = salesRoles.includes(user?.role);
+
       apiCall.get({
-        route: `/properties?limit=12`, // limit to 12 for the selection view
+        route: isSalesRelated ? "/properties/assigned" : "/properties?limit=12",
         onSuccess: (res) => {
           setLoading(false);
           if (res.success) {
@@ -137,7 +256,7 @@ const PropertyDetails = () => {
         },
       });
     }
-  }, [id]);
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -185,8 +304,19 @@ const PropertyDetails = () => {
                       alt={item.microMarket}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-4 left-4 bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest">
-                      {item.propertyType}
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
+                        {item.propertyType}
+                      </div>
+                      {(item.isVerified === "partial" ||
+                        item.isVerified === "verified") && (
+                        <div className="bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit">
+                          <MdVerified size={10} />
+                          {item.isVerified === "partial"
+                            ? "Partial"
+                            : "Verified"}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
@@ -199,7 +329,15 @@ const PropertyDetails = () => {
                       {item.city}, {item.state}
                     </div>
 
-                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
+                    {item.salesAgent && (
+                      <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold uppercase mb-4 bg-indigo-50 px-2 py-1 rounded w-fit">
+                        <FiInfo size={10} />
+                        Assigned to: {item.salesAgent.firstName}{" "}
+                        {item.salesAgent.lastName}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 gap-2">
                       <div>
                         <p className="text-[10px] font-bold text-gray-400 uppercase">
                           Price
@@ -208,16 +346,27 @@ const PropertyDetails = () => {
                           ₹{item.sellingPrice} Cr
                         </p>
                       </div>
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/property/property-details/${item.propertyId}`,
-                          )
-                        }
-                        className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
-                      >
-                        View <MdArrowForward />
-                      </button>
+                      <div className="flex gap-2">
+                        {item.isVerified !== "partial" &&
+                          item.isVerified !== "verified" && (
+                            <button
+                              onClick={(e) => handleVerify(e, item.propertyId)}
+                              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
+                            >
+                              Verify
+                            </button>
+                          )}
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/property/property-details/${item.propertyId}`,
+                            )
+                          }
+                          className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
+                        >
+                          View <MdArrowForward />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -298,6 +447,14 @@ const PropertyDetails = () => {
           />
           <InfoRow label="Built Year" value={property.completionYear} />
           <InfoRow label="Ownership" value={property.ownershipType} />
+          <InfoRow
+            label="Assigned Agent"
+            value={
+              property.salesAgent
+                ? `${property.salesAgent.firstName} ${property.salesAgent.lastName}`
+                : "Not Assigned"
+            }
+          />
         </PropertyDetailsCard>
 
         <PropertyDetailsCard title="Legal & Title" icon={FaRegFileAlt}>
@@ -627,11 +784,37 @@ const PropertyDetails = () => {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <span
-            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-green-100 text-green-700 flex items-center gap-1`}
-          >
-            <MdVerified /> Verified
-          </span>
+          {property?.isVerified === "partial" ||
+          property?.isVerified === "verified" ? (
+            <span
+              className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-green-100 text-green-700 flex items-center gap-1`}
+            >
+              <MdVerified />{" "}
+              {property?.isVerified === "partial"
+                ? "Partially Verified"
+                : "Verified"}
+            </span>
+          ) : (
+            <button
+              onClick={(e) => handleVerify(e, property.propertyId)}
+              className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+            >
+              Verify Now
+            </button>
+          )}
+          {canAssignProperty && property && (
+            <button
+              onClick={() => {
+                if (property.salesId) {
+                  setSelectedUserId(property.salesId);
+                }
+                setIsAssignModalOpen(true);
+              }}
+              className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+            >
+              {property.salesId ? "Reassign Property" : "Assign Property"}
+            </button>
+          )}
           <span
             className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-blue-100 text-blue-700`}
           >
@@ -711,6 +894,95 @@ const PropertyDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Assignment Modal */}
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scaleIn border border-gray-100">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 uppercase tracking-tight mb-0.5">
+                  {property?.salesId ? "Change Representative" : "Assign Agent"}
+                </h2>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">
+                  Team assignment management
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2.5">
+                  Sales Agent
+                </label>
+                <div className="relative group">
+                  <select
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-4 focus:ring-[#EE2529]/10 focus:border-[#EE2529] transition-all outline-none appearance-none cursor-pointer group-hover:bg-white"
+                  >
+                    <option value="">Select from team list</option>
+                    {assignableUsers.map((u) => (
+                      <option key={u.userId} value={u.userId}>
+                        {u.name || `${u.firstName} ${u.lastName}`} (
+                        {u.role === "Sales Manager" ? "MGR" : "EXEC"})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <MdArrowForward className="rotate-90" />
+                  </div>
+                </div>
+              </div>
+
+              {selectedUserId && (
+                <div className="p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-start gap-3">
+                  <FiInfo
+                    className="text-indigo-500 mt-0.5 shrink-0"
+                    size={14}
+                  />
+                  <p className="text-[10px] text-indigo-700 font-bold leading-relaxed uppercase tracking-tight">
+                    The chosen agent will manage verification and inquiries for
+                    this property. Review your choice before confirming.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-5 bg-gray-50/50 flex gap-3 border-t border-gray-100">
+              <button
+                onClick={() => setIsAssignModalOpen(false)}
+                className="flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:bg-white hover:text-gray-700 transition-all border border-transparent hover:border-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={
+                  !selectedUserId ||
+                  assignLoading ||
+                  selectedUserId === property?.salesId
+                }
+                onClick={handleAssignSubmit}
+                className={`flex-1 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg transition-all flex items-center justify-center gap-2 ${
+                  !selectedUserId ||
+                  assignLoading ||
+                  selectedUserId === property?.salesId
+                    ? "bg-gray-200 cursor-not-allowed shadow-none"
+                    : "bg-[#EE2529] hover:bg-[#D32F2F] shadow-red-200 active:scale-95"
+                }`}
+              >
+                {assignLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : selectedUserId === property?.salesId ? (
+                  "No Change"
+                ) : (
+                  "Confirm"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
