@@ -367,7 +367,7 @@ const PropertyDetails = () => {
                       </div>
                       <div className="flex gap-2">
                         {
-                          item.isVerified !== "completed" && (
+                          item.isVerified !== "completed"&& item.isVerified !== "partial" && (
                             <button
                               onClick={(e) => handleVerify(e, item.propertyId)}
                               className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
