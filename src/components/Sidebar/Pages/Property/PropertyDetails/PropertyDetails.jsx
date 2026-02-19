@@ -128,12 +128,15 @@ const PropertyDetails = () => {
             setPropertyList((prev) =>
               prev.map((p) =>
                 p.propertyId === propertyId
-                  ? { ...p, isVerified: "partial" }
+                  ? { ...p, isVerified: res.data.isVerified }
                   : p,
               ),
             );
           } else {
-            setProperty((prev) => ({ ...prev, isVerified: "partial" }));
+            setProperty((prev) => ({
+              ...prev,
+              isVerified: res.data.isVerified,
+            }));
           }
         }
       },
@@ -309,8 +312,14 @@ const PropertyDetails = () => {
                         {item.propertyType}
                       </div>
                       {(item.isVerified === "partial" ||
-                        item.isVerified === "verified") && (
-                        <div className="bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit">
+                        item.isVerified === "completed") && (
+                        <div
+                          className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
+                            item.isVerified === "partial"
+                              ? "bg-orange-500"
+                              : "bg-green-500"
+                          }`}
+                        >
                           <MdVerified size={10} />
                           {item.isVerified === "partial"
                             ? "Partial"
@@ -320,10 +329,20 @@ const PropertyDetails = () => {
                     </div>
                   </div>
                   <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 truncate">
-                      {item.microMarket ||
-                        `Commercial Space ${item.propertyId.slice(0, 4)}`}
-                    </h3>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
+                        {item.microMarket ||
+                          `Commercial Space ${item.propertyId.slice(0, 4)}`}
+                      </h3>
+                      {item.isVerified === "partial" && (
+                        <button
+                          onClick={(e) => handleVerify(e, item.propertyId)}
+                          className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
+                        >
+                          2nd Verify
+                        </button>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
                       <FiMapPin className="text-[#EE2529]" />
                       {item.city}, {item.state}
@@ -347,8 +366,8 @@ const PropertyDetails = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {item.isVerified !== "partial" &&
-                          item.isVerified !== "verified" && (
+                        {
+                          item.isVerified !== "completed" && (
                             <button
                               onClick={(e) => handleVerify(e, item.propertyId)}
                               className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
@@ -784,16 +803,25 @@ const PropertyDetails = () => {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          {property?.isVerified === "partial" ||
+          {property?.isVerified === "completed" ||
           property?.isVerified === "verified" ? (
             <span
               className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-green-100 text-green-700 flex items-center gap-1`}
             >
-              <MdVerified />{" "}
-              {property?.isVerified === "partial"
-                ? "Partially Verified"
-                : "Verified"}
+              <MdVerified /> Verified
             </span>
+          ) : property?.isVerified === "partial" ? (
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-orange-100 text-orange-700 flex items-center gap-1">
+                <MdVerified /> Partially Verified
+              </span>
+              <button
+                onClick={(e) => handleVerify(e, property.propertyId)}
+                className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+              >
+                2nd Verify
+              </button>
+            </div>
           ) : (
             <button
               onClick={(e) => handleVerify(e, property.propertyId)}
