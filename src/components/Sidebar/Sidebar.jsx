@@ -172,17 +172,17 @@ const buildMenuItems = (role) => {
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
-            link: "/dashboard/agent",
+            link: "/dashboard/work-board",
           },
           {
             title: "Sales Agent (Property Dealer)",
             icon: <MdRealEstateAgent className="w-4 h-4" />,
-            link: "/dashboard/agent",
+            link: "/dashboard/agent/property-dealer",
           },
           {
             title: "Sales Agent (Client Dealer)",
             icon: <MdRealEstateAgent className="w-4 h-4" />,
-            link: "/dashboard/agent",
+            link: "/dashboard/agent/client-dealer",
           },
         ],
       },
@@ -218,7 +218,7 @@ const buildMenuItems = (role) => {
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
-            link: "/dashboard/agent",
+            link: "/dashboard/work-board",
           },
           {
             title: "Sales Agent",

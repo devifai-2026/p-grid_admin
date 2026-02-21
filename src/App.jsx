@@ -21,8 +21,10 @@ import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCus
 import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
 import Users from "./components/Sidebar/Pages/Users/Users";
+import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
+import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -57,7 +59,11 @@ const AppRoutes = () => {
         <Route element={<MainLayout />}>
           {/* Dashboard */}
           <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-          <Route path="/dashboard/agent" element={<Agent />} />
+          {/* <Route path="/dashboard/agent" element={<Agent />} /> */}
+          <Route path="/dashboard/work-board" element={<WorkBoard />} />
+          <Route path="/dashboard/agent" element={<SalesAgents />} />
+          <Route path="/dashboard/agent/property-dealer" element={<SalesAgents />} />
+          <Route path="/dashboard/agent/client-dealer" element={<SalesAgents />} />
 
           {/* Properties */}
           <Route path="/property/property-grid" element={<PropertyGrid />} />
