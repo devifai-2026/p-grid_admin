@@ -21,8 +21,14 @@ import Notifications from "./Notifications/Notifications";
 const Header = ({ toggleSidebar, onLogout }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const { notifications, setNotifications, unreadCount, deleteNotification } =
-    useNotifications();
+  const {
+    notifications,
+    setNotifications,
+    unreadCount,
+    deleteNotification,
+    pagination,
+    loadMore,
+  } = useNotifications();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userName, setUserName] = useState("Admin");
   const [userRole, setUserRole] = useState("Staff");
@@ -31,43 +37,6 @@ const Header = ({ toggleSidebar, onLogout }) => {
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const { logout } = useAuthApi();
-
-  const fetchNotifications = async () => {
-    try {
-      apiCall.get({
-        route: "/admin/notifications",
-        params: { limit: 10 },
-        onSuccess: (res) => {
-          if (res.success) {
-            const mapped = res.data.map((n) => ({
-              id: n.id,
-              title: n.notificationText.includes("property")
-                ? "Property Update"
-                : "Notification",
-              message: n.notificationText,
-              time: formatTimeAgo(n.createdAt),
-              read: n.isRead,
-              type: n.notificationText.toLowerCase().includes("added")
-                ? "success"
-                : "info",
-              createdAt: n.createdAt,
-            }));
-
-            // Sync with context - only add if they don't exist yet (to respect real-time arrivals)
-            setNotifications((prev) => {
-              const existingIds = new Set(prev.map((p) => p.id));
-              const uniqueNew = mapped.filter((m) => !existingIds.has(m.id));
-              return [...prev, ...uniqueNew]
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .slice(0, 50);
-            });
-          }
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
 
   const formatTimeAgo = (dateStr) => {
     const date = new Date(dateStr);
@@ -83,8 +52,6 @@ const Header = ({ toggleSidebar, onLogout }) => {
 
   // Load user data and notifications
   useEffect(() => {
-    fetchNotifications();
-
     const userStr = localStorage.getItem("user");
     if (userStr) {
       try {
@@ -245,6 +212,8 @@ const Header = ({ toggleSidebar, onLogout }) => {
                 onMarkAsRead={handleMarkAsRead}
                 onDelete={handleDelete}
                 onClearAll={handleClearAll}
+                pagination={pagination}
+                onLoadMore={loadMore}
                 className="right-0 mt-2 top-full"
               />
             )}

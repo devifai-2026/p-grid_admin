@@ -32,6 +32,7 @@ import SignUp from "./components/auth/SignUp";
 import ResetEmail from "./components/auth/ResetEmail";
 import ResetOtp from "./components/auth/ResetOtp";
 import ConfirmPassword from "./components/auth/ConfirmPassword";
+import SalesBoard from "./components/Sidebar/Pages/SalesBoard/SalesBoard";
 
 const AppRoutes = () => {
   const { login, isLoggedIn, user } = useAuth();
@@ -64,6 +65,7 @@ const AppRoutes = () => {
           <Route path="/dashboard/agent" element={<SalesAgents />} />
           <Route path="/dashboard/agent/property-dealer" element={<SalesAgents />} />
           <Route path="/dashboard/agent/client-dealer" element={<SalesAgents />} />
+          <Route path="/dashboard/sales-board" element={<SalesBoard />} />
 
           {/* Properties */}
           <Route path="/property/property-grid" element={<PropertyGrid />} />

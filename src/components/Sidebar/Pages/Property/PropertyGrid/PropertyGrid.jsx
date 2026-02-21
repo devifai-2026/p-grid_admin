@@ -29,6 +29,8 @@ const PropertyGrid = () => {
     forRent: false,
     forSale: false,
     allProperty: true,
+    cottage: false,
+    villa: false,
     apartment: false,
     duplex: false,
     balcony: false,
@@ -39,6 +41,10 @@ const PropertyGrid = () => {
     fitnessClub: false,
   });
 
+  const [amenitiesList, setAmenitiesList] = useState([]);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [selectedBedrooms, setSelectedBedrooms] = useState([]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -48,10 +54,65 @@ const PropertyGrid = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const fetchProperties = (page = 1) => {
-    setLoading(true);
+  useEffect(() => {
     apiCall.get({
-      route: `/properties?page=${page}&limit=9`,
+      route: "/amenities",
+      onSuccess: (res) => {
+        if (res.success) {
+          setAmenitiesList(res.data || []);
+        }
+      },
+    });
+  }, []);
+
+  const fetchProperties = (
+    page = 1,
+    overrideFilters = null,
+    overrideAmenities = null,
+    overridePrice = null,
+    overrideBedrooms = null,
+  ) => {
+    setLoading(true);
+
+    const activeFilters = overrideFilters || selectedFilters;
+    const activeAmenities = overrideAmenities || selectedAmenities;
+    const activePrice = overridePrice || priceRange;
+    const activeBedrooms = overrideBedrooms || selectedBedrooms;
+
+    let query = `/properties?page=${page}&limit=9`;
+
+    if (activeBedrooms.length > 0) {
+      query += `&bedrooms=${activeBedrooms.join(",")}`;
+    }
+
+    // Pricing filters
+    if (activeFilters.forSale && !activeFilters.forRent) {
+      query += `&minPrice=${activePrice[0]}&maxPrice=${activePrice[1]}`;
+    } else if (activeFilters.forRent && !activeFilters.forSale) {
+      query += `&minRent=${activePrice[0]}&maxRent=${activePrice[1]}`;
+    } else {
+      query += `&maxPrice=${activePrice[1]}`;
+    }
+
+    // Property Types
+    let types = [];
+    if (!activeFilters.allProperty) {
+      if (activeFilters.cottage) types.push("Cottage");
+      if (activeFilters.villa) types.push("Villa");
+      if (activeFilters.apartment) types.push("Apartment");
+      if (activeFilters.duplex) types.push("Duplex Bungalow");
+    }
+    if (types.length > 0) {
+      query += `&propertyTypes=${types.join(",")}`;
+    }
+
+    // Amenities
+    if (activeAmenities.length > 0) {
+      query += `&amenityIds=${activeAmenities.join(",")}`;
+    }
+
+    apiCall.get({
+      route: query,
       onSuccess: (res) => {
         setLoading(false);
         if (res.success) {
@@ -70,13 +131,59 @@ const PropertyGrid = () => {
 
   useEffect(() => {
     fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilterChange = (key) => {
-    setSelectedFilters((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    let nextState;
+    setSelectedFilters((prev) => {
+      nextState = { ...prev, [key]: !prev[key] };
+
+      // Mutual exclusivity for property types
+      const propertySubTypes = ["cottage", "villa", "apartment", "duplex"];
+
+      if (key === "allProperty" && nextState.allProperty) {
+        // If "All Properties" is checked, uncheck sub-types
+        propertySubTypes.forEach((type) => {
+          nextState[type] = false;
+        });
+      } else if (propertySubTypes.includes(key) && nextState[key]) {
+        // If a specific sub-type is checked, uncheck "All Properties"
+        nextState.allProperty = false;
+      }
+
+      return nextState;
+    });
+    // Auto fetch properties (nextState is synchronously computed)
+    setTimeout(() => {
+      fetchProperties(1, nextState);
+    }, 0);
+  };
+
+  const handleAmenityChange = (id) => {
+    let nextState;
+    setSelectedAmenities((prev) => {
+      nextState = prev.includes(id)
+        ? prev.filter((aId) => aId !== id)
+        : [...prev, id];
+      return nextState;
+    });
+    setTimeout(() => {
+      fetchProperties(1, null, nextState);
+    }, 0);
+  };
+
+  const handleBedroomChange = (bhkVal) => {
+    let nextState;
+    setSelectedBedrooms((prev) => {
+      nextState = prev.includes(bhkVal)
+        ? prev.filter((val) => val !== bhkVal)
+        : [...prev, bhkVal];
+      return nextState;
+    });
+    setTimeout(() => {
+      fetchProperties(1, null, null, null, nextState);
+    }, 0);
   };
 
   const getStatusInfo = (property) => {
@@ -143,18 +250,21 @@ const PropertyGrid = () => {
             <input
               type="range"
               min="0"
-              max="100000"
+              max="100000000"
+              step="10000"
               value={priceRange[1]}
               onChange={(e) =>
                 setPriceRange([priceRange[0], parseInt(e.target.value)])
               }
+              onMouseUp={() => fetchProperties(1)}
+              onTouchEnd={() => fetchProperties(1)}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#EE2529]"
             />
           </div>
           <div className="flex justify-between items-center text-sm text-gray-600">
-            <span>6000</span>
+            <span>{formatPrice(priceRange[0])}</span>
             <span>to</span>
-            <span>100000</span>
+            <span>{formatPrice(priceRange[1])}</span>
           </div>
         </div>
 
@@ -195,7 +305,7 @@ const PropertyGrid = () => {
               <input
                 type="checkbox"
                 checked={selectedFilters.allProperty}
-                onChange={() => handleFilterChange("all-property")}
+                onChange={() => handleFilterChange("allProperty")}
                 className="w-4 h-4"
               />
               <span className="text-sm text-gray-600">All Properties</span>
@@ -248,7 +358,12 @@ const PropertyGrid = () => {
             {["1 BHK", "2 BHK", "3 BHK", "4 & 5 BHK"].map((option) => (
               <button
                 key={option}
-                className="px-3 py-1 text-xs border border-[#EE2529] text-[#EE2529] rounded hover:bg-red-50"
+                onClick={() => handleBedroomChange(option)}
+                className={`px-3 py-1 text-xs border border-[#EE2529] rounded transition-colors ${
+                  selectedBedrooms.includes(option)
+                    ? "bg-[#EE2529] text-white"
+                    : "text-[#EE2529] hover:bg-red-50"
+                }`}
               >
                 {option}
               </button>
@@ -262,65 +377,33 @@ const PropertyGrid = () => {
             Accessibility Features :
           </h4>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.balcony}
-                onChange={() => handleFilterChange("balcony")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Balcony</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.parking}
-                onChange={() => handleFilterChange("parking")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Parking</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.spa}
-                onChange={() => handleFilterChange("spa")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Spa</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.pool}
-                onChange={() => handleFilterChange("pool")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Pool</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.restaurant}
-                onChange={() => handleFilterChange("restaurant")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Restaurant</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.fitnessClub}
-                onChange={() => handleFilterChange("fitnessClub")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Fitness Club</span>
-            </label>
+            {amenitiesList.map((amenity) => (
+              <label
+                key={amenity.amenityId}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedAmenities.includes(amenity.amenityId)}
+                  onChange={() => handleAmenityChange(amenity.amenityId)}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm text-gray-600">
+                  {amenity.amenityName}
+                </span>
+              </label>
+            ))}
           </div>
         </div>
 
         {/* Apply Button */}
-        <button className="w-full bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-2 px-4 rounded-lg transition mb-4">
+        <button
+          onClick={() => {
+            setShowFilters(false);
+            fetchProperties(1);
+          }}
+          className="w-full bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-2 px-4 rounded-lg transition mb-4"
+        >
           Apply
         </button>
       </div>

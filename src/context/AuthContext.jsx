@@ -9,20 +9,32 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Initial check
-    const userStr = localStorage.getItem("user");
-    const loggedInStr = localStorage.getItem("isLoggedIn");
+    const syncUser = () => {
+      const userStr = localStorage.getItem("user");
+      const loggedInStr = localStorage.getItem("isLoggedIn");
 
-    if (userStr && loggedInStr === "true") {
-      try {
-        setUserState(JSON.parse(userStr));
-        setIsLoggedIn(true);
-      } catch (e) {
-        console.error("Failed to parse user data", e);
-        localStorage.removeItem("user");
-        localStorage.removeItem("isLoggedIn");
+      if (userStr && loggedInStr === "true") {
+        try {
+          setUserState(JSON.parse(userStr));
+          setIsLoggedIn(true);
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.removeItem("user");
+          localStorage.removeItem("isLoggedIn");
+          setUserState(null);
+          setIsLoggedIn(false);
+        }
+      } else {
+        setUserState(null);
+        setIsLoggedIn(false);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    syncUser();
+
+    window.addEventListener("userLoginStatusChanged", syncUser);
+    return () => window.removeEventListener("userLoginStatusChanged", syncUser);
   }, []);
 
   const login = (userData) => {

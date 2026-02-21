@@ -8,17 +8,23 @@ import {
   FiSearch,
   FiMoreVertical,
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 
 import { useNotifications } from "../../../../context/NotificationContext";
 
 const AllNotifications = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("all"); // 'all', 'unread', 'read'
   const [searchQuery, setSearchQuery] = useState("");
-  const { notifications, setNotifications, deleteNotification } =
-    useNotifications();
+  const {
+    notifications,
+    setNotifications,
+    deleteNotification,
+    pagination,
+    loadMore,
+  } = useNotifications();
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({});
 
   const formatTimeAgo = (dateStr) => {
     const date = new Date(dateStr);
@@ -203,83 +209,113 @@ const AllNotifications = () => {
       {/* Notifications List */}
       <div className="px-4 sm:px-0 space-y-3">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`group relative bg-white p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:shadow-lg hover:border-red-100 flex gap-4 ${
-                !notification.read
-                  ? "border-l-4 border-l-[#EE2529] border-y-gray-50 border-r-gray-50"
-                  : "border-gray-100 opacity-80"
-              }`}
-            >
-              {/* Unread Indicator Dot */}
-              {!notification.read && (
-                <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#EE2529] rounded-full animate-pulse shadow-sm shadow-red-200" />
-              )}
+          <>
+            {filteredNotifications.map((notification) => {
+              const propId =
+                notification.data?.propertyId || notification.propertyId;
+              return (
+                <div
+                  key={notification.id}
+                  onClick={() => {
+                    if (propId) {
+                      navigate(`/property/property-details/${propId}`);
+                    }
+                  }}
+                  className={`group relative bg-white p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:shadow-lg hover:border-red-100 flex gap-4 ${
+                    propId ? "cursor-pointer" : ""
+                  } ${
+                    !notification.read
+                      ? "border-l-4 border-l-[#EE2529] border-y-gray-50 border-r-gray-50"
+                      : "border-gray-100 opacity-80"
+                  }`}
+                >
+                  {/* Unread Indicator Dot */}
+                  {!notification.read && (
+                    <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#EE2529] rounded-full animate-pulse shadow-sm shadow-red-200" />
+                  )}
 
-              {/* Icon Container */}
-              <div
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${getIconColor(
-                  notification.type,
-                )}`}
-              >
-                {notification.type === "alert" ? (
-                  <FiBell size={20} />
-                ) : notification.type === "success" ? (
-                  <FiCheck size={20} />
-                ) : (
-                  <FiClock size={20} />
-                )}
-              </div>
-
-              {/* Content Area */}
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <h3
-                    className={`text-sm sm:text-base font-bold truncate leading-none ${
-                      !notification.read ? "text-gray-900" : "text-gray-600"
-                    }`}
+                  {/* Icon Container */}
+                  <div
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${getIconColor(
+                      notification.type,
+                    )}`}
                   >
-                    {notification.title}
-                  </h3>
-                </div>
-
-                <p className="text-gray-500 text-xs sm:text-sm mt-1.5 line-clamp-2 leading-relaxed font-medium">
-                  {notification.message}
-                </p>
-
-                {/* Status & Actions */}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    <span className="flex items-center gap-1">
-                      <FiClock size={12} />{" "}
-                      {formatTimeAgo(notification.createdAt)}
-                    </span>
-                    {notification.time && <span>•</span>}
-                    <span>{notification.date}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!notification.read && (
-                      <button
-                        onClick={() => handleMarkAsRead(notification.id)}
-                        className="px-3 py-1.5 text-[10px] font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
-                      >
-                        Read
-                      </button>
+                    {notification.type === "alert" ? (
+                      <FiBell size={20} />
+                    ) : notification.type === "success" ? (
+                      <FiCheck size={20} />
+                    ) : (
+                      <FiClock size={20} />
                     )}
-                    <button
-                      onClick={() => handleDelete(notification.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Remove"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
+                  </div>
+
+                  {/* Content Area */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <h3
+                        className={`text-sm sm:text-base font-bold truncate leading-none ${
+                          !notification.read ? "text-gray-900" : "text-gray-600"
+                        }`}
+                      >
+                        {notification.title}
+                      </h3>
+                    </div>
+
+                    <p className="text-gray-500 text-xs sm:text-sm mt-1.5 line-clamp-2 leading-relaxed font-medium">
+                      {notification.message}
+                    </p>
+
+                    {/* Status & Actions */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        <span className="flex items-center gap-1">
+                          <FiClock size={12} />{" "}
+                          {formatTimeAgo(notification.createdAt)}
+                        </span>
+                        {notification.time && <span>•</span>}
+                        <span>{notification.date}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!notification.read && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsRead(notification.id);
+                            }}
+                            className="px-3 py-1.5 text-[10px] font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
+                          >
+                            Read
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(notification.id);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Remove"
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+            {pagination?.hasNextPage && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={loadMore}
+                  className="px-8 py-3 bg-white border border-red-100 text-[#EE2529] font-bold rounded-xl hover:bg-red-50 hover:shadow-md transition-all flex items-center gap-2 group"
+                >
+                  Load More
+                  <FiClock className="group-hover:rotate-12 transition-transform" />
+                </button>
               </div>
-            </div>
-          ))
+            )}
+          </>
         ) : (
           /* Enhanced Empty State */
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">

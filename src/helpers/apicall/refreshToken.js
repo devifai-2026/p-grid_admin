@@ -19,8 +19,8 @@ export const refreshAccessToken = async () => {
             },
         });
 
-        const responseText = await response.text();
-        const data = decodeResponseData(responseText);
+        const responseData = await response.json();
+        const data = decodeResponseData(responseData);
 
         if (!response.ok) {
             throw new Error(data.message || "Failed to refresh token");
@@ -30,8 +30,10 @@ export const refreshAccessToken = async () => {
             const updatedUser = {
                 ...user,
                 token: data.data.accessToken,
+                accessToken: data.data.accessToken,
             };
             localStorage.setItem("user", JSON.stringify(updatedUser));
+            window.dispatchEvent(new Event('userLoginStatusChanged'));
             return data.data.accessToken;
         } else {
             throw new Error("Invalid response from refresh endpoint");

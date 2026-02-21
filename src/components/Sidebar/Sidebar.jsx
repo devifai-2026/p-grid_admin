@@ -90,7 +90,7 @@ const buildMenuItems = (role) => {
           {
             title: "Sales Board",
             icon: <FiBarChart2 className="w-4 h-4" />,
-            link: "/dashboard/agent",
+            link: "/dashboard/sales-board",
           },
           {
             title: "Sales Agent",
