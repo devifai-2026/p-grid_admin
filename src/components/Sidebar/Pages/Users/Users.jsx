@@ -105,7 +105,7 @@ const Users = () => {
     if (isAdminOrSuperAdmin) {
       const timer = setTimeout(() => {
         apiCall.get({
-          route: "/admin/sales-managers",
+          route: "/admin/sales-related-active-users/Sales Manager",
           onSuccess: (res) => {
             if (res.success) {
               setSalesManagers(res.data || []);

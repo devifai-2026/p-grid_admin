@@ -136,8 +136,20 @@ const UserModal = ({
                 >
                   <option value="">Select Sales Manager</option>
                   {salesManagers.map((sm) => (
-                    <option key={sm.value} value={sm.value}>
-                      {sm.label}
+                    <option
+                      key={
+                        sm.value ||
+                        sm.userId ||
+                        sm.user_id ||
+                        sm.id ||
+                        Math.random()
+                      }
+                      value={sm.value || sm.userId || sm.user_id || sm.id || ""}
+                    >
+                      {sm.label ||
+                        sm.name ||
+                        `${sm.firstName || ""} ${sm.lastName || ""}`.trim() ||
+                        "Manager"}
                     </option>
                   ))}
                 </select>
