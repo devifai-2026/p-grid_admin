@@ -167,26 +167,6 @@ const WorkBoard = () => {
     searchUsers("");
   };
 
-  const handleUnassignProperty = (propertyId) => {
-    if (!window.confirm("Are you sure you want to unassign this property?"))
-      return;
-    setAssignPropertyLoading(true);
-    apiCall.put({
-      route: `/admin/properties/${propertyId}/assign`,
-      payload: { userId: null }, // Assuming null unassigns
-      onSuccess: () => {
-        setAssignPropertyLoading(false);
-        setIsAssignModalOpen(false);
-        setRefreshKey((prev) => prev + 1);
-        alert("Property unassigned successfully!");
-      },
-      onError: (err) => {
-        setAssignPropertyLoading(false);
-        alert(err.message || "Failed to unassign property");
-      },
-    });
-  };
-
   useEffect(() => {
     fetchData();
   }, [fetchData, refreshKey]);
@@ -230,12 +210,13 @@ const WorkBoard = () => {
   // --- Property Handlers ---
   const handleAssignProperty = (propertyId, userId) => {
     if (!userId) return;
+    if (targetProperty?.salesId === userId) return;
     setAssignPropertyLoading(true);
     apiCall.put({
       route: `/admin/properties/${propertyId}/assign`,
       payload: { userId },
       onSuccess: () => {
-        setAssignPropertyLoading(true); // Keep loading until modal closes
+        setAssignPropertyLoading(false);
         setIsAssignModalOpen(false);
         setRefreshKey((prev) => prev + 1);
         alert("Property assigned successfully!");
@@ -618,14 +599,14 @@ const WorkBoard = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[32px] shadow-2xl overflow-hidden border border-white"
+              className="relative w-full max-w-lg bg-white rounded-[32px] shadow-2xl overflow-hidden"
             >
               {/* Modal Header */}
               <div className="p-8 bg-slate-50 border-b border-slate-100">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">
-                      Assign Property
+                      {targetProperty?.salesId ? "Reassign Property" : "Assign Property"}
                     </h2>
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
                       {targetProperty?.microMarket || "New Property Location"}
@@ -662,7 +643,7 @@ const WorkBoard = () => {
                   userSearchResults.map((userRes) => (
                     <button
                       key={userRes.userId}
-                      disabled={assignPropertyLoading}
+                    //   disabled={assignPropertyLoading}
                       onClick={() =>
                         handleAssignProperty(
                           targetProperty.propertyId,
@@ -736,23 +717,6 @@ const WorkBoard = () => {
                 ) : null}
               </div>
 
-              {/* Modal Footer (Unassign Option) */}
-              {targetProperty?.salesId && (
-                <div className="p-6 bg-red-50/50 border-t border-red-100">
-                  <button
-                    onClick={() =>
-                      handleUnassignProperty(targetProperty.propertyId)
-                    }
-                    className="w-full py-4 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white rounded-2xl transition-all border border-red-100"
-                  >
-                    Unassign Current Agent (
-                    {targetProperty.salesAgent?.name ||
-                      targetProperty.salesAgent?.firstName ||
-                      "Agent"}
-                    )
-                  </button>
-                </div>
-              )}
             </motion.div>
           </div>
         )}

@@ -439,7 +439,7 @@ const PropertyDetails = () => {
                           className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
                             item.isVerified === "partial"
                               ? "bg-orange-500"
-                              : "bg-green-500"
+                              : "bg-red-500"
                           }`}
                         >
                           <MdVerified size={10} />
@@ -916,7 +916,7 @@ const PropertyDetails = () => {
       </div>
     </div>
   );
-
+console.log(property)
   const renderNotesContent = () => (
     <div className="space-y-6 animate-fadeIn">
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -929,33 +929,34 @@ const PropertyDetails = () => {
         </p>
 
         {/* Add Note Input */}
-        <div className="mb-8">
-          <textarea
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Type your note here..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:ring-4 focus:ring-[#EE2529]/10 focus:border-[#EE2529] transition-all outline-none resize-none min-h-[120px]"
-          />
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={handleAddNote}
-              disabled={!newNote.trim() || isSubmittingNote}
-              className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all flex items-center gap-2 ${
-                !newNote.trim() || isSubmittingNote
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "bg-[#EE2529] hover:bg-[#D32F2F] active:scale-95"
-              }`}
-            >
-              {isSubmittingNote ? (
-                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              ) : (
-                <FiMessageSquare />
-              )}
-              Add Note
-            </button>
+        {property.isVerified !== "completed" && (
+          <div className="mb-8">
+            <textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Type your note here..."
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:ring-4 focus:ring-[#EE2529]/10 focus:border-[#EE2529] transition-all outline-none resize-none min-h-[120px]"
+            />
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleAddNote}
+                disabled={!newNote.trim() || isSubmittingNote}
+                className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all flex items-center gap-2 ${
+                  !newNote.trim() || isSubmittingNote
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-[#EE2529] hover:bg-[#D32F2F] active:scale-95"
+                }`}
+              >
+                {isSubmittingNote ? (
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <FiMessageSquare />
+                )}
+                Add Note
+              </button>
+            </div>
           </div>
-        </div>
-
+        )}
         {/* Notes List */}
         <div className="space-y-4">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
