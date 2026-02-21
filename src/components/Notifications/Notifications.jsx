@@ -5,6 +5,7 @@ const Notifications = ({
   notifications,
   onClose,
   onMarkAsRead,
+  onDelete,
   onClearAll,
   className = "",
 }) => {
@@ -85,15 +86,24 @@ const Notifications = ({
               </div>
 
               {/* Actions */}
-              {!notification.read && (
+              <div className="shrink-0 flex items-center gap-1 self-center opacity-0 group-hover:opacity-100 transition-all">
+                {!notification.read && (
+                  <button
+                    onClick={() => onMarkAsRead(notification.id)}
+                    className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-full"
+                    title="Mark as read"
+                  >
+                    <FiCheck size={14} />
+                  </button>
+                )}
                 <button
-                  onClick={() => onMarkAsRead(notification.id)}
-                  className="shrink-0 p-1.5 self-center text-blue-500 hover:bg-blue-50 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-                  title="Mark as read"
+                  onClick={() => onDelete(notification.id)}
+                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full"
+                  title="Delete"
                 >
-                  <FiCheck size={14} />
+                  <FiTrash2 size={14} />
                 </button>
-              )}
+              </div>
             </div>
           ))
         )}

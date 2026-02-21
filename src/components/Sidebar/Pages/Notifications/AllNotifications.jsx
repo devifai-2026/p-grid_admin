@@ -15,7 +15,8 @@ import { useNotifications } from "../../../../context/NotificationContext";
 const AllNotifications = () => {
   const [filter, setFilter] = useState("all"); // 'all', 'unread', 'read'
   const [searchQuery, setSearchQuery] = useState("");
-  const { notifications, setNotifications } = useNotifications();
+  const { notifications, setNotifications, deleteNotification } =
+    useNotifications();
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({});
 
@@ -93,6 +94,21 @@ const AllNotifications = () => {
       } catch (error) {
         console.error("Error clearing notifications:", error);
       }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      apiCall.delete({
+        route: `/admin/notifications/${id}`,
+        onSuccess: (res) => {
+          if (res.success) {
+            deleteNotification(id);
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
     }
   };
 

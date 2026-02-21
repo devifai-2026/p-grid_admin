@@ -21,7 +21,8 @@ import Notifications from "./Notifications/Notifications";
 const Header = ({ toggleSidebar, onLogout }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const { notifications, setNotifications, unreadCount } = useNotifications();
+  const { notifications, setNotifications, unreadCount, deleteNotification } =
+    useNotifications();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userName, setUserName] = useState("Admin");
   const [userRole, setUserRole] = useState("Staff");
@@ -160,6 +161,21 @@ const Header = ({ toggleSidebar, onLogout }) => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      apiCall.delete({
+        route: `/admin/notifications/${id}`,
+        onSuccess: (res) => {
+          if (res.success) {
+            deleteNotification(id);
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between">
@@ -227,6 +243,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
                 notifications={notifications}
                 onClose={() => setIsNotificationsOpen(false)}
                 onMarkAsRead={handleMarkAsRead}
+                onDelete={handleDelete}
                 onClearAll={handleClearAll}
                 className="right-0 mt-2 top-full"
               />

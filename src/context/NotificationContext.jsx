@@ -74,6 +74,10 @@ export const NotificationProvider = ({ children }) => {
     };
   }, [user?.userId, addNotification]);
 
+  const deleteNotification = useCallback((id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
   return (
     <NotificationContext.Provider
       value={{
@@ -81,6 +85,7 @@ export const NotificationProvider = ({ children }) => {
         setNotifications,
         unreadCount,
         addNotification,
+        deleteNotification,
       }}
     >
       {children}
