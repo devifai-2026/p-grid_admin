@@ -42,8 +42,14 @@ const UserFilters = ({
           >
             <option value="All">All Roles</option>
             <option value="Admin">Admin</option>
+            <option value="Super Admin">Super Admin</option>
             <option value="Sales Manager">Sales Manager</option>
-            <option value="Sales Executive">Sales Executive</option>
+            <option value="Sales Executive - Client Dealer">
+              Sales Executive (Client Dealer)
+            </option>
+            <option value="Sales Executive - Property Manager">
+              Sales Executive (Property Manager)
+            </option>
           </select>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { useUserStorage } from "../../../../helpers/useUserStorage";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 
@@ -9,9 +10,21 @@ import UserTable from "./components/UserTable";
 import UserModal from "./components/UserModal";
 
 const Users = () => {
+  const location = useLocation();
   const { user: currentUser } = useUserStorage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
+
+  // Handle pre-selected role from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get("roleName");
+    if (roleParam) {
+      setSelectedRole(roleParam);
+      // Reset to page 1 when role changes via URL
+      setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    }
+  }, [location.search]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -51,15 +64,19 @@ const Users = () => {
   // 1. Fetch Users
   const fetchUsers = useCallback(() => {
     setLoading(true);
-    const queryParams = [`page=${pagination.currentPage}`, `limit=10`];
+    const params = {
+      page: pagination.currentPage,
+      limit: 10,
+    };
 
     // Filter by role if selected
     if (selectedRole !== "All") {
-      queryParams.push(`roleName=${selectedRole}`);
+      params.roleName = selectedRole;
     }
 
     apiCall.get({
-      route: `/admin/users?${queryParams.join("&")}`,
+      route: "/admin/users",
+      params,
       onSuccess: (res) => {
         setLoading(false);
         if (res.success) {

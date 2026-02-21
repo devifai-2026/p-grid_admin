@@ -103,7 +103,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "My Property", link: "/property/property-grid" },
+          { title: "My Property", link: "/property/property-details" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
@@ -144,7 +144,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "My Property", link: "/property/property-grid" },
+          { title: "My Property", link: "/property/property-details" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
@@ -190,7 +190,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "Hot Property", link: "/property/property-grid" },
+          { title: "Hot Property", link: "/property/property-details" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
@@ -228,7 +228,7 @@ const buildMenuItems = (role) => {
           {
             title: "Sales Manager",
             icon: <FiBriefcase className="w-4 h-4" />,
-            link: "/users",
+            link: "/users?roleName=Sales%20Manager",
           },
         ],
       },
@@ -236,7 +236,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "Hot Property", link: "/property/property-grid" },
+          { title: "Hot Property", link: "/property/property-details" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
@@ -271,8 +271,8 @@ const buildMenuItems = (role) => {
       title: "Property",
       icon: <FiHome className="w-5 h-5" />,
       submenus: [
-        { title: "Property Grid", link: "/property/property-grid" },
         { title: "Property Details", link: "/property/property-details" },
+        { title: "Property Grid", link: "/property/property-grid" },
         { title: "Add Property", link: "/property/add-property" },
       ],
     },
@@ -295,25 +295,24 @@ const Sidebar = ({ collapsed }) => {
   const menuItems = buildMenuItems(user?.role);
 
   const [expandedMenus, setExpandedMenus] = useState(() =>
-    menuItems
-      .filter((item) => item.submenus)
-      .map((item) => item.title)
+    menuItems.filter((item) => item.submenus).map((item) => item.title),
   );
 
   const toggleExpand = (title) => {
     setExpandedMenus((prev) =>
-      prev.includes(title)
-        ? prev.filter((t) => t !== title)
-        : [...prev, title]
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title],
     );
   };
 
   const isExpanded = (title) => expandedMenus.includes(title);
 
-  const isActive = (link) => location.pathname === link;
+  const isActive = (link) => {
+    const currentPath = location.pathname + location.search;
+    return decodeURIComponent(currentPath) === decodeURIComponent(link);
+  };
 
   const isSubMenuActive = (submenus) =>
-    submenus?.some((sub) => location.pathname === sub.link);
+    submenus?.some((sub) => isActive(sub.link));
 
   const isParentActive = (item) => {
     if (item.isLogout) return false;

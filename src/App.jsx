@@ -82,7 +82,19 @@ const AppRoutes = () => {
           />
           <Route
             path="/customers/investors"
-            element={<CustomerGrid roleTitle="Investors" roleName="Inverstor" />}
+            element={<CustomerGrid roleTitle="Investors" roleName="Investor" />}
+          />
+          <Route
+            path="/customers/sales-manager"
+            element={<CustomerGrid roleTitle="Sales Manager" roleName="Sales Manager" />}
+          />
+          <Route
+            path="/customers/sales-executive-client-dealer"
+            element={<CustomerGrid roleTitle="Sales Executive - Client Dealer" roleName="Sales Executive - Client Dealer" />}
+          />
+          <Route
+            path="/customers/sales-executive-property-manager"
+            element={<CustomerGrid roleTitle="Sales Executive - Property Manager" roleName="Sales Executive - Property Manager" />}
           />
           <Route path="/customers/grid-view" element={<GridView />} />
           <Route
@@ -137,5 +149,5 @@ const App = () => {
 
 export default App;
 
-
 // Admin - > 6666666661
+// Client Dealer -> 7777777771

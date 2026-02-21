@@ -100,8 +100,14 @@ const Login = ({ onLogin }) => {
         setIsSubmitting(false);
         if (res.success) {
           console.log("Login successful:", res.data);
-          if (res.data.role === "Owner" || res.data.role === "Broker" || res.data.role === "Inverstor") {
-            setError("You are not authorized to login, only Admin, Sales Manager, Sales Executive and Super Admin can login");
+          if (
+            res.data.role === "Owner" ||
+            res.data.role === "Broker" ||
+            res.data.role === "Investor"
+          ) {
+            setError(
+              "You are not authorized to login, only Admin, Sales Manager, Sales Executive and Super Admin can login",
+            );
             return;
           }
           // Add pulse animation to button
