@@ -152,7 +152,7 @@ const AddCustomer = () => {
                   </div>
                   <div>
                     <p className="text-lg font-bold text-[#EE2529]">
-                      {formData.investProperty || '$142,465'}
+                      {formData.investProperty || '₹142,465'}
                     </p>
                     <p className="text-xs text-slate-600 font-medium">Invest</p>
                   </div>

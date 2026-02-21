@@ -33,7 +33,7 @@ const GridView = () => {
       address: "Schoolstraat 161 5151 HH Drunen",
       viewProperty: 231,
       ownProperty: 27,
-      investProperty: "$928,128",
+      investProperty: "₹928,128",
     },
     {
       id: 2,
@@ -47,7 +47,7 @@ const GridView = () => {
       address: "Jean Racinelaan 48 5629 PK Eindhoven",
       viewProperty: 134,
       ownProperty: 13,
-      investProperty: "$435,892",
+      investProperty: "₹435,892",
     },
     {
       id: 3,
@@ -61,7 +61,7 @@ const GridView = () => {
       address: "Alkmenehof 124 2728 KA Zoetermeer",
       viewProperty: 301,
       ownProperty: 15,
-      investProperty: "$743,120",
+      investProperty: "₹743,120",
     },
     {
       id: 4,
@@ -75,7 +75,7 @@ const GridView = () => {
       address: "Oudegracht 135 3511 NJ Utrecht",
       viewProperty: 109,
       ownProperty: 7,
-      investProperty: "$635,812",
+      investProperty: "₹635,812",
     },
     {
       id: 5,
@@ -89,7 +89,7 @@ const GridView = () => {
       address: "Willem de Zwijgerlaan 183 2315 AT Leiden",
       viewProperty: 142,
       ownProperty: 18,
-      investProperty: "$733,291",
+      investProperty: "₹733,291",
     },
     {
       id: 6,
@@ -103,7 +103,7 @@ const GridView = () => {
       address: "Bongerd 116 6367 CL Voerendaal",
       viewProperty: 109,
       ownProperty: 10,
-      investProperty: "$831,760",
+      investProperty: "₹831,760",
     },
   ];
 
