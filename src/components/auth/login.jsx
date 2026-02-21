@@ -143,7 +143,7 @@ const Login = ({ onLogin }) => {
 
   const handleUseAdminCredentials = () => {
     setFormData({
-      mobileNumber: "7550969931",
+      mobileNumber: "6666666661",
       otp: "111111",
       verificationId: "", // Reset verification ID to force new generation
     });
