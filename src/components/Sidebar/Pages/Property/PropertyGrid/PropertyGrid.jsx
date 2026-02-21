@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BsBookmark } from "react-icons/bs";
 import { FaBath, FaBed, FaRuler } from "react-icons/fa";
 import { FiMapPin, FiHeart, FiSearch, FiFilter, FiX } from "react-icons/fi";
-import { MdOutlineRoofing } from "react-icons/md";
+import { MdOutlineRoofing, MdVerified } from "react-icons/md";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 
 const PropertyGrid = () => {
@@ -354,10 +354,23 @@ const PropertyGrid = () => {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
 
-                    {/* Verified Badge - Top Right */}
-                    <div className="absolute top-4 right-0 bg-[#EE2529] text-white text-[10px] font-bold px-3 py-1 rounded-l-md shadow-md z-10">
-                      VERIFIED
-                    </div>
+                    {/* Verification Badge - Top Right */}
+                    {(property.isVerified === "partial" ||
+                      property.isVerified === "completed" ||
+                      property.isVerified === "verified") && (
+                      <div
+                        className={`absolute top-4 right-0 text-white text-[10px] font-bold px-3 py-1 rounded-l-md shadow-md z-10 flex items-center gap-1 ${
+                          property.isVerified === "partial"
+                            ? "bg-orange-500"
+                            : "bg-green-600"
+                        }`}
+                      >
+                        <MdVerified size={12} />
+                        {property.isVerified === "partial"
+                          ? "PARTIAL"
+                          : "VERIFIED"}
+                      </div>
+                    )}
 
                     {/* Status Badge - Top Left */}
                     <div

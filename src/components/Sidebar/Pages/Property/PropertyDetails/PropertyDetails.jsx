@@ -123,25 +123,74 @@ const PropertyDetails = () => {
       onSuccess: (res) => {
         if (res.success) {
           alert("Property verified successfully!");
+          const updatedData = res.data;
           // Refresh the list
           if (!id || id === "undefined" || id === "null") {
             setPropertyList((prev) =>
               prev.map((p) =>
                 p.propertyId === propertyId
-                  ? { ...p, isVerified: res.data.isVerified }
+                  ? {
+                      ...p,
+                      isVerified: updatedData.isVerified,
+                      verificationLogs: updatedData.verificationLogs,
+                    }
                   : p,
               ),
             );
           } else {
             setProperty((prev) => ({
               ...prev,
-              isVerified: res.data.isVerified,
+              isVerified: updatedData.isVerified,
+              verificationLogs: updatedData.verificationLogs,
             }));
           }
         }
       },
       onError: (err) => {
         alert(err.message || "Failed to verify property");
+      },
+    });
+  };
+
+  const handleUnverify = (e, propertyId) => {
+    e.stopPropagation();
+    if (
+      !window.confirm(
+        "Are you sure you want to remove your verification from this property?",
+      )
+    )
+      return;
+
+    apiCall.delete({
+      route: `/admin/properties/${propertyId}/verify`,
+      onSuccess: (res) => {
+        if (res.success) {
+          alert("Verification removed successfully!");
+          const updatedData = res.data;
+          // Refresh the list
+          if (!id || id === "undefined" || id === "null") {
+            setPropertyList((prev) =>
+              prev.map((p) =>
+                p.propertyId === propertyId
+                  ? {
+                      ...p,
+                      isVerified: updatedData.isVerified,
+                      verificationLogs: updatedData.verificationLogs,
+                    }
+                  : p,
+              ),
+            );
+          } else {
+            setProperty((prev) => ({
+              ...prev,
+              isVerified: updatedData.isVerified,
+              verificationLogs: updatedData.verificationLogs,
+            }));
+          }
+        }
+      },
+      onError: (err) => {
+        alert(err.message || "Failed to remove verification");
       },
     });
   };
@@ -218,8 +267,11 @@ const PropertyDetails = () => {
     console.log("PropertyDetails mounted. ID:", id);
     if (id && id !== "undefined" && id !== "null") {
       setLoading(true);
+      const fetchRoute = isAdminOrSuperAdmin
+        ? `/admin/properties/${id}`
+        : `/properties/${id}`;
       apiCall.get({
-        route: `/properties/${id}`,
+        route: fetchRoute,
         onSuccess: (res) => {
           console.log("PropertyDetails API Success:", res);
           setLoading(false);
@@ -250,6 +302,7 @@ const PropertyDetails = () => {
         onSuccess: (res) => {
           setLoading(false);
           if (res.success) {
+            console.log(res.data);
             setPropertyList(res.data || []);
           }
         },
@@ -334,14 +387,17 @@ const PropertyDetails = () => {
                         {item.microMarket ||
                           `Commercial Space ${item.propertyId.slice(0, 4)}`}
                       </h3>
-                      {item.isVerified === "partial" && (
-                        <button
-                          onClick={(e) => handleVerify(e, item.propertyId)}
-                          className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
-                        >
-                          2nd Verify
-                        </button>
-                      )}
+                      {item.isVerified === "partial" &&
+                        !item.verificationLogs?.some(
+                          (log) => log.userId === user?.userId,
+                        ) && (
+                          <button
+                            onClick={(e) => handleVerify(e, item.propertyId)}
+                            className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
+                          >
+                            2nd Verify
+                          </button>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
                       <FiMapPin className="text-[#EE2529]" />
@@ -366,15 +422,30 @@ const PropertyDetails = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {
-                          item.isVerified !== "completed"&& item.isVerified !== "partial" && (
-                            <button
-                              onClick={(e) => handleVerify(e, item.propertyId)}
-                              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
-                            >
-                              Verify
-                            </button>
-                          )}
+                        {item.verificationLogs?.some(
+                          (log) => log.userId === user?.userId,
+                        ) ? (
+                          <button
+                            onClick={(e) => handleUnverify(e, item.propertyId)}
+                            className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-200 transition"
+                          >
+                            Unverify
+                          </button>
+                        ) : (
+                          <>
+                            {item.isVerified !== "completed" &&
+                              item.isVerified !== "partial" && (
+                                <button
+                                  onClick={(e) =>
+                                    handleVerify(e, item.propertyId)
+                                  }
+                                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
+                                >
+                                  Verify
+                                </button>
+                              )}
+                          </>
+                        )}
                         <button
                           onClick={() =>
                             navigate(
@@ -524,6 +595,32 @@ const PropertyDetails = () => {
             value={property.caretaker?.caretakerName || "Professional"}
           />
         </PropertyDetailsCard>
+
+        {property.verificationLogs && property.verificationLogs.length > 0 && (
+          <PropertyDetailsCard title="Verification History" icon={MdVerified}>
+            <div className="space-y-4">
+              {property.verificationLogs.map((log, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-1 pb-3 border-b border-gray-50 last:border-0 last:pb-0"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-gray-800">
+                      {log.name}
+                    </span>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 uppercase">
+                      {log.role}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    <span>{log.email}</span>
+                    <span>{new Date(log.verifiedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </PropertyDetailsCard>
+        )}
       </div>
     </div>
   );
@@ -790,45 +887,67 @@ const PropertyDetails = () => {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Top Bar */}
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-4 flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition text-gray-600"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition text-gray-600"
           >
-            <FiArrowLeft size={20} />
+            <FiArrowLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
-          <h1 className="text-lg font-bold text-gray-800 uppercase tracking-widest">
+          <h1 className="text-base sm:text-lg font-bold text-gray-800 uppercase tracking-[0.1em] sm:tracking-widest">
             Overview
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          {property?.isVerified === "completed" ||
-          property?.isVerified === "verified" ? (
-            <span
-              className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-green-100 text-green-700 flex items-center gap-1`}
-            >
-              <MdVerified /> Verified
-            </span>
-          ) : property?.isVerified === "partial" ? (
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {property && (
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-orange-100 text-orange-700 flex items-center gap-1">
-                <MdVerified /> Partially Verified
-              </span>
-              <button
-                onClick={(e) => handleVerify(e, property.propertyId)}
-                className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+              <span
+                className={`px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded flex items-center gap-1 ${
+                  property.isVerified === "completed"
+                    ? "bg-green-100 text-green-700"
+                    : property.isVerified === "partial"
+                      ? "bg-orange-100 text-orange-700"
+                      : "bg-gray-100 text-gray-500"
+                }`}
               >
-                2nd Verify
-              </button>
+                <MdVerified className="w-3 h-3 sm:w-3.5 sm:h-3.5" />{" "}
+                {property.isVerified === "completed"
+                  ? "Verified"
+                  : property.isVerified === "partial"
+                    ? "Partially"
+                    : "Pending"}
+              </span>
+
+              {[
+                "Admin",
+                "Super Admin",
+                "Sales Manager",
+                "Sales Executive - Property Manager",
+              ].includes(user?.role) && (
+                <>
+                  {property.verificationLogs?.some(
+                    (log) => log.userId === user?.userId,
+                  ) ? (
+                    <button
+                      onClick={(e) => handleUnverify(e, property.propertyId)}
+                      className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-red-100 text-red-700 hover:bg-red-200 transition"
+                    >
+                      Unverify
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => handleVerify(e, property.propertyId)}
+                      className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+                    >
+                      {property.isVerified === "partial"
+                        ? "2nd Verify"
+                        : "Verify Now"}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
-          ) : (
-            <button
-              onClick={(e) => handleVerify(e, property.propertyId)}
-              className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
-            >
-              Verify Now
-            </button>
           )}
           {canAssignProperty && property && (
             <button
@@ -838,13 +957,13 @@ const PropertyDetails = () => {
                 }
                 setIsAssignModalOpen(true);
               }}
-              className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+              className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
             >
-              {property.salesId ? "Reassign Property" : "Assign Property"}
+              {property.salesId ? "Reassign" : "Assign"}
             </button>
           )}
           <span
-            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded bg-blue-100 text-blue-700`}
+            className={`px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-blue-100 text-blue-700`}
           >
             {property?.status || "For Sale"}
           </span>
