@@ -110,6 +110,12 @@ const PropertyDetails = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
 
+  // Notes States
+  const [notesData, setNotesData] = useState([]);
+  const [newNote, setNewNote] = useState("");
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+
   const isAdminOrSuperAdmin = ["Admin", "Super Admin"].includes(user?.role);
   const isSalesManager = user?.role === "Sales Manager";
   const canAssignProperty = isAdminOrSuperAdmin || isSalesManager;
@@ -314,6 +320,62 @@ const PropertyDetails = () => {
       });
     }
   }, [id, user]);
+
+  const fetchNotes = () => {
+    if (!id) return;
+    setNotesLoading(true);
+    apiCall.get({
+      route: `/notes/${id}`,
+      onSuccess: (res) => {
+        setNotesLoading(false);
+        if (res.success && res.data?.notes) {
+          // The backend returns { property, notes, totalNotes }
+          // notes is the record which contains the notes array
+          setNotesData(res.data.notes.notes || []);
+        } else {
+          setNotesData([]);
+        }
+      },
+      onError: (err) => {
+        setNotesLoading(false);
+        console.error("Error fetching notes:", err);
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab === "notes") {
+      fetchNotes();
+    }
+  }, [activeTab, id]);
+
+  const handleAddNote = () => {
+    if (!newNote.trim()) return;
+
+    setIsSubmittingNote(true);
+    apiCall.post({
+      route: `/properties/${id}/notes`,
+      payload: {
+        notes: [
+          {
+            note: newNote.trim(),
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      },
+      onSuccess: (res) => {
+        setIsSubmittingNote(false);
+        if (res.success) {
+          setNewNote("");
+          fetchNotes(); // Refresh notes list
+        }
+      },
+      onError: (err) => {
+        setIsSubmittingNote(false);
+        alert(err.message || "Failed to add note");
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -855,6 +917,103 @@ const PropertyDetails = () => {
     </div>
   );
 
+  const renderNotesContent = () => (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-800 uppercase tracking-tight mb-2">
+          Notes for the property owner
+        </h2>
+        <p className="text-gray-500 text-sm mb-6">
+          Add important notes that will be visible to the property owner in
+          their dashboard.
+        </p>
+
+        {/* Add Note Input */}
+        <div className="mb-8">
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="Type your note here..."
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:ring-4 focus:ring-[#EE2529]/10 focus:border-[#EE2529] transition-all outline-none resize-none min-h-[120px]"
+          />
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleAddNote}
+              disabled={!newNote.trim() || isSubmittingNote}
+              className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all flex items-center gap-2 ${
+                !newNote.trim() || isSubmittingNote
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-[#EE2529] hover:bg-[#D32F2F] active:scale-95"
+              }`}
+            >
+              {isSubmittingNote ? (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <FiMessageSquare />
+              )}
+              Add Note
+            </button>
+          </div>
+        </div>
+
+        {/* Notes List */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
+            Previous Notes
+          </h3>
+          {notesLoading ? (
+            <div className="py-8 text-center">
+              <div className="w-8 h-8 border-3 border-[#EE2529] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                Fetching notes...
+              </p>
+            </div>
+          ) : notesData.length === 0 ? (
+            <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+              <FiFileText size={40} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-sm text-gray-400 font-medium">
+                No notes added yet for this property.
+              </p>
+            </div>
+          ) : (
+            notesData.map((note, idx) => (
+              <div
+                key={idx}
+                className="p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-200 transition-all group"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-[#EE2529]">
+                      <FiMessageSquare size={14} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">
+                        Agent / Admin
+                      </p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                        Sales Representative
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                    {new Date(note.createdAt).toLocaleDateString()} at{" "}
+                    {new Date(note.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed pl-10">
+                  {note.note}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderFaqContent = () => (
     <div className="space-y-4 animate-fadeIn max-w-3xl mx-auto">
       {[
@@ -1032,6 +1191,7 @@ const PropertyDetails = () => {
                   { id: "lease", label: "Lease", icon: FiFileText },
                   { id: "analytics", label: "Analytics", icon: FaChartLine },
                   { id: "location", label: "Location", icon: FiMapPin },
+                  { id: "notes", label: "Notes", icon: FiMessageSquare },
                   { id: "faqs", label: "FAQs", icon: FiHelpCircle },
                 ].map((tab) => (
                   <TabButton
@@ -1049,6 +1209,7 @@ const PropertyDetails = () => {
               {activeTab === "lease" && renderLeaseContent()}
               {activeTab === "analytics" && renderAnalyticsContent()}
               {activeTab === "location" && renderLocationContent()}
+              {activeTab === "notes" && renderNotesContent()}
               {activeTab === "faqs" && renderFaqContent()}
             </div>
           </div>
