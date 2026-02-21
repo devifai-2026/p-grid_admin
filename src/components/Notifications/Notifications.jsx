@@ -1,4 +1,4 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import { FiX, FiCheck, FiClock, FiTrash2 } from "react-icons/fi";
 
 const Notifications = ({
@@ -8,9 +8,11 @@ const Notifications = ({
   onClearAll,
   className = "",
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div
-      className={`absolute w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 ${className}`}
+      className={`absolute w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-fade-in-down ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
@@ -53,10 +55,10 @@ const Notifications = ({
               {/* Icon/Avatar Placeholder */}
               <div
                 className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                  notification.type === "alert"
-                    ? "bg-red-100 text-red-600"
-                    : notification.type === "success"
-                      ? "bg-green-100 text-green-600"
+                  notification.type === "success"
+                    ? "bg-green-100 text-green-600"
+                    : notification.type === "alert"
+                      ? "bg-red-100 text-red-600"
                       : "bg-blue-100 text-blue-600"
                 }`}
               >
@@ -64,7 +66,7 @@ const Notifications = ({
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-start justify-between gap-2">
                   <p
                     className={`text-sm font-medium truncate ${
@@ -98,13 +100,17 @@ const Notifications = ({
       </div>
 
       {/* Footer */}
-      {notifications.length > 0 && (
-        <div className="p-2 border-t border-gray-100 bg-gray-50/50">
-          <button className="w-full py-2 text-xs font-medium text-gray-600 hover:text-[#EE2529] transition-colors text-center">
-            View All Notifications
-          </button>
-        </div>
-      )}
+      <div className="p-2 border-t border-gray-100 bg-gray-50/50">
+        <button
+          onClick={() => {
+            onClose();
+            navigate("/notifications");
+          }}
+          className="w-full py-2 text-xs font-medium text-gray-600 hover:text-[#EE2529] transition-colors text-center"
+        >
+          View All Notifications
+        </button>
+      </div>
     </div>
   );
 };

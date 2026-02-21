@@ -8,57 +8,28 @@ import {
   FiSearch,
   FiMoreVertical,
 } from "react-icons/fi";
+import { apiCall } from "../../../../helpers/apicall/apiCall";
+
+import { useNotifications } from "../../../../context/NotificationContext";
 
 const AllNotifications = () => {
   const [filter, setFilter] = useState("all"); // 'all', 'unread', 'read'
   const [searchQuery, setSearchQuery] = useState("");
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Inquiry Recieved",
-      message: "John Doe has sent an inquiry for Property #1234.",
-      time: "2 mins ago",
-      read: false,
-      type: "alert",
-      date: "Today",
-    },
-    {
-      id: 2,
-      title: "Payment Successful",
-      message: "Subscription renewal payment was successful.",
-      time: "1 hour ago",
-      read: false,
-      type: "success",
-      date: "Today",
-    },
-    {
-      id: 3,
-      title: "System Update",
-      message: "System maintenance scheduled for tonight at 2 AM.",
-      time: "5 hours ago",
-      read: true,
-      type: "info",
-      date: "Today",
-    },
-    {
-      id: 4,
-      title: "New Property Listed",
-      message: "A new property matching your criteria has been listed.",
-      time: "Yesterday",
-      read: true,
-      type: "info",
-      date: "Yesterday",
-    },
-    {
-      id: 5,
-      title: "Account Verified",
-      message: "Your account documentation has been verified successfully.",
-      time: "2 days ago",
-      read: true,
-      type: "success",
-      date: "Earlier",
-    },
-  ]);
+  const { notifications, setNotifications } = useNotifications();
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({});
+
+  const formatTimeAgo = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
 
   // Filter notifications based on tab and search
   const filteredNotifications = notifications.filter((notification) => {
@@ -66,8 +37,8 @@ const AllNotifications = () => {
       filter === "all"
         ? true
         : filter === "unread"
-        ? !notification.read
-        : notification.read; // 'read' filter
+          ? !notification.read
+          : notification.read;
 
     const matchesSearch =
       notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,23 +47,52 @@ const AllNotifications = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const handleMarkAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAsRead = async (id) => {
+    try {
+      apiCall.patch({
+        route: `/admin/notifications/${id}/read`,
+        onSuccess: (res) => {
+          if (res.success) {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+            );
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
   };
 
-  const handleDelete = (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const handleMarkAllRead = async () => {
+    try {
+      apiCall.patch({
+        route: "/admin/notifications/read-all",
+        onSuccess: (res) => {
+          if (res.success) {
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error marking all read:", error);
+    }
   };
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm("Are you sure you want to clear all notifications?")) {
-      setNotifications([]);
+      try {
+        apiCall.delete({
+          route: "/admin/notifications/clear-all",
+          onSuccess: (res) => {
+            if (res.success) {
+              setNotifications([]);
+            }
+          },
+        });
+      } catch (error) {
+        console.error("Error clearing notifications:", error);
+      }
     }
   };
 
@@ -192,7 +192,7 @@ const AllNotifications = () => {
               {/* Icon */}
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${getIconColor(
-                  notification.type
+                  notification.type,
                 )}`}
               >
                 {notification.type === "alert" ? (

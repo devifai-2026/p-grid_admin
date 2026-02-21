@@ -14,47 +14,76 @@ import {
 } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthApi } from "../helpers/API/Auth/authAPIs";
+import { apiCall } from "../helpers/apicall/apiCall";
+import { useNotifications } from "../context/NotificationContext";
 import Notifications from "./Notifications/Notifications";
 
 const Header = ({ toggleSidebar, onLogout }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Inquiry Recieved",
-      message: "John Doe has sent an inquiry for Property #1234.",
-      time: "2m ago",
-      read: false,
-      type: "alert",
-    },
-    {
-      id: 2,
-      title: "Payment Successful",
-      message: "Subscription renewal payment was successful.",
-      time: "1h ago",
-      read: false,
-      type: "success",
-    },
-    {
-      id: 3,
-      title: "System Update",
-      message: "System maintenance scheduled for tonight at 2 AM.",
-      time: "5h ago",
-      read: true,
-      type: "info",
-    },
-  ]);
+  const { notifications, setNotifications, unreadCount } = useNotifications();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userName, setUserName] = useState("Admin");
   const [userRole, setUserRole] = useState("Staff");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const { logout } = useAuthApi();
 
-  // Load user data
+  const fetchNotifications = async () => {
+    try {
+      apiCall.get({
+        route: "/admin/notifications",
+        params: { limit: 10 },
+        onSuccess: (res) => {
+          if (res.success) {
+            const mapped = res.data.map((n) => ({
+              id: n.id,
+              title: n.notificationText.includes("property")
+                ? "Property Update"
+                : "Notification",
+              message: n.notificationText,
+              time: formatTimeAgo(n.createdAt),
+              read: n.isRead,
+              type: n.notificationText.toLowerCase().includes("added")
+                ? "success"
+                : "info",
+              createdAt: n.createdAt,
+            }));
+
+            // Sync with context - only add if they don't exist yet (to respect real-time arrivals)
+            setNotifications((prev) => {
+              const existingIds = new Set(prev.map((p) => p.id));
+              const uniqueNew = mapped.filter((m) => !existingIds.has(m.id));
+              return [...prev, ...uniqueNew]
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 50);
+            });
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const formatTimeAgo = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
+  // Load user data and notifications
   useEffect(() => {
+    fetchNotifications();
+
     const userStr = localStorage.getItem("user");
     if (userStr) {
       try {
@@ -99,17 +128,37 @@ const Header = ({ toggleSidebar, onLogout }) => {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const handleMarkAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+  const handleMarkAsRead = async (id) => {
+    try {
+      apiCall.patch({
+        route: `/admin/notifications/${id}/read`,
+        onSuccess: (res) => {
+          if (res.success) {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+            );
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
   };
 
-  const handleClearAll = () => {
-    setNotifications([]);
+  const handleClearAll = async () => {
+    try {
+      apiCall.delete({
+        route: "/admin/notifications/clear-all",
+        onSuccess: (res) => {
+          if (res.success) {
+            setNotifications([]);
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error clearing all notifications:", error);
+    }
   };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
