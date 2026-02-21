@@ -1191,16 +1191,22 @@ const PropertyDetails = () => {
                   { id: "lease", label: "Lease", icon: FiFileText },
                   { id: "analytics", label: "Analytics", icon: FaChartLine },
                   { id: "location", label: "Location", icon: FiMapPin },
-                  { id: "notes", label: "Notes", icon: FiMessageSquare },
+                  user?.role === "Sales Executive - Property Manager" && {
+                    id: "notes",
+                    label: "Notes",
+                    icon: FiMessageSquare,
+                  },
                   { id: "faqs", label: "FAQs", icon: FiHelpCircle },
-                ].map((tab) => (
-                  <TabButton
-                    key={tab.id}
-                    {...tab}
-                    active={activeTab === tab.id}
-                    onClick={setActiveTab}
-                  />
-                ))}
+                ]
+                  .filter(Boolean)
+                  .map((tab) => (
+                    <TabButton
+                      key={tab.id}
+                      {...tab}
+                      active={activeTab === tab.id}
+                      onClick={setActiveTab}
+                    />
+                  ))}
               </div>
             </div>
 
@@ -1209,7 +1215,9 @@ const PropertyDetails = () => {
               {activeTab === "lease" && renderLeaseContent()}
               {activeTab === "analytics" && renderAnalyticsContent()}
               {activeTab === "location" && renderLocationContent()}
-              {activeTab === "notes" && renderNotesContent()}
+              {activeTab === "notes" &&
+                user?.role === "Sales Executive - Property Manager" &&
+                renderNotesContent()}
               {activeTab === "faqs" && renderFaqContent()}
             </div>
           </div>
