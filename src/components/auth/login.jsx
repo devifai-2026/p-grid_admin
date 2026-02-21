@@ -211,6 +211,18 @@ const Login = ({ onLogin }) => {
             data-aos="fade-right"
             data-aos-delay="200"
           >
+            {/* Decorative elements - Background */}
+            <div
+              className="absolute top-0 right-0 w-32 h-32 bg-red-500 opacity-20 rounded-full -translate-y-16 translate-x-16 z-0"
+              data-aos="fade-down-left"
+              data-aos-delay="700"
+            ></div>
+            <div
+              className="absolute bottom-0 left-0 w-48 h-48 bg-red-500 opacity-20 rounded-full translate-y-24 -translate-x-24 z-0"
+              data-aos="fade-up-right"
+              data-aos-delay="800"
+            ></div>
+
             <div className="relative z-10 text-white">
               <div className="mb-8" data-aos="fade-up" data-aos-delay="300">
                 <h1 className="text-4xl font-bold mb-2"># PreLease</h1>
@@ -244,18 +256,6 @@ const Login = ({ onLogin }) => {
                   Your gateway to premium property management.
                 </p>
               </div>
-
-              {/* Decorative elements */}
-              <div
-                className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16"
-                data-aos="fade-down-left"
-                data-aos-delay="700"
-              ></div>
-              <div
-                className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full translate-y-24 -translate-x-24"
-                data-aos="fade-up-right"
-                data-aos-delay="800"
-              ></div>
             </div>
           </div>
 

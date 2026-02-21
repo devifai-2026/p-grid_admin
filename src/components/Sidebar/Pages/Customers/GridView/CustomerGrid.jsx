@@ -113,96 +113,117 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCustomers.map((customer) => (
-            <div
-              key={customer.userId || customer.id}
-              onMouseEnter={() =>
-                setHoveredCard(customer.userId || customer.id)
-              }
-              onMouseLeave={() => setHoveredCard(null)}
-              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 hover:border-red-100"
-            >
-              {/* Card Header Background */}
-              <div className="h-24 bg-gradient-to-r from-red-50 to-orange-50 relative">
-                {/* Header Overlay - No edit action */}
-              </div>
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100">
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
+                    User Info
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden md:table-cell">
+                    Contact Details
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden lg:table-cell">
+                    Business / Location
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
+                    Role
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredCustomers.map((customer) => (
+                  <tr
+                    key={customer.userId || customer.id}
+                    className="group hover:bg-slate-50/80 transition-all duration-200"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={
+                              customer.profilePicture ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                customer.name ||
+                                  `${customer.firstName || "U"} ${customer.lastName || ""}`,
+                              )}&background=random`
+                            }
+                            alt={customer.name}
+                            className="w-11 h-11 rounded-xl object-cover shadow-sm ring-2 ring-white group-hover:ring-red-50 transition-all border border-slate-100"
+                          />
+                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">
+                            {customer.name ||
+                              `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
+                              "Unknown User"}
+                          </p>
+                          <p className="text-xs text-slate-400 font-medium">
+                            ID:{" "}
+                            {(customer.userId || customer.id || "N/A").slice(
+                              0,
+                              8,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
 
-              {/* Profile Info */}
-              <div className="px-6 pb-6 -mt-12 relative text-center">
-                <div className="inline-block relative">
-                  <div className="w-24 h-24 rounded-2xl bg-white p-1 shadow-lg group-hover:scale-105 transition-transform duration-300">
-                    <img
-                      src={
-                        customer.profilePicture ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name || "User")}&background=random`
-                      }
-                      alt={customer.name}
-                      className="w-full h-full rounded-xl object-cover"
-                    />
-                  </div>
-                  <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
-                </div>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <FiMail className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-medium truncate max-w-[200px]">
+                            {customer.email}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <FiPhone className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-medium">
+                            {customer.mobileNumber || "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
 
-                <div className="mt-4">
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">
-                    {customer.name ||
-                      `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
-                      "Unknown User"}
-                  </h3>
-                  <div className="flex items-center justify-center gap-2 mt-1">
-                    <span className="px-3 py-1 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-red-100">
-                      {customer.role || roleName}
-                    </span>
-                  </div>
-                </div>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                          <FiMapPin className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-700">
+                            {customer.reraNumber || "Micro Market"}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {customer.microMarket || "Noida/NCR"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
 
-                <div className="mt-6 space-y-3 text-left">
-                  <div className="flex items-start gap-3 text-slate-600 hover:text-red-500 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:bg-red-50">
-                      <FiMail className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">
-                        Email Address
-                      </p>
-                      <p className="text-sm truncate">{customer.email}</p>
-                    </div>
-                  </div>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-100">
+                        {customer.role || roleName}
+                      </span>
+                    </td>
 
-                  <div className="flex items-start gap-3 text-slate-600 hover:text-red-500 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:bg-red-50">
-                      <FiPhone className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">
-                        Phone Number
-                      </p>
-                      <p className="text-sm">
-                        {customer.mobileNumber || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 text-slate-600 hover:text-red-500 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:bg-red-50">
-                      <FiMapPin className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">
-                        Business Details
-                      </p>
-                      <p className="text-sm truncate">
-                        {customer.reraNumber
-                          ? `RERA: ${customer.reraNumber}`
-                          : "Property Consultant"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span className="text-[10px] font-bold">ACTIVE</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
