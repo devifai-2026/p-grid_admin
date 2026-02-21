@@ -126,88 +126,100 @@ const AllNotifications = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in-up">
+    <div className="p-0 sm:p-4 max-w-6xl mx-auto space-y-4 animate-fade-in-up h-full pb-10">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 sm:rounded-2xl border-b sm:border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-            <FiBell className="text-[#EE2529]" />
-            All Notifications
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+              <FiBell className="text-[#EE2529]" size={20} />
+            </div>
+            Notifications
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Stay updated with your latest activities and alerts.
+          <p className="text-gray-400 text-xs sm:text-sm mt-1">
+            Browse and manage your latest activity updates.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={handleMarkAllRead}
             disabled={notifications.every((n) => n.read)}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-semibold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all disabled:opacity-40"
           >
-            Mark all as read
+            Mark all read
           </button>
           <button
             onClick={handleClearAll}
             disabled={notifications.length === 0}
-            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
           >
-            <FiTrash2 size={16} /> Clear all
+            <FiTrash2 size={14} /> Clear list
           </button>
         </div>
       </div>
 
-      {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* Tabs */}
-        <div className="flex bg-gray-100 p-1 rounded-lg w-full md:w-auto">
-          {[
-            { id: "all", label: "All" },
-            { id: "unread", label: "Unread" },
-            { id: "read", label: "Read" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilter(tab.id)}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all flex-1 md:flex-none ${
-                filter === tab.id
-                  ? "bg-white text-[#EE2529] shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Filters & Search - Sticky for better UX */}
+      <div className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md py-2 px-4 sm:px-0">
+        <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          {/* Tabs */}
+          <div className="flex bg-gray-50 p-1 rounded-xl w-full sm:w-auto">
+            {[
+              { id: "all", label: "All" },
+              { id: "unread", label: "Unread" },
+              { id: "read", label: "Read" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                className={`px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all flex-1 sm:flex-none ${
+                  filter === tab.id
+                    ? "bg-white text-[#EE2529] shadow-sm"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Search */}
-        <div className="relative w-full md:w-80">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search notifications..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transaction-all"
-          />
+          {/* Search */}
+          <div className="relative w-full sm:w-72">
+            <FiSearch
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder="Filter by content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#EE2529]/20 focus:bg-white transition-all outline-none"
+            />
+          </div>
         </div>
       </div>
 
       {/* Notifications List */}
-      <div className="space-y-4">
+      <div className="px-4 sm:px-0 space-y-3">
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map((notification) => (
             <div
               key={notification.id}
-              className={`relative bg-white p-5 rounded-xl border transition-all duration-300 hover:shadow-md flex gap-4 ${
+              className={`group relative bg-white p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:shadow-lg hover:border-red-100 flex gap-4 ${
                 !notification.read
-                  ? "border-l-4 border-l-[#EE2529] border-y-gray-100 border-r-gray-100 bg-red-50/10"
-                  : "border-gray-100"
+                  ? "border-l-4 border-l-[#EE2529] border-y-gray-50 border-r-gray-50"
+                  : "border-gray-100 opacity-80"
               }`}
             >
-              {/* Icon */}
+              {/* Unread Indicator Dot */}
+              {!notification.read && (
+                <div className="absolute top-4 right-4 w-2.5 h-2.5 bg-[#EE2529] rounded-full animate-pulse shadow-sm shadow-red-200" />
+              )}
+
+              {/* Icon Container */}
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${getIconColor(
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${getIconColor(
                   notification.type,
                 )}`}
               >
@@ -220,42 +232,46 @@ const AllNotifications = () => {
                 )}
               </div>
 
-              {/* Content */}
+              {/* Content Area */}
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-1">
+                <div className="flex justify-between items-start">
                   <h3
-                    className={`text-base font-semibold ${
-                      !notification.read ? "text-gray-900" : "text-gray-700"
+                    className={`text-sm sm:text-base font-bold truncate leading-none ${
+                      !notification.read ? "text-gray-900" : "text-gray-600"
                     }`}
                   >
                     {notification.title}
                   </h3>
-                  <span className="text-xs text-gray-400 flex items-center gap-1 shrink-0 whitespace-nowrap">
-                    <FiClock size={12} /> {notification.time}
-                  </span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-2">
+
+                <p className="text-gray-500 text-xs sm:text-sm mt-1.5 line-clamp-2 leading-relaxed font-medium">
                   {notification.message}
                 </p>
 
-                {/* Actions Row */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                    {notification.date}
-                  </span>
-                  <div className="flex items-center gap-3">
+                {/* Status & Actions */}
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    <span className="flex items-center gap-1">
+                      <FiClock size={12} />{" "}
+                      {formatTimeAgo(notification.createdAt)}
+                    </span>
+                    {notification.time && <span>•</span>}
+                    <span>{notification.date}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {!notification.read && (
                       <button
                         onClick={() => handleMarkAsRead(notification.id)}
-                        className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors"
+                        className="px-3 py-1.5 text-[10px] font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
                       >
-                        <FiCheck size={14} /> Mark as read
+                        Read
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(notification.id)}
-                      className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50"
-                      title="Delete notification"
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove"
                     >
                       <FiTrash2 size={16} />
                     </button>
@@ -265,20 +281,18 @@ const AllNotifications = () => {
             </div>
           ))
         ) : (
-          /* Empty State */
-          <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiBell className="text-gray-300 text-3xl" />
+          /* Enhanced Empty State */
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FiBell className="text-gray-200 text-4xl" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-1">
-              {searchQuery
-                ? "No matching notifications found"
-                : "You're all caught up!"}
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              {searchQuery ? "No results found" : "Peace and quiet!"}
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-400 text-sm max-w-xs mx-auto">
               {searchQuery
-                ? "Try adjusting your search or filters"
-                : "New notifications will appear here when they arrive."}
+                ? "Try searching for something else or clearing your filters."
+                : "Your notification inbox is currently empty. We'll let you know when something happens."}
             </p>
             {searchQuery && (
               <button
@@ -286,9 +300,9 @@ const AllNotifications = () => {
                   setSearchQuery("");
                   setFilter("all");
                 }}
-                className="mt-4 px-6 py-2 text-sm font-medium text-[#EE2529] bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                className="mt-6 px-8 py-3 text-sm font-bold text-[#EE2529] bg-red-50 rounded-xl hover:bg-red-100 transition-all"
               >
-                Clear Search
+                Reset Search
               </button>
             )}
           </div>
