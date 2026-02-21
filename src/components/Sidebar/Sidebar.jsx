@@ -261,7 +261,7 @@ const Sidebar = ({ collapsed }) => {
 
       {/* Footer / User Profile Summary */}
       {!collapsed && (
-        <div className="absolute bottom-0 w-full p-4 ">
+        <div className="absolute bottom-0 w-full p-4 bg-red-50/80 backdrop-blur-md border-t border-red-100">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-rose-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
               {user?.name

@@ -16,6 +16,7 @@ import {
   FiPhone,
   FiMessageSquare,
   FiCalendar,
+  FiImage,
 } from "react-icons/fi";
 import {
   MdVerified,
@@ -352,14 +353,20 @@ const PropertyDetails = () => {
                   className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group flex flex-col"
                 >
                   <div className="h-48 overflow-hidden relative bg-gray-100">
-                    <img
-                      src={
-                        item.media?.[0]?.fileUrl ||
-                        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&h=300&fit=crop"
-                      }
-                      alt={item.microMarket}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                    {item.media?.[0]?.fileUrl ? (
+                      <img
+                        src={item.media[0].fileUrl}
+                        alt={item.microMarket}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                        <FiImage size={40} className="mb-2 opacity-50" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                          No Image
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                       <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
                         {item.propertyType}
@@ -976,14 +983,20 @@ const PropertyDetails = () => {
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
               <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 relative">
-                <img
-                  src={
-                    property?.media?.[0]?.fileUrl ||
-                    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
-                  }
-                  alt="Property"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
+                {property?.media?.[0]?.fileUrl ? (
+                  <img
+                    src={property.media[0].fileUrl}
+                    alt="Property"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                    <FiImage size={64} className="mb-3 opacity-50" />
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] opacity-50">
+                      No Image Available
+                    </span>
+                  </div>
+                )}
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 text-[#EE2529]">
                   <FiHeart className="fill-current" />
                 </div>

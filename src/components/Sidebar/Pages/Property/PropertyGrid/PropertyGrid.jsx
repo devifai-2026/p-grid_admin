@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsBookmark } from "react-icons/bs";
 import { FaBath, FaBed, FaRuler } from "react-icons/fa";
-import { FiMapPin, FiHeart, FiSearch, FiFilter, FiX } from "react-icons/fi";
+import {
+  FiMapPin,
+  FiHeart,
+  FiSearch,
+  FiFilter,
+  FiX,
+  FiImage,
+} from "react-icons/fi";
 import { MdOutlineRoofing, MdVerified } from "react-icons/md";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 
@@ -345,14 +352,20 @@ const PropertyGrid = () => {
                 >
                   {/* Image Container */}
                   <div className="relative h-48 overflow-hidden bg-gray-100">
-                    <img
-                      src={
-                        property.media?.[0]?.fileUrl ||
-                        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&h=300&fit=crop"
-                      }
-                      alt={property.microMarket || "Property"}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
+                    {property.media?.[0]?.fileUrl ? (
+                      <img
+                        src={property.media[0].fileUrl}
+                        alt={property.microMarket || "Property"}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                        <FiImage size={40} className="mb-2 opacity-50" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                          No Image Available
+                        </span>
+                      </div>
+                    )}
 
                     {/* Verification Badge - Top Right */}
                     {(property.isVerified === "partial" ||
