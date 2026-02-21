@@ -94,7 +94,7 @@ const CustomerDetails = () => {
       date: '12/19/2025',
       type: 'Residences',
       address: '4604, Phill Lane Kiowa',
-      amount: '$45,842',
+      amount: '₹45,842',
       status: 'Paid',
       agent: 'Michael A. Miner'
     },
@@ -103,7 +103,7 @@ const CustomerDetails = () => {
       date: '09/10/2025',
       type: 'Villas',
       address: '127, Boulevard Cockeysville',
-      amount: '$76,483',
+      amount: '₹76,483',
       status: 'Paid',
       agent: 'Theresa T. Brose'
     },
@@ -112,7 +112,7 @@ const CustomerDetails = () => {
       date: '11/14/2024',
       type: 'Bungalow',
       address: '900, Creede Wl 54913',
-      amount: '$83,644',
+      amount: '₹83,644',
       status: 'Paid',
       agent: 'Walter L. Calab'
     },
@@ -121,7 +121,7 @@ const CustomerDetails = () => {
       date: '08/21/2025',
       type: 'Apartment',
       address: '223, Creede Santa Maria',
-      amount: '$94,305',
+      amount: '₹94,305',
       status: 'Paid',
       agent: 'Olive Mize'
     },
@@ -130,7 +130,7 @@ const CustomerDetails = () => {
       date: '07/15/2025',
       type: 'Townhouse',
       address: '789, Oak Street',
-      amount: '$58,900',
+      amount: '₹58,900',
       status: 'Paid',
       agent: 'John D. Smith'
     },
@@ -139,7 +139,7 @@ const CustomerDetails = () => {
       date: '06/22/2025',
       type: 'Condo',
       address: '456, Pine Avenue',
-      amount: '$67,200',
+      amount: '₹67,200',
       status: 'Pending',
       agent: 'Sarah Johnson'
     },
@@ -148,7 +148,7 @@ const CustomerDetails = () => {
       date: '05/18/2025',
       type: 'Mansion',
       address: '123, Maple Road',
-      amount: '$125,000',
+      amount: '₹125,000',
       status: 'Paid',
       agent: 'Robert Williams'
     },
@@ -157,7 +157,7 @@ const CustomerDetails = () => {
       date: '04/12/2025',
       type: 'Duplex',
       address: '321, Elm Street',
-      amount: '$89,500',
+      amount: '₹89,500',
       status: 'Paid',
       agent: 'Lisa Anderson'
     },
@@ -166,7 +166,7 @@ const CustomerDetails = () => {
       date: '03/10/2025',
       type: 'Penthouse',
       address: '654, Skyline Blvd',
-      amount: '$210,000',
+      amount: '₹210,000',
       status: 'Paid',
       agent: 'James Wilson'
     },
@@ -175,7 +175,7 @@ const CustomerDetails = () => {
       date: '02/05/2025',
       type: 'Studio',
       address: '987, Urban Ave',
-      amount: '$35,500',
+      amount: '₹35,500',
       status: 'Pending',
       agent: 'Emily Davis'
     },
@@ -184,7 +184,7 @@ const CustomerDetails = () => {
       date: '01/15/2025',
       type: 'Farmhouse',
       address: '741, Country Rd',
-      amount: '$180,000',
+      amount: '₹180,000',
       status: 'Paid',
       agent: 'Thomas Brown'
     },
@@ -193,17 +193,17 @@ const CustomerDetails = () => {
       date: '12/20/2024',
       type: 'Cottage',
       address: '852, Lakeside Dr',
-      amount: '$95,000',
+      amount: '₹95,000',
       status: 'Paid',
       agent: 'Jessica Miller'
     }
   ];
 
   const recentTransactions = [
-    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '$13,987', txn: 'TXN-341220' },
-    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '$2,710', txn: 'TXN-836451' },
-    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '$13,987', txn: 'TXN-341220' },
-    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '$2,710', txn: 'TXN-836451' }
+    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '₹13,987', txn: 'TXN-341220' },
+    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '₹2,710', txn: 'TXN-836451' },
+    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '₹13,987', txn: 'TXN-341220' },
+    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '₹2,710', txn: 'TXN-836451' }
   ];
 
   // Calculate total pages based on current itemsPerPage
@@ -515,14 +515,14 @@ const CustomerDetails = () => {
                 <BsGraphUp className="w-8 h-8 text-rose-500" />
                 <div>
                   <p className="text-xs text-rose-600 font-medium">Total Invest On Property</p>
-                  <p className="text-lg font-bold text-rose-700">$928,128</p>
+                  <p className="text-lg font-bold text-rose-700">₹928,128</p>
                 </div>
               </div>
               <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-4 flex items-center gap-4">
                 <BsGraphDown className="w-8 h-8 text-emerald-500" />
                 <div>
                   <p className="text-xs text-emerald-600 font-medium">Income</p>
-                  <p className="text-lg font-bold text-emerald-700">$613,321.12</p>
+                  <p className="text-lg font-bold text-emerald-700">₹613,321.12</p>
                 </div>
               </div>
             </div>

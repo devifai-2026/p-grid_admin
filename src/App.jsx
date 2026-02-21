@@ -18,6 +18,7 @@ import AddProperty from "./components/Sidebar/Pages/Property/AddProperty/AddProp
 import GridView from "./components/Sidebar/Pages/Customers/GridView/GridView";
 import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails";
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
+import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
 import Users from "./components/Sidebar/Pages/Users/Users";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
@@ -71,6 +72,18 @@ const AppRoutes = () => {
           <Route path="/property/add-property" element={<AddProperty />} />
 
           {/* Customers */}
+          <Route
+            path="/customers/owners"
+            element={<CustomerGrid roleTitle="Owners" roleName="Owner" />}
+          />
+          <Route
+            path="/customers/brokers"
+            element={<CustomerGrid roleTitle="Brokers" roleName="Broker" />}
+          />
+          <Route
+            path="/customers/investors"
+            element={<CustomerGrid roleTitle="Investors" roleName="Inverstor" />}
+          />
           <Route path="/customers/grid-view" element={<GridView />} />
           <Route
             path="/customers/customer-details"
@@ -79,22 +92,12 @@ const AppRoutes = () => {
           <Route path="/customers/add-customer" element={<AddCustomer />} />
           <Route
             path="/customers"
-            element={<Navigate to="/customers/grid-view" replace />}
+            element={<Navigate to="/customers/owners" replace />}
           />
 
           {/* Others */}
           <Route path="/users" element={<Users />} />
-          <Route
-            path="/enquiry"
-            element={
-              user?.role?.includes("Sales") ||
-              user?.role === "Sales Manager" ? (
-                <Enquiry />
-              ) : (
-                <Navigate to="/dashboard/analytics" replace />
-              )
-            }
-          />
+          <Route path="/enquiry" element={<Enquiry />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* Placeholder Routes */}
