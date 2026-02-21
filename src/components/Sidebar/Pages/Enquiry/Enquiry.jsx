@@ -1,68 +1,56 @@
-import React, { useState, useEffect } from "react";
-import {
-  FiSearch,
-  FiRefreshCw,
-  FiMessageSquare,
-  FiHome,
-  FiUser,
-  FiCalendar,
-  FiUserPlus,
-  FiCheckCircle,
-} from "react-icons/fi";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiMessageSquare } from "react-icons/fi";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useAuth } from "../../../../context/AuthContext";
 
-const dummyInquiries = [];
+// Sub-components
+import EnquiryHeader from "./components/EnquiryHeader";
+import EnquiryCard from "./components/EnquiryCard";
 
 const Enquiry = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [inquiries, setInquiries] = useState(dummyInquiries);
+  const [inquiries, setInquiries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [executives, setExecutives] = useState([]);
   const [assigningId, setAssigningId] = useState(null);
   const [selectedExec, setSelectedExec] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
+  const [autoAssignLoading, setAutoAssignLoading] = useState(null);
 
-  const isManager = ["Admin", "Super Admin", "Sales Manager"].includes(
-    user?.role,
+  const isManager = useMemo(
+    () => ["Admin", "Super Admin", "Sales Manager"].includes(user?.role),
+    [user?.role],
   );
 
+  const fetchInquiries = useCallback(() => {
+    if (!user) return;
+    setLoading(true);
+
+    const endpoint = isManager
+      ? "/admin/pending-inquiries"
+      : "/sales/assigned-inquiries";
+
+    apiCall.get({
+      route: endpoint,
+      onSuccess: (res) => {
+        setLoading(false);
+        if (res.success && res.data) {
+          setInquiries(res.data);
+        }
+      },
+      onError: (err) => {
+        setLoading(false);
+        console.error("Error fetching inquiries:", err);
+      },
+    });
+  }, [isManager, user]);
+
   useEffect(() => {
-    const fetchInquiries = () => {
-      setLoading(true);
-
-      // Determine endpoint based on role
-      const isAdmin = ["Admin", "Super Admin", "Sales Manager"].includes(
-        user?.role,
-      );
-      const endpoint = isAdmin
-        ? "/admin/pending-inquiries"
-        : "/sales/assigned-inquiries";
-
-      apiCall.get({
-        route: endpoint,
-        onSuccess: (res) => {
-          setLoading(false);
-          if (res.success && res.data && res.data.length > 0) {
-            setInquiries(res.data);
-          }
-        },
-        onError: (err) => {
-          setLoading(false);
-          console.error("Error fetching inquiries:", err);
-        },
-      });
-    };
-
-    if (user) {
-      const timer = setTimeout(() => {
-        fetchInquiries();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [refreshKey, user]);
+    fetchInquiries();
+  }, [refreshKey, fetchInquiries]);
 
   useEffect(() => {
     if (isManager) {
@@ -89,7 +77,7 @@ const Enquiry = () => {
         inquirerId,
         assignedTo: selectedExec,
       },
-      onSuccess: (res) => {
+      onSuccess: () => {
         setAssignLoading(false);
         setAssigningId(null);
         setSelectedExec("");
@@ -102,221 +90,108 @@ const Enquiry = () => {
     });
   };
 
-  const filteredInquiries = inquiries.filter((item) => {
-    const propTitle =
-      `${item.property?.propertyType || ""} ${item.property?.city || ""}`.toLowerCase();
-    const inquirerName =
-      `${item.inquirer?.firstName || ""} ${item.inquirer?.lastName || ""}`.toLowerCase();
-    const idMatch = (item.propertyId || "").toLowerCase();
+  const handleAutoAssign = (propertyId, inquirerId) => {
+    setAutoAssignLoading(propertyId + inquirerId);
 
-    return (
-      propTitle.includes(searchTerm.toLowerCase()) ||
-      inquirerName.includes(searchTerm.toLowerCase()) ||
-      idMatch.includes(searchTerm.toLowerCase())
-    );
-  });
+    apiCall.post({
+      route: "/admin/inquiries/auto-assign",
+      payload: { propertyId, inquirerId },
+      onSuccess: () => {
+        setAutoAssignLoading(null);
+        setRefreshKey((prev) => prev + 1);
+      },
+      onError: (err) => {
+        setAutoAssignLoading(null);
+        alert(err.message || "Failed to auto-assign inquiry");
+      },
+    });
+  };
+
+  const filteredInquiries = useMemo(() => {
+    return inquiries.filter((item) => {
+      const propTitle =
+        `${item.property?.propertyType || ""} ${item.property?.city || ""}`.toLowerCase();
+      const inquirerName =
+        `${item.inquirer?.firstName || ""} ${item.inquirer?.lastName || ""}`.toLowerCase();
+      const idMatch = (item.propertyId || "").toLowerCase();
+      const search = searchTerm.toLowerCase();
+
+      return (
+        propTitle.includes(search) ||
+        inquirerName.includes(search) ||
+        idMatch.includes(search)
+      );
+    });
+  }, [inquiries, searchTerm]);
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            Property Enquiries
-          </h1>
-          <p className="text-slate-500 mt-1">
-            View and manage investor notes for your assigned properties
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50/50 p-3 md:p-6 space-y-4 md:space-y-6">
+      {/* Premium Header */}
+      <EnquiryHeader
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        loading={loading}
+        onRefresh={() => setRefreshKey((prev) => prev + 1)}
+      />
 
-      {/* Search and Refresh */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-96">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search by property or investor..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <button
-          onClick={() => setRefreshKey((prev) => prev + 1)}
-          className="p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 transition-colors flex items-center gap-2 text-sm font-medium"
-          title="Refresh List"
-        >
-          <FiRefreshCw className={loading ? "animate-spin" : ""} />
-          Refresh
-        </button>
-      </div>
-
-      {/* Enquiries List */}
-      <div className="grid grid-cols-1 gap-6">
-        {loading && inquiries.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
-            <div className="flex justify-center items-center gap-2 text-slate-500">
-              <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-              Loading inquiries...
-            </div>
-          </div>
-        ) : filteredInquiries.length > 0 ? (
-          filteredInquiries.map((item) => (
-            <div
-              key={item.id || item.propertyId}
-              className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
+      {/* Main List Container */}
+      <div className="space-y-4 md:space-y-6">
+        <AnimatePresence mode="popLayout">
+          {loading && inquiries.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white rounded-2xl md:rounded-3xl p-12 text-center border-2 border-dashed border-slate-100"
             >
-              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
-                    <FiHome className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-800 text-lg">
-                      {item.property?.propertyType || "Property Enquiry"} in{" "}
-                      {item.property?.city || "Unknown City"}
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Property ID: {item.propertyId}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-600">
-                      {item.inquiries?.length || 0} Queries
-                    </div>
-                    {item.status && (
-                      <span
-                        className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                          item.status === "pending"
-                            ? "bg-amber-100 text-amber-700"
-                            : item.status === "assigned"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    )}
-                  </div>
-
-                  {isManager && item.status === "pending" && (
-                    <button
-                      onClick={() => setAssigningId(item.id || item.propertyId)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors border border-red-100"
-                    >
-                      <FiUserPlus className="w-3.5 h-3.5" />
-                      Assign
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {assigningId === (item.id || item.propertyId) && (
-                <div className="p-4 bg-red-50/50 border-b border-red-100 animate-in slide-in-from-top duration-300">
-                  <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center gap-3">
-                    <div className="flex-1 w-full">
-                      <select
-                        value={selectedExec}
-                        onChange={(e) => setSelectedExec(e.target.value)}
-                        className="w-full pl-3 pr-10 py-2 rounded-lg border border-red-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm bg-white cursor-pointer"
-                      >
-                        <option value="">Select Executive to Assign</option>
-                        {executives.map((exec) => (
-                          <option
-                            key={exec.value || exec.userId || exec.id}
-                            value={exec.value || exec.userId || exec.id}
-                          >
-                            {exec.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <button
-                        onClick={() =>
-                          handleAssign(item.propertyId, item.inquirerId)
-                        }
-                        disabled={!selectedExec || assignLoading}
-                        className="flex-1 sm:flex-none px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-red-200 flex items-center justify-center gap-2"
-                      >
-                        {assignLoading ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <FiCheckCircle className="w-4 h-4" />
-                        )}
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => {
-                          setAssigningId(null);
-                          setSelectedExec("");
-                        }}
-                        className="flex-1 sm:flex-none px-4 py-2 bg-white text-slate-500 rounded-lg text-sm font-bold hover:bg-slate-100 border border-slate-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="p-5 space-y-4">
-                {item.inquiries && item.inquiries.length > 0 ? (
-                  item.inquiries.map((note, index) => (
-                    <div
-                      key={index}
-                      className="flex gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm">
-                          <FiUser className="w-5 h-5" />
-                        </div>
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex justify-between items-start">
-                          <p className="font-semibold text-slate-800 text-sm">
-                            {item.inquirer
-                              ? `${item.inquirer.firstName || ""} ${item.inquirer.lastName || ""}`
-                              : "User Inquiry"}
-                          </p>
-                          <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                            <FiCalendar className="w-3 h-3" />
-                            {note.createdAt
-                              ? new Date(note.createdAt).toLocaleString()
-                              : ""}
-                          </span>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {note.question}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-slate-500 py-4 italic">
-                    No questions available for this enquiry.
-                  </p>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center text-slate-500">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
-                <FiMessageSquare className="w-8 h-8" />
-              </div>
-              <p className="text-lg font-medium">No enquiries found</p>
-              <p className="text-sm">
-                New property inquiries will appear here once submitted.
+              <div className="w-12 h-12 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">
+                Synchronizing Enquiries...
               </p>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          ) : filteredInquiries.length > 0 ? (
+            filteredInquiries.map((item, index) => (
+              <EnquiryCard
+                key={item.id || item.propertyId}
+                item={item}
+                index={index}
+                isManager={isManager}
+                autoAssignLoading={autoAssignLoading}
+                handleAutoAssign={handleAutoAssign}
+                assigningId={assigningId}
+                setAssigningId={setAssigningId}
+                selectedExec={selectedExec}
+                setSelectedExec={setSelectedExec}
+                executives={executives}
+                handleAssign={handleAssign}
+                assignLoading={assignLoading}
+              />
+            ))
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white rounded-3xl p-12 md:p-20 text-center border border-white shadow-xl shadow-slate-100"
+            >
+              <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-6 shadow-inner">
+                <FiMessageSquare size={40} />
+              </div>
+              <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter mb-2">
+                Inbox Clear
+              </h2>
+              <p className="text-slate-400 text-xs font-medium italic max-w-md mx-auto">
+                {searchTerm
+                  ? `No results for "${searchTerm}".`
+                  : "No pending enquiries found."}
+              </p>
+              <button
+                onClick={() => setSearchTerm("")}
+                className="mt-6 px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95"
+              >
+                Clear Filters
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

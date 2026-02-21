@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaLeaf, FaEdit, FaSearch, FaFilter } from "react-icons/fa";
+import { FaLeaf, FaSearch, FaFilter } from "react-icons/fa";
 import {
   FiRefreshCw,
   FiMail,
@@ -17,13 +17,10 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const fetchCustomers = useCallback(() => {
-    setLoading(true);
     // Fetch users filtered by roleName
     apiCall.get({
       route: `/get-client-users?roleName=${roleName}&limit=50`,
       onSuccess: (res) => {
-        setLoading(false);
-        console.log(`Fetched Data for ${roleName}:`, res);
         if (res.success) {
           // Normalize data to ensure it's always an array
           const users = Array.isArray(res.data) ? res.data : [];
@@ -31,9 +28,9 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
         }
       },
       onError: (err) => {
-        setLoading(false);
         console.error(`Error fetching ${roleName}s:`, err);
       },
+      setLoading,
     });
   }, [roleName]);
 
@@ -94,7 +91,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
         </div>
       </div>
 
-      {loading && customers.length === 0 ? (
+      {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-16 h-16 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin"></div>
           <p className="mt-4 text-slate-500 animate-pulse">
@@ -128,9 +125,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
             >
               {/* Card Header Background */}
               <div className="h-24 bg-gradient-to-r from-red-50 to-orange-50 relative">
-                <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 text-slate-400 group-hover:text-red-500 transition-colors">
-                  <FaEdit className="w-4 h-4" />
-                </div>
+                {/* Header Overlay - No edit action */}
               </div>
 
               {/* Profile Info */}
@@ -203,25 +198,6 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                           : "Property Consultant"}
                       </p>
                     </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 grid grid-cols-2 gap-3">
-                  <div className="bg-slate-50 rounded-xl p-3 group-hover:bg-red-50/50 transition-colors">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">
-                      Properties
-                    </p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {customer.viewProperty || 0}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 rounded-xl p-3 group-hover:bg-red-50/50 transition-colors">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">
-                      Inv. Value
-                    </p>
-                    <p className="text-lg font-bold text-red-600">
-                      ₹{customer.investProperty || "0"}
-                    </p>
                   </div>
                 </div>
               </div>
