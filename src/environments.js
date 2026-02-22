@@ -24,7 +24,7 @@ const ENV_CONFIG = {
     BASE_URL: "http://localhost:3000/api/v1",
   },
   prod: {
-    BASE_URL: "",
+    BASE_URL: "https://pre-lease-server.onrender.com/api/v1",
   },
 };
 const env_ = isLocalhost ? "local" : "prod";
