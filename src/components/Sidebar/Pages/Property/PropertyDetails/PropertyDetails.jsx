@@ -103,6 +103,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("property");
   const [activeFaq, setActiveFaq] = useState(null);
+  const [verificationFilter, setVerificationFilter] = useState("all");
 
   // Assignment States
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -403,133 +404,226 @@ const PropertyDetails = () => {
             </p>
           </div>
 
+          {/* Verification Filters */}
+          <div className="flex flex-wrap items-center gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 w-fit">
+            {[
+              {
+                id: "all",
+                label: "All Properties",
+                count: propertyList.length,
+              },
+              {
+                id: "verified",
+                label: "Verified",
+                count: propertyList.filter((p) => p.isVerified === "completed")
+                  .length,
+              },
+              {
+                id: "partial",
+                label: "Partially Verified",
+                count: propertyList.filter((p) => p.isVerified === "partial")
+                  .length,
+              },
+              {
+                id: "pending",
+                label: "Pending",
+                count: propertyList.filter(
+                  (p) =>
+                    !p.isVerified ||
+                    (p.isVerified !== "completed" &&
+                      p.isVerified !== "partial"),
+                ).length,
+              },
+            ].map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setVerificationFilter(filter.id)}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+                  verificationFilter === filter.id
+                    ? "bg-[#EE2529] text-white shadow-lg shadow-red-100 scale-[1.02]"
+                    : "bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                }`}
+              >
+                {filter.label}
+                <span
+                  className={`px-2 py-0.5 rounded-lg text-[10px] ${
+                    verificationFilter === filter.id
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-400"
+                  }`}
+                >
+                  {filter.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {propertyList.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-gray-500 font-medium">
-                No properties available to display.
+            {propertyList.filter((item) => {
+              if (verificationFilter === "all") return true;
+              if (verificationFilter === "verified")
+                return item.isVerified === "completed";
+              if (verificationFilter === "partial")
+                return item.isVerified === "partial";
+              if (verificationFilter === "pending")
+                return (
+                  !item.isVerified ||
+                  (item.isVerified !== "completed" &&
+                    item.isVerified !== "partial")
+                );
+              return true;
+            }).length === 0 ? (
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                  <FiInfo size={32} className="text-gray-300" />
+                </div>
+                <p className="text-gray-500 font-black uppercase tracking-widest">
+                  No {verificationFilter !== "all" ? verificationFilter : ""}{" "}
+                  properties found
+                </p>
+                <p className="text-xs text-gray-400 mt-2 font-bold uppercase">
+                  Try adjusting your filters to see more results
+                </p>
               </div>
             ) : (
-              propertyList.map((item) => (
-                <div
-                  key={item.propertyId}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group flex flex-col"
-                >
-                  <div className="h-48 overflow-hidden relative bg-gray-100">
-                    {item.media?.[0]?.fileUrl ? (
-                      <img
-                        src={item.media[0].fileUrl}
-                        alt={item.microMarket}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                        <FiImage size={40} className="mb-2 opacity-50" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                          No Image
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute top-4 left-4 flex flex-col gap-2">
-                      <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
-                        {item.propertyType}
-                      </div>
-                      {(item.isVerified === "partial" ||
-                        item.isVerified === "completed") && (
-                        <div
-                          className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
-                            item.isVerified === "partial"
-                              ? "bg-orange-500"
-                              : "bg-red-500"
-                          }`}
-                        >
-                          <MdVerified size={10} />
-                          {item.isVerified === "partial"
-                            ? "Partial"
-                            : "Verified"}
+              propertyList
+                .filter((item) => {
+                  if (verificationFilter === "all") return true;
+                  if (verificationFilter === "verified")
+                    return item.isVerified === "completed";
+                  if (verificationFilter === "partial")
+                    return item.isVerified === "partial";
+                  if (verificationFilter === "pending")
+                    return (
+                      !item.isVerified ||
+                      (item.isVerified !== "completed" &&
+                        item.isVerified !== "partial")
+                    );
+                  return true;
+                })
+                .map((item) => (
+                  <div
+                    key={item.propertyId}
+                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group flex flex-col"
+                  >
+                    <div className="h-48 overflow-hidden relative bg-gray-100">
+                      {item.media?.[0]?.fileUrl ? (
+                        <img
+                          src={item.media[0].fileUrl}
+                          alt={item.microMarket}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                          <FiImage size={40} className="mb-2 opacity-50" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                            No Image
+                          </span>
                         </div>
                       )}
+                      <div className="absolute top-4 left-4 flex flex-col gap-2">
+                        <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
+                          {item.propertyType}
+                        </div>
+                        {(item.isVerified === "partial" ||
+                          item.isVerified === "completed") && (
+                          <div
+                            className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
+                              item.isVerified === "partial"
+                                ? "bg-orange-500"
+                                : "bg-red-500"
+                            }`}
+                          >
+                            <MdVerified size={10} />
+                            {item.isVerified === "partial"
+                              ? "Partial"
+                              : "Verified"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
+                          {item.microMarket ||
+                            `Commercial Space ${item.propertyId.slice(0, 4)}`}
+                        </h3>
+                        {item.isVerified === "partial" &&
+                          !item.verificationLogs?.some(
+                            (log) => log.userId === user?.userId,
+                          ) && (
+                            <button
+                              onClick={(e) => handleVerify(e, item.propertyId)}
+                              className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
+                            >
+                              2nd Verify
+                            </button>
+                          )}
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
+                        <FiMapPin className="text-[#EE2529]" />
+                        {item.city}, {item.state}
+                      </div>
+
+                      {item.salesAgent && (
+                        <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold uppercase mb-4 bg-indigo-50 px-2 py-1 rounded w-fit">
+                          <FiInfo size={10} />
+                          Assigned to: {item.salesAgent.firstName}{" "}
+                          {item.salesAgent.lastName}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 gap-2">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase">
+                            Price
+                          </p>
+                          <p className="text-sm font-black text-gray-800">
+                            ₹{item.sellingPrice} Cr
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          {item.verificationLogs?.some(
+                            (log) => log.userId === user?.userId,
+                          ) ? (
+                            <button
+                              onClick={(e) =>
+                                handleUnverify(e, item.propertyId)
+                              }
+                              className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-200 transition"
+                            >
+                              Unverify
+                            </button>
+                          ) : (
+                            <>
+                              {item.isVerified !== "completed" &&
+                                item.isVerified !== "partial" && (
+                                  <button
+                                    onClick={(e) =>
+                                      handleVerify(e, item.propertyId)
+                                    }
+                                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
+                                  >
+                                    Verify
+                                  </button>
+                                )}
+                            </>
+                          )}
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/property/property-details/${item.propertyId}`,
+                              )
+                            }
+                            className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
+                          >
+                            View <MdArrowForward />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
-                        {item.microMarket ||
-                          `Commercial Space ${item.propertyId.slice(0, 4)}`}
-                      </h3>
-                      {item.isVerified === "partial" &&
-                        !item.verificationLogs?.some(
-                          (log) => log.userId === user?.userId,
-                        ) && (
-                          <button
-                            onClick={(e) => handleVerify(e, item.propertyId)}
-                            className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
-                          >
-                            2nd Verify
-                          </button>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
-                      <FiMapPin className="text-[#EE2529]" />
-                      {item.city}, {item.state}
-                    </div>
-
-                    {item.salesAgent && (
-                      <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold uppercase mb-4 bg-indigo-50 px-2 py-1 rounded w-fit">
-                        <FiInfo size={10} />
-                        Assigned to: {item.salesAgent.firstName}{" "}
-                        {item.salesAgent.lastName}
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 gap-2">
-                      <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">
-                          Price
-                        </p>
-                        <p className="text-sm font-black text-gray-800">
-                          ₹{item.sellingPrice} Cr
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        {item.verificationLogs?.some(
-                          (log) => log.userId === user?.userId,
-                        ) ? (
-                          <button
-                            onClick={(e) => handleUnverify(e, item.propertyId)}
-                            className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-200 transition"
-                          >
-                            Unverify
-                          </button>
-                        ) : (
-                          <>
-                            {item.isVerified !== "completed" &&
-                              item.isVerified !== "partial" && (
-                                <button
-                                  onClick={(e) =>
-                                    handleVerify(e, item.propertyId)
-                                  }
-                                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
-                                >
-                                  Verify
-                                </button>
-                              )}
-                          </>
-                        )}
-                        <button
-                          onClick={() =>
-                            navigate(
-                              `/property/property-details/${item.propertyId}`,
-                            )
-                          }
-                          className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
-                        >
-                          View <MdArrowForward />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
+                ))
             )}
           </div>
         </div>
