@@ -120,7 +120,6 @@ const PropertyDetails = () => {
   const isAdminOrSuperAdmin = ["Admin", "Super Admin"].includes(user?.role);
   const isSalesManager = user?.role === "Sales Manager";
   const canAssignProperty = isAdminOrSuperAdmin || isSalesManager;
-  console.log(property);
   const handleVerify = (e, propertyId) => {
     e.stopPropagation();
     if (!window.confirm("Are you sure you want to verify this property?"))
@@ -272,7 +271,6 @@ const PropertyDetails = () => {
   }, [isAssignModalOpen]);
 
   useEffect(() => {
-    console.log("PropertyDetails mounted. ID:", id);
     if (id && id !== "undefined" && id !== "null") {
       setLoading(true);
       const fetchRoute = isAdminOrSuperAdmin
@@ -281,7 +279,6 @@ const PropertyDetails = () => {
       apiCall.get({
         route: fetchRoute,
         onSuccess: (res) => {
-          console.log("PropertyDetails API Success:", res);
           setLoading(false);
           const data = res.data || res;
           setProperty(data);
@@ -306,7 +303,7 @@ const PropertyDetails = () => {
       const isSalesRelated = salesRoles.includes(user?.role);
 
       apiCall.get({
-        route: isSalesRelated ? "/properties/assigned" : "/properties?limit=12",
+        route: isSalesRelated ? "/properties/assigned" : "/properties?limit=1000",
         onSuccess: (res) => {
           setLoading(false);
           if (res.success) {
