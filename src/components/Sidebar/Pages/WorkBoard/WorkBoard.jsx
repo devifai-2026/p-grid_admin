@@ -588,7 +588,6 @@ const WorkBoard = () => {
       {/* --- ASSIGNMENT MODAL --- */}
       <AnimatePresence>
         {isAssignModalOpen &&
-          createPortal(
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -721,9 +720,8 @@ const WorkBoard = () => {
                   ) : null}
                 </div>
               </motion.div>
-            </div>,
-            document.body,
-          )}
+            </div>
+          }
       </AnimatePresence>
     </div>
   );
