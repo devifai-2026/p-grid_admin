@@ -271,7 +271,7 @@ const Login = ({ onLogin }) => {
                 data-aos="fade-right"
                 data-aos-delay="500"
               >
-                SIGN IN
+                SIGN IN -
               </h3>
               <p
                 className="text-gray-600 mb-8"
