@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FaLeaf, FaSearch, FaFilter } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import {
   FiRefreshCw,
   FiMail,
@@ -11,11 +12,13 @@ import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
 
 const CustomerGrid = ({ roleTitle, roleName }) => {
+  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [statusLoadingId, setStatusLoadingId] = useState(null);
   const fetchCustomers = useCallback(() => {
     // Fetch users filtered by roleName
     apiCall.get({
@@ -37,6 +40,35 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers, refreshKey]);
+
+  const toggleUserStatus = (e, customer) => {
+    e.stopPropagation(); // Prevent navigation to details page
+    const userId = customer.userId || customer.id;
+    if (!userId) return;
+
+    setStatusLoadingId(userId);
+    const newStatus = !customer.isActive;
+
+    apiCall.put({
+      route: `/admin/users/${userId}`,
+      payload: { isActive: newStatus },
+      onSuccess: (res) => {
+        if (res.success) {
+          setCustomers((prev) =>
+            prev.map((c) => {
+              const currentId = c.userId || c.id;
+              return currentId === userId ? { ...c, isActive: newStatus } : c;
+            }),
+          );
+        }
+        setStatusLoadingId(null);
+      },
+      onError: (err) => {
+        console.error("Error toggling user status:", err);
+        setStatusLoadingId(null);
+      },
+    });
+  };
 
   const filteredCustomers = customers.filter((customer) => {
     const name = (customer.name || "").toLowerCase();
@@ -139,7 +171,12 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                 {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.userId || customer.id}
-                    className="group hover:bg-slate-50/80 transition-all duration-200"
+                    onClick={() =>
+                      navigate(
+                        `/client-details/${customer.userId || customer.id}`,
+                      )
+                    }
+                    className="group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
@@ -214,10 +251,48 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span className="text-[10px] font-bold">ACTIVE</span>
-                      </div>
+                      {(() => {
+                        const custId = customer.userId || customer.id;
+                        const isToggleLoading = statusLoadingId === custId;
+
+                        return (
+                          <button
+                            onClick={(e) => toggleUserStatus(e, customer)}
+                            disabled={isToggleLoading}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
+                              isToggleLoading
+                                ? "bg-slate-50 text-slate-400 border-slate-100 cursor-wait"
+                                : customer.isActive
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+                                  : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+                            }`}
+                            title={
+                              isToggleLoading
+                                ? ""
+                                : `Click to mark as ${customer.isActive ? "Inactive" : "Active"}`
+                            }
+                          >
+                            {isToggleLoading ? (
+                              <FiRefreshCw className="w-2.5 h-2.5 animate-spin" />
+                            ) : (
+                              <div
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  customer.isActive
+                                    ? "bg-emerald-500 animate-pulse"
+                                    : "bg-slate-400"
+                                }`}
+                              ></div>
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                              {isToggleLoading
+                                ? "UPDATING"
+                                : customer.isActive
+                                  ? "ACTIVE"
+                                  : "INACTIVE"}
+                            </span>
+                          </button>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))}

@@ -17,6 +17,7 @@ import PropertyDetails from "./components/Sidebar/Pages/Property/PropertyDetails
 import AddProperty from "./components/Sidebar/Pages/Property/AddProperty/AddProperty";
 import GridView from "./components/Sidebar/Pages/Customers/GridView/GridView";
 import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails";
+import ClientDetails from "./components/Sidebar/Pages/Customers/ClientDetails/ClientDetails";
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
 import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
@@ -110,6 +111,7 @@ const AppRoutes = () => {
             element={<CustomerDetails />}
           />
           <Route path="/customers/add-customer" element={<AddCustomer />} />
+          <Route path="/client-details/:id" element={<ClientDetails />} />
           <Route
             path="/customers"
             element={<Navigate to="/customers/owners" replace />}
