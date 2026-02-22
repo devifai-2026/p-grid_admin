@@ -916,7 +916,7 @@ const PropertyDetails = () => {
       </div>
     </div>
   );
-console.log(property)
+  console.log(property);
   const renderNotesContent = () => (
     <div className="space-y-6 animate-fadeIn">
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -989,7 +989,7 @@ console.log(property)
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-800">
-                        Agent / Admin
+                        Property Dealer
                       </p>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
                         Sales Representative
@@ -1227,7 +1227,7 @@ console.log(property)
 
       {/* Assignment Modal */}
       {isAssignModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-scaleIn border border-gray-100">
             <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
               <div>
