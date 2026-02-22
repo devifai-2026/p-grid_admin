@@ -23,6 +23,7 @@ export const request = async (
     const isExternal =
       route.startsWith("http://") || route.startsWith("https://");
 
+      
     const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
     const url = isExternal ? route : `${BASE_URL}${normalizedRoute}`;
 
