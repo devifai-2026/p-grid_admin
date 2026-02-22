@@ -27,7 +27,12 @@ const ENV_CONFIG = {
     BASE_URL: "https://pre-lease-server.onrender.com/api/v1",
   },
 };
-const env_ = isLocalhost ? "local" : "prod";
+const env_ = 
+  import.meta.env.PROD || 
+  (isBrowser && window.location.hostname.includes("netlify.app")) || 
+  !isLocalhost 
+    ? "prod" : "local";
+
 
 /* Final env object */
 export const env = {
