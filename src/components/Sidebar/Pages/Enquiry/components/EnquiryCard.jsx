@@ -9,6 +9,12 @@ import {
   FiClock,
   FiCheckCircle,
   FiChevronRight,
+  FiMapPin,
+  FiPhone,
+  FiMail,
+  FiCalendar,
+  FiChevronDown,
+  FiAlertCircle,
 } from "react-icons/fi";
 
 const EnquiryCard = ({
@@ -25,168 +31,204 @@ const EnquiryCard = ({
   handleAssign,
   assignLoading,
 }) => {
+  const isPending = item.status === "pending";
+  const isAutoAssigning = autoAssignLoading === (item.propertyId + item.inquirerId);
+  const isCurrentAssigning = assigningId === (item.id || item.propertyId);
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ delay: index * 0.05 }}
-      className="bg-white rounded-2xl md:rounded-3xl shadow-xl shadow-slate-100 border border-white overflow-hidden group hover:shadow-red-50 transition-all duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 100 }}
+      className="relative bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden group hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500"
     >
-      {/* Card Header Strip */}
-      <div className="px-5 py-4 bg-slate-50/50 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-red-400 flex items-center justify-center text-white shadow-md shadow-red-100 group-hover:rotate-6 transition-transform">
-            <FiHome size={18} />
+      {/* Visual Accent */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${isPending ? "bg-amber-400" : "bg-blue-500"}`} />
+
+      {/* Main Content Container */}
+      <div className="p-6 md:p-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+          <div className="flex gap-5">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-xl shadow-slate-200 group-hover:scale-110 transition-transform duration-500">
+                <FiHome size={28} />
+              </div>
+              <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center text-white ${isPending ? "bg-amber-500" : "bg-blue-500"}`}>
+                {isPending ? <FiAlertCircle size={10} /> : <FiCheckCircle size={10} />}
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">
+                  {item.property?.propertyType || "Premium Asset"}
+                </h3>
+                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border ${
+                  isPending 
+                    ? "bg-amber-50 text-amber-600 border-amber-100" 
+                    : "bg-blue-50 text-blue-600 border-blue-100"
+                }`}>
+                  {item.status}
+                </span>
+              </div>
+              <p className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                <FiMapPin className="text-red-500" />
+                {item.property?.microMarket || "Unknown Block"}, {item.property?.city || "Unknown City"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base md:text-lg font-black text-slate-800 uppercase tracking-tighter">
-              {item.property?.propertyType || "Enquiry"} in{" "}
-              {item.property?.city}
-            </h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span
-                className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest ${
-                  item.status === "pending"
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-blue-100 text-blue-700"
+
+          {isManager && isPending && (
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              <button
+                onClick={() => handleAutoAssign(item.propertyId, item.inquirerId)}
+                disabled={isAutoAssigning}
+                className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 disabled:opacity-50"
+              >
+                {isAutoAssigning ? (
+                  <FiRefreshCw className="animate-spin" size={14} />
+                ) : (
+                  <FiLayers size={14} />
+                )}
+                <span>Smart Assign</span>
+              </button>
+              <button
+                onClick={() => setAssigningId(isCurrentAssigning ? null : (item.id || item.propertyId))}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border ${
+                  isCurrentAssigning 
+                    ? "bg-red-50 text-red-600 border-red-200" 
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
                 }`}
               >
-                {item.status}
-              </span>
+                <FiUserPlus size={14} />
+                <span>Manual</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Assignment Interface */}
+        <AnimatePresence>
+          {isCurrentAssigning && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-8"
+            >
+              <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-3xl flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-1 w-full relative group/select">
+                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/select:text-red-500 transition-colors" />
+                  <select
+                    value={selectedExec}
+                    onChange={(e) => setSelectedExec(e.target.value)}
+                    className="w-full appearance-none pl-12 pr-10 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-[11px] font-black uppercase tracking-widest bg-white cursor-pointer transition-all"
+                  >
+                    <option value="">Choose Executive</option>
+                    {executives.map((exec) => (
+                      <option
+                        key={exec.value || exec.userId || exec.id}
+                        value={exec.value || exec.userId || exec.id}
+                      >
+                        {exec.label}
+                      </option>
+                    ))}
+                  </select>
+                  <FiChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => handleAssign(item.propertyId, item.inquirerId)}
+                    disabled={!selectedExec || assignLoading}
+                    className="flex-1 sm:flex-none px-8 py-4 bg-red-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-red-700 shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                  >
+                    {assignLoading ? <FiRefreshCw className="animate-spin" /> : <FiCheckCircle />}
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* User Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 bg-slate-50 border border-slate-100 rounded-[2rem]">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <FiUser className="text-red-500" size={12} /> Prospect Identity
+            </p>
+            <p className="text-sm font-black text-slate-800 uppercase italic">
+              {item.inquirer
+                ? `${item.inquirer.firstName} ${item.inquirer.lastName}`
+                : "Confidential Investor"}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <FiMail className="text-red-500" size={12} /> Communication
+            </p>
+            <p className="text-xs font-bold text-slate-600 lowercase transition-colors hover:text-red-500 cursor-pointer">
+              {item.inquirer?.email || "No email available"}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <FiCalendar className="text-red-500" size={12} /> Intent Date
+            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold text-slate-600">
+                {new Date(item.createdAt || Date.now()).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </p>
             </div>
           </div>
         </div>
 
-        {isManager && item.status === "pending" && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleAutoAssign(item.propertyId, item.inquirerId)}
-              disabled={autoAssignLoading === item.propertyId + item.inquirerId}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all active:scale-95 disabled:opacity-50"
-            >
-              {autoAssignLoading === item.propertyId + item.inquirerId ? (
-                <FiRefreshCw className="animate-spin size-3" />
-              ) : (
-                <FiLayers size={14} />
-              )}
-              <span className="hidden sm:inline">Auto-Assign</span>
-            </button>
-            <button
-              onClick={() => setAssigningId(item.id || item.propertyId)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-100 active:scale-95"
-            >
-              <FiUserPlus size={14} />
-              <span className="hidden sm:inline">Assign</span>
-            </button>
+        {/* Message Content */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+             <FiClock className="text-red-500" size={14} />
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inquiry Timeline</span>
           </div>
-        )}
-      </div>
-
-      {/* Assignment Dropdown UI */}
-      <AnimatePresence>
-        {assigningId === (item.id || item.propertyId) && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-red-50/20 border-b border-red-100"
-          >
-            <div className="p-5 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-3">
-              <div className="flex-1 w-full relative">
-                <select
-                  value={selectedExec}
-                  onChange={(e) => setSelectedExec(e.target.value)}
-                  className="w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl border border-red-100 focus:outline-none focus:border-red-500 text-[10px] font-black uppercase tracking-widest bg-white cursor-pointer"
-                >
-                  <option value="">Select Sales Agent</option>
-                  {executives.map((exec) => (
-                    <option
-                      key={exec.value || exec.userId || exec.id}
-                      value={exec.value || exec.userId || exec.id}
-                    >
-                      {exec.label}
-                    </option>
-                  ))}
-                </select>
-                <FiChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 rotate-90 pointer-events-none" />
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
-                  onClick={() => handleAssign(item.propertyId, item.inquirerId)}
-                  disabled={!selectedExec || assignLoading}
-                  className="flex-1 sm:flex-none px-6 py-2.5 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-700 shadow-md shadow-red-200 transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  {assignLoading ? (
-                    <FiRefreshCw className="animate-spin size-3" />
-                  ) : (
-                    <FiCheckCircle size={14} />
-                  )}
-                  Confirm
-                </button>
-                <button
-                  onClick={() => {
-                    setAssigningId(null);
-                    setSelectedExec("");
-                  }}
-                  className="flex-1 sm:flex-none px-6 py-2.5 bg-white text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all active:scale-95"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Queries Section */}
-      <div className="p-4 md:p-6 space-y-4">
-        {item.inquiries?.map((note, idx) => (
-          <div
-            key={idx}
-            className="flex gap-3 md:gap-4 p-4 rounded-xl md:rounded-2xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:shadow-lg hover:shadow-slate-100 transition-all group/note"
-          >
-            <div className="flex-shrink-0 relative">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-300 border border-slate-100 shadow-sm group-hover/note:text-red-500 group-hover/note:scale-110 transition-all">
-                <FiUser size={18} />
-              </div>
-              {idx === 0 && (
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-600 rounded-full border-2 border-white"></div>
-              )}
-            </div>
-
-            <div className="flex-1 space-y-1.5">
-              <div className="flex justify-between items-center">
-                <p className="text-[11px] font-black text-slate-800 uppercase tracking-tight italic">
-                  {item.inquirer
-                    ? `${item.inquirer.firstName} ${item.inquirer.lastName}`
-                    : "Investor"}
-                </p>
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <FiClock size={10} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">
-                    {new Date(note.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              <div className="relative">
-                <p className="text-slate-600 text-xs leading-relaxed font-medium">
+          
+          <div className="space-y-3">
+            {item.inquiries?.map((note, idx) => (
+              <div
+                key={idx}
+                className="relative p-5 rounded-3xl bg-white border border-slate-100 shadow-sm group/note hover:border-red-100 transition-all duration-300"
+              >
+                <p className="text-slate-600 text-xs leading-relaxed font-bold">
                   {note.question}
                 </p>
+                <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <FiClock size={10} />
+                    {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover/note:bg-red-50 group-hover/note:text-red-500 transition-all">
+                    <FiUser size={12} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            ))}
 
-        {(!item.inquiries || item.inquiries.length === 0) && (
-          <div className="py-6 text-center space-y-2">
-            <FiLayers size={30} className="text-slate-200 mx-auto" />
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest italic">
-              No message content found
-            </p>
+            {(!item.inquiries || item.inquiries.length === 0) && (
+              <div className="py-12 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200 text-center">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-sm">
+                  <FiLayers size={24} />
+                </div>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest italic">
+                  Observation portal waiting for data
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </motion.div>
   );
