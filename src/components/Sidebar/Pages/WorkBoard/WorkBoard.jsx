@@ -125,10 +125,13 @@ const WorkBoard = () => {
     setSearchingUsers(true);
     const params = {
       roleName: "Sales Executive - Property Manager",
-      limit: 10,
+      limit: 100, // Fetch more to ensure local filtering is viable if needed
     };
+
     if (term) {
       params.search = term;
+      params.q = term; // Fallback for different backend versions
+      params.query = term;
     }
 
     apiCall.get({
@@ -137,17 +140,50 @@ const WorkBoard = () => {
       onSuccess: (res) => {
         setSearchingUsers(false);
         if (res.success && res.data) {
-          setUserSearchResults(res.data);
+          let results = Array.isArray(res.data) ? res.data : [];
+
+          // Defensive local filtering: Ensure results match tokens if a term exists
+          if (term) {
+            const tokens = term
+              .toLowerCase()
+              .trim()
+              .split(/\s+/)
+              .filter(Boolean);
+            results = results.filter((u) => {
+              const fullName =
+                `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+              const name = (u.name || "").toLowerCase();
+              const email = (u.email || "").toLowerCase();
+              return tokens.every(
+                (t) =>
+                  fullName.includes(t) || name.includes(t) || email.includes(t),
+              );
+            });
+          }
+
+          setUserSearchResults(results);
         }
       },
-      onError: () => setSearchingUsers(false),
+      onError: () => {
+        setSearchingUsers(false);
+        console.error("User search failed");
+      },
     });
   }, []);
 
   useEffect(() => {
+    // Initial fetch of property managers
+    searchUsers("");
+  }, [searchUsers]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
-      searchUsers(userSearchTerm);
-    }, 500);
+      if (userSearchTerm) {
+        searchUsers(userSearchTerm);
+      } else {
+        searchUsers("");
+      }
+    }, 400);
     return () => clearTimeout(timer);
   }, [userSearchTerm, searchUsers]);
 
