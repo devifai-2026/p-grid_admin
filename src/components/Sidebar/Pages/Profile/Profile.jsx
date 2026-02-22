@@ -35,8 +35,8 @@ const Profile = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
-          <p className="text-slate-400 font-medium tracking-widest text-xs uppercase animate-pulse">
+          <div className="w-10 h-10 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
+          <p className="text-slate-400 font-medium tracking-widest text-[10px] uppercase animate-pulse">
             Loading Profile...
           </p>
         </div>
@@ -57,235 +57,220 @@ const Profile = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-slate-50 overflow-hidden px-4 py-8 md:p-12">
-      {/* Background blobs for premium feel */}
+    <div className="relative min-h-screen bg-[#f8fafc] overflow-hidden px-4 py-6 md:px-8 md:py-10">
+      {/* Background blobs - subtle */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div
-          className="absolute top-1/2 -left-24 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl animate-bounce"
-          style={{ transitionDuration: "5s" }}
-        ></div>
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-red-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 -left-24 w-60 h-60 bg-blue-500/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2rem] shadow-2xl shadow-red-100 overflow-hidden mb-8 border border-white"
+          className="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden mb-6"
         >
-          {/* Banner */}
-          <div className="h-48 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 animate-gradient-xy"></div>
-            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+          {/* Banner - Compact */}
+          <div className="h-32 md:h-40 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-red-900/90 animate-gradient-xy"></div>
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
 
-            {/* Banner Decoration */}
-            <div className="absolute bottom-4 right-6 flex gap-2">
-              <button className="p-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-all border border-white/30">
-                <FiCamera size={16} />
+            <div className="absolute bottom-3 right-4">
+              <button className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-all border border-white/20">
+                <FiCamera size={14} />
               </button>
             </div>
           </div>
 
-          {/* Profile Basic Info */}
-          <div className="px-8 pb-10">
-            <div className="relative flex flex-col md:flex-row items-center md:items-end gap-8 -mt-16">
+          {/* Profile Basic Info - Refined */}
+          <div className="px-6 pb-8">
+            <div className="relative flex flex-col md:flex-row items-center md:items-end gap-5 -mt-10 md:-mt-12">
               <div className="relative group">
-                <div className="w-36 h-36 md:w-44 md:h-44 rounded-3xl bg-white p-2 shadow-2xl border border-slate-100 group-hover:scale-105 transition-transform duration-500">
-                  <div className="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 to-red-400 flex items-center justify-center text-white text-4xl md:text-6xl font-black shadow-inner border-4 border-white">
+                <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-xl border border-slate-100 transition-transform duration-300">
+                  <div className="w-full h-full rounded-xl bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center text-white text-3xl md:text-4xl font-black shadow-inner">
                     {getInitials(user.name)}
                   </div>
                 </div>
-                <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-lg"></div>
+                <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
               </div>
 
-              <div className="flex-1 text-center md:text-left">
-                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                  <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight uppercase">
+              <div className="flex-1 text-center md:text-left pt-2">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
                     {user.name}
                   </h1>
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-black uppercase tracking-widest border border-red-100 italic">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider border border-red-100/50">
                     {user.role}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap justify-center md:justify-start gap-6">
-                  <div className="flex items-center gap-2.5 text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 hover:border-red-200 transition-colors cursor-pointer">
-                    <FiMail className="text-red-500" />
-                    <span className="text-sm font-bold truncate max-w-[200px]">
-                      {user.email}
-                    </span>
+                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 text-xs font-medium">
+                    <FiMail className="text-red-500/80" size={14} />
+                    <span>{user.email}</span>
                   </div>
-                  <div className="flex items-center gap-2.5 text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 hover:border-red-200 transition-colors cursor-pointer">
-                    <FiPhone className="text-red-500" />
-                    <span className="text-sm font-bold tracking-widest">
-                      +91 {user.mobileNumber}
-                    </span>
+                  <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 text-xs font-medium">
+                    <FiPhone className="text-red-500/80" size={14} />
+                    <span>+91 {user.mobileNumber}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center gap-2 text-xs uppercase tracking-widest">
-                  <FiEdit3 /> Edit Profile
-                </button>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Panel - Bio & Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Panel */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Quick Stats */}
+            {/* Quick Stats - Compact */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-[2rem] shadow-xl p-8 border border-white"
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl shadow-sm p-6 border border-slate-200/60"
             >
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]"></div>
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-5 flex items-center gap-2">
+                <div className="w-1 h-4 bg-red-500 rounded-full"></div>
                 Platform Status
               </h3>
 
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:border-red-100 transition-all">
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
-                      <FiSettings />
+                    <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-600 border border-slate-100">
+                      <FiSettings size={14} />
                     </div>
-                    <span className="text-xs font-black text-slate-500 uppercase">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">
                       Access
                     </span>
                   </div>
-                  <span className="text-xs font-black px-3 py-1 bg-white rounded-lg shadow-sm border border-slate-100 text-slate-800">
-                    UNLIMITED
+                  <span className="text-[10px] font-black px-2 py-0.5 bg-slate-200 text-slate-700 rounded-md uppercase">
+                    Unlimited
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:border-green-100 transition-all">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
-                      <FiCheck />
+                    <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-green-500 border border-slate-100">
+                      <FiCheck size={14} />
                     </div>
-                    <span className="text-xs font-black text-slate-500 uppercase">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">
                       Account
                     </span>
                   </div>
-                  <span className="text-xs font-black px-3 py-1 bg-green-50 rounded-lg border border-green-100 text-green-600">
-                    VERIFIED
+                  <span className="text-[10px] font-black px-2 py-0.5 bg-green-100 text-green-700 rounded-md uppercase">
+                    Verified
                   </span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Verification Items */}
+            {/* Security Card - Modern & Small */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-slate-900 rounded-[2rem] shadow-2xl p-8 text-white relative overflow-hidden group"
+              transition={{ delay: 0.2 }}
+              className="bg-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/20 rounded-full blur-2xl group-hover:bg-red-600/40 transition-all"></div>
-              <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-6 flex items-center gap-3 relative z-10">
-                <div className="w-1.5 h-6 bg-red-500 rounded-full"></div>
-                Account Security
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-red-500/10 rounded-full blur-2xl"></div>
+
+              <h3 className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-5 flex items-center gap-2">
+                <div className="w-1 h-4 bg-red-500 rounded-full"></div>
+                Security
               </h3>
 
-              <div className="space-y-6 relative z-10">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <FiShield className="text-red-400 text-xl" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black uppercase mb-1 leading-none tracking-tight">
-                      2FA Active
-                    </h4>
-                    <p className="text-[10px] text-slate-400 font-medium">
-                      Extra layer of security enabled
-                    </p>
-                  </div>
+              <div className="flex items-center gap-4 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  <FiShield className="text-red-400 text-lg" />
                 </div>
-                <button className="w-full py-4 bg-red-600 hover:bg-red-700 rounded-2xl text-[10px] font-black uppercase tracking-[2px] shadow-lg shadow-red-900/50 transition-all active:scale-95">
-                  Update Settings
-                </button>
+                <div>
+                  <h4 className="text-[12px] font-bold uppercase tracking-tight">
+                    2FA Is Active
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-medium italic">
+                    High protection level
+                  </p>
+                </div>
               </div>
+
+              <button className="w-full py-2.5 bg-red-600 hover:bg-red-700 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-red-900/20">
+                Update Settings
+              </button>
             </motion.div>
           </div>
 
-          {/* Right Panel - Tabbed Content */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Custom Tab Bar */}
+          {/* Right Panel */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Custom Tab Bar - Sleek */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white p-2 rounded-2xl shadow-xl flex gap-2 border border-slate-100"
+              transition={{ delay: 0.3 }}
+              className="bg-white p-1 rounded-xl shadow-sm flex border border-slate-200/60"
             >
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
                     activeTab === tab.id
-                      ? "bg-red-600 text-white shadow-lg shadow-red-200 scale-[1.02]"
+                      ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  {tab.icon}
+                  <span className="text-[14px]">{tab.icon}</span>
                   {tab.label}
                 </button>
               ))}
             </motion.div>
 
-            {/* Tab Panels */}
+            {/* Tab Content */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="min-h-[400px]"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="min-h-[300px]"
               >
                 {activeTab === "overview" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="p-8 rounded-[2rem] bg-white shadow-xl shadow-slate-100 border border-slate-100 group hover:border-red-200 transition-all">
-                      <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 mb-6 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all duration-300">
-                        <FiMapPin size={24} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-6 rounded-2xl bg-white shadow-sm border border-slate-200/60 group hover:border-red-100 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 mb-4 group-hover:bg-red-500 group-hover:text-white transition-all duration-300 border border-slate-100">
+                        <FiMapPin size={18} />
                       </div>
-                      <h4 className="font-black text-slate-800 uppercase text-sm mb-3 tracking-tight">
+                      <h4 className="font-bold text-slate-700 uppercase text-[11px] mb-2 tracking-wide">
                         Location Context
                       </h4>
-                      <p className="text-xs text-slate-500 leading-loose italic">
+                      <p className="text-[11px] text-slate-500 leading-relaxed italic">
                         Authorized service region: Mumbai HQ. Cross-region
-                        administrative privileges active for all Tier-1 property
-                        categories.
+                        administrative privileges active.
                       </p>
                     </div>
 
-                    <div className="p-8 rounded-[2rem] bg-white shadow-xl shadow-slate-100 border border-slate-100 group hover:border-red-200 transition-all">
-                      <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                        <FiCalendar size={24} />
+                    <div className="p-6 rounded-2xl bg-white shadow-sm border border-slate-200/60 group hover:border-orange-100 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 mb-4 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300 border border-slate-100">
+                        <FiCalendar size={18} />
                       </div>
-                      <h4 className="font-black text-slate-800 uppercase text-sm mb-3 tracking-tight">
+                      <h4 className="font-bold text-slate-700 uppercase text-[11px] mb-2 tracking-wide">
                         Member Timeline
                       </h4>
-                      <p className="text-xs text-slate-500 leading-loose italic">
-                        Account established: Feb 15, 2026. Consistent activity
-                        track record with superior task completion ratio.
+                      <p className="text-[11px] text-slate-500 leading-relaxed italic">
+                        Account established: Feb 15, 2026. Consistent track
+                        record with superior task completion.
                       </p>
                     </div>
 
-                    <div className="md:col-span-2 p-8 rounded-[2rem] bg-gradient-to-br from-slate-50 to-white shadow-xl border border-slate-100 italic relative overflow-hidden">
-                      <div className="absolute -bottom-8 -right-8 opacity-5 text-slate-900 group-hover:opacity-10 transition-all">
-                        <FiTarget size={160} />
+                    <div className="md:col-span-2 p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-300/60 italic relative overflow-hidden group">
+                      <div className="absolute -bottom-4 -right-4 opacity-5 text-slate-900 transition-all group-hover:scale-110">
+                        <FiTarget size={100} />
                       </div>
-                      <h4 className="text-[10px] font-black text-red-500 uppercase tracking-[3px] mb-4">
+                      <h4 className="text-[9px] font-bold text-red-500 uppercase tracking-[3px] mb-3">
                         Professional Note
                       </h4>
-                      <p className="text-slate-600 text-sm leading-relaxed max-w-2xl">
+                      <p className="text-slate-600 text-[12px] leading-relaxed max-w-2xl relative z-10">
                         "Committed to excellence in pre-lease property
                         management and client relationship building. Expert in
                         administrative workflows and digital transformation of
@@ -296,69 +281,65 @@ const Profile = () => {
                 )}
 
                 {activeTab === "activity" && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[
                       {
                         action: "Login detected from Mumbai IP",
                         time: "11 Mins ago",
-                        type: "system",
+                        color: "bg-red-500",
                       },
                       {
                         action: "Updated Property Listing #9921",
                         time: "2 Hours ago",
-                        type: "action",
+                        color: "bg-blue-500",
                       },
                       {
                         action: "Password changed successfully",
                         time: "1 Day ago",
-                        type: "secure",
+                        color: "bg-green-500",
                       },
                     ].map((activity, i) => (
                       <motion.div
-                        initial={{ opacity: 0, x: 20 }}
+                        initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.1 }}
+                        transition={{ delay: i * 0.05 }}
                         key={i}
-                        className="p-6 bg-white rounded-3xl shadow-lg shadow-slate-100 border border-slate-100 flex items-center justify-between group hover:border-red-200 transition-all"
+                        className="p-4 bg-white rounded-xl shadow-sm border border-slate-200/60 flex items-center justify-between group hover:border-slate-300 transition-all"
                       >
-                        <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-4">
                           <div
-                            className={`w-3 h-3 rounded-full ${i === 0 ? "bg-red-600" : "bg-slate-300"} animate-pulse`}
+                            className={`w-2 h-2 rounded-full ${activity.color} animate-pulse shadow-sm`}
                           ></div>
                           <div>
-                            <p className="text-sm font-black text-slate-800 leading-none mb-1.5 uppercase tracking-tight">
+                            <p className="text-[11px] font-bold text-slate-800 uppercase tracking-tight">
                               {activity.action}
                             </p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                               {activity.time}
                             </p>
                           </div>
                         </div>
-                        <FiChevronRight className="text-slate-300 group-hover:text-red-500 transition-all" />
+                        <FiChevronRight className="text-slate-300 group-hover:text-slate-500 transition-all" />
                       </motion.div>
                     ))}
                   </div>
                 )}
 
                 {activeTab === "security" && (
-                  <div className="bg-white rounded-[2rem] shadow-2xl p-10 border border-slate-100 flex flex-col items-center justify-center text-center">
-                    <div className="w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center text-red-600 mb-8 border border-red-100">
-                      <FiShield size={40} />
+                  <div className="bg-white rounded-2xl shadow-sm p-8 border border-slate-200/60 flex flex-col items-center justify-center text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 mb-6 border border-red-100/50">
+                      <FiShield size={28} />
                     </div>
-                    <h4 className="font-black text-slate-800 uppercase text-xl mb-4 tracking-tighter">
+                    <h4 className="font-bold text-slate-800 uppercase text-sm mb-3 tracking-tight">
                       Vault Security Setup
                     </h4>
-                    <p className="text-xs text-slate-500 max-w-sm mb-10 leading-relaxed italic">
-                      Your biometric and PIN authentication methods are up to
-                      date. We recommend changing your PIN every 90 days for
-                      maximum integrity.
+                    <p className="text-[10px] text-slate-500 max-w-xs mb-8 leading-relaxed italic">
+                      Biometric and PIN methods are active. We recommend
+                      refreshing your access keys every 90 days.
                     </p>
-                    <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                      <button className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[2px] hover:bg-black transition-all shadow-xl active:scale-95">
-                        Update Login PIN
-                      </button>
-                      <button className="px-10 py-4 border-2 border-slate-200 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-[2px] hover:bg-slate-50 transition-all active:scale-95">
-                        Manage Devices
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                      <button className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95">
+                        Devices
                       </button>
                     </div>
                   </div>
@@ -369,7 +350,6 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Global Style for Animations */}
       <style>{`
         @keyframes gradient-xy {
           0%, 100% { background-position: 0% 50%; }

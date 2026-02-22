@@ -103,8 +103,8 @@ const EnquiryCard = ({
                   <option value="">Select Sales Agent</option>
                   {executives.map((exec) => (
                     <option
-                      key={exec.userId || exec.id}
-                      value={exec.userId || exec.id}
+                      key={exec.value || exec.userId || exec.id}
+                      value={exec.value || exec.userId || exec.id}
                     >
                       {exec.label}
                     </option>

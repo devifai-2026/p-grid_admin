@@ -73,9 +73,7 @@ const MainLayout = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Main Header */}
-        <div className="flex-shrink-0 z-30 bg-white">
-          <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
-        </div>
+        <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
