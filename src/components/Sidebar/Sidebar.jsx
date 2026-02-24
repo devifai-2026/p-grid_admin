@@ -96,7 +96,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          ...analyticsSubmenu,
+          // ...analyticsSubmenu,
           {
             title: "Sales Board",
             icon: <FiBarChart2 className="w-4 h-4" />,
@@ -133,7 +133,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          ...analyticsSubmenu,
+          // ...analyticsSubmenu,
           {
             title: "Enquiry Board",
             icon: <FiMessageSquare className="w-4 h-4" />,
@@ -217,7 +217,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          ...analyticsSubmenu,
+          // ...analyticsSubmenu,
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
@@ -258,7 +258,7 @@ const buildMenuItems = (role) => {
       title: "Dashboard",
       icon: <MdDashboard className="w-5 h-5" />,
       submenus: [
-        ...analyticsSubmenu,
+        // ...analyticsSubmenu,
         {
           title: "Agent",
           icon: <MdRealEstateAgent className="w-4 h-4" />,
