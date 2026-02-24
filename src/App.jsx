@@ -11,6 +11,7 @@ import PrivateRoute from "./helpers/PrivateRoute";
 
 // Page Imports
 import AnalyticsPage from "./components/Sidebar/Pages/Dashboard/Analytics/AnalyticsPage";
+import PropertyNotes from "./components/Sidebar/Pages/PropertyNotes/PropertyNotes";
 import Agent from "./components/Sidebar/Pages/Dashboard/Agent/Agent";
 import PropertyGrid from "./components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid";
 import PropertyDetails from "./components/Sidebar/Pages/Property/PropertyDetails/PropertyDetails";
@@ -67,6 +68,7 @@ const AppRoutes = () => {
           <Route path="/dashboard/agent/property-dealer" element={<SalesAgents />} />
           <Route path="/dashboard/agent/client-dealer" element={<SalesAgents />} />
           <Route path="/dashboard/sales-board" element={<SalesBoard />} />
+          <Route path="/dashboard/property-notes" element={<PropertyNotes />} />
 
           {/* Properties */}
           <Route path="/property/property-grid" element={<PropertyGrid />} />

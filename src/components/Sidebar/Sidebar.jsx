@@ -175,6 +175,11 @@ const buildMenuItems = (role) => {
             link: "/dashboard/work-board",
           },
           {
+            title: "Property Notes",
+            icon: <MdWorkOutline className="w-4 h-4" />,
+            link: "/dashboard/property-notes",
+          },
+          {
             title: "Sales Agent (Property Dealer)",
             icon: <MdRealEstateAgent className="w-4 h-4" />,
             link: "/dashboard/agent/property-dealer",

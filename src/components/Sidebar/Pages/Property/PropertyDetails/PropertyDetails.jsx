@@ -111,6 +111,15 @@ const PropertyDetails = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
 
+  // Pagination States
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
   // Notes States
   const [notesData, setNotesData] = useState([]);
   const [newNote, setNewNote] = useState("");
@@ -270,6 +279,50 @@ const PropertyDetails = () => {
     }
   }, [isAssignModalOpen]);
 
+  const fetchPropertyList = (page = 1) => {
+    if (id && id !== "undefined" && id !== "null") return;
+    setLoading(true);
+
+    const salesRoles = [
+      "Sales Manager",
+      "Sales Executive",
+      "Sales Executive - Property Manager",
+      "Sales Executive - Client Dealer",
+    ];
+    const isSalesRelated = salesRoles.includes(user?.role);
+    const baseRoute = isSalesRelated ? "/properties/assigned" : "/properties";
+    let route = `${baseRoute}?page=${page}&limit=9`;
+
+    if (verificationFilter !== "all") {
+      const mappedFilter =
+        verificationFilter === "verified" ? "completed" : verificationFilter;
+      route += `&isVerified=${mappedFilter}`;
+    }
+
+    apiCall.get({
+      route,
+      onSuccess: (res) => {
+        setLoading(false);
+        if (res.success) {
+          setPropertyList(res.data || []);
+          if (res.pagination) {
+            setPagination(res.pagination);
+          }
+        }
+      },
+      onError: (err) => {
+        setLoading(false);
+        console.error("Error fetching property list:", err);
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!id || id === "undefined" || id === "null") {
+      fetchPropertyList(1);
+    }
+  }, [verificationFilter]);
+
   useEffect(() => {
     if (id && id !== "undefined" && id !== "null") {
       setLoading(true);
@@ -290,32 +343,7 @@ const PropertyDetails = () => {
         },
       });
     } else {
-      // Logic for NO ID: Fetch list of properties
-      console.log("No ID provided. Fetching property list...");
-      setLoading(true);
-
-      const salesRoles = [
-        "Sales Manager",
-        "Sales Executive",
-        "Sales Executive - Property Manager",
-        "Sales Executive - Client Dealer",
-      ];
-      const isSalesRelated = salesRoles.includes(user?.role);
-
-      apiCall.get({
-        route: isSalesRelated ? "/properties/assigned" : "/properties?limit=1000",
-        onSuccess: (res) => {
-          setLoading(false);
-          if (res.success) {
-            console.log(res.data);
-            setPropertyList(res.data || []);
-          }
-        },
-        onError: (err) => {
-          setLoading(false);
-          console.error("Error fetching property list:", err);
-        },
-      });
+      fetchPropertyList(1);
     }
   }, [id, user]);
 
@@ -407,29 +435,18 @@ const PropertyDetails = () => {
               {
                 id: "all",
                 label: "All Properties",
-                count: propertyList.length,
               },
               {
                 id: "verified",
                 label: "Verified",
-                count: propertyList.filter((p) => p.isVerified === "completed")
-                  .length,
               },
               {
                 id: "partial",
                 label: "Partially Verified",
-                count: propertyList.filter((p) => p.isVerified === "partial")
-                  .length,
               },
               {
                 id: "pending",
                 label: "Pending",
-                count: propertyList.filter(
-                  (p) =>
-                    !p.isVerified ||
-                    (p.isVerified !== "completed" &&
-                      p.isVerified !== "partial"),
-                ).length,
               },
             ].map((filter) => (
               <button
@@ -442,34 +459,12 @@ const PropertyDetails = () => {
                 }`}
               >
                 {filter.label}
-                <span
-                  className={`px-2 py-0.5 rounded-lg text-[10px] ${
-                    verificationFilter === filter.id
-                      ? "bg-white/20 text-white"
-                      : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  {filter.count}
-                </span>
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {propertyList.filter((item) => {
-              if (verificationFilter === "all") return true;
-              if (verificationFilter === "verified")
-                return item.isVerified === "completed";
-              if (verificationFilter === "partial")
-                return item.isVerified === "partial";
-              if (verificationFilter === "pending")
-                return (
-                  !item.isVerified ||
-                  (item.isVerified !== "completed" &&
-                    item.isVerified !== "partial")
-                );
-              return true;
-            }).length === 0 ? (
+            {propertyList.length === 0 ? (
               <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
                   <FiInfo size={32} className="text-gray-300" />
@@ -483,146 +478,164 @@ const PropertyDetails = () => {
                 </p>
               </div>
             ) : (
-              propertyList
-                .filter((item) => {
-                  if (verificationFilter === "all") return true;
-                  if (verificationFilter === "verified")
-                    return item.isVerified === "completed";
-                  if (verificationFilter === "partial")
-                    return item.isVerified === "partial";
-                  if (verificationFilter === "pending")
-                    return (
-                      !item.isVerified ||
-                      (item.isVerified !== "completed" &&
-                        item.isVerified !== "partial")
-                    );
-                  return true;
-                })
-                .map((item) => (
-                  <div
-                    key={item.propertyId}
-                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group flex flex-col"
-                  >
-                    <div className="h-48 overflow-hidden relative bg-gray-100">
-                      {item.media?.[0]?.fileUrl ? (
-                        <img
-                          src={item.media[0].fileUrl}
-                          alt={item.microMarket}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                          <FiImage size={40} className="mb-2 opacity-50" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                            No Image
-                          </span>
+              propertyList.map((item) => (
+                <div
+                  key={item.propertyId}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group flex flex-col"
+                >
+                  <div className="h-48 overflow-hidden relative bg-gray-100">
+                    {item.media?.[0]?.fileUrl ? (
+                      <img
+                        src={item.media[0].fileUrl}
+                        alt={item.microMarket}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                        <FiImage size={40} className="mb-2 opacity-50" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                          No Image
+                        </span>
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
+                        {item.propertyType}
+                      </div>
+                      {(item.isVerified === "partial" ||
+                        item.isVerified === "completed") && (
+                        <div
+                          className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
+                            item.isVerified === "partial"
+                              ? "bg-orange-500"
+                              : "bg-red-500"
+                          }`}
+                        >
+                          <MdVerified size={10} />
+                          {item.isVerified === "partial"
+                            ? "Partial"
+                            : "Verified"}
                         </div>
                       )}
-                      <div className="absolute top-4 left-4 flex flex-col gap-2">
-                        <div className="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest w-fit">
-                          {item.propertyType}
-                        </div>
-                        {(item.isVerified === "partial" ||
-                          item.isVerified === "completed") && (
-                          <div
-                            className={`text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-widest flex items-center gap-1 w-fit ${
-                              item.isVerified === "partial"
-                                ? "bg-orange-500"
-                                : "bg-red-500"
-                            }`}
-                          >
-                            <MdVerified size={10} />
-                            {item.isVerified === "partial"
-                              ? "Partial"
-                              : "Verified"}
-                          </div>
-                        )}
-                      </div>
                     </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
-                          {item.microMarket ||
-                            `Commercial Space ${item.propertyId.slice(0, 4)}`}
-                        </h3>
-                        {item.isVerified === "partial" &&
-                          !item.verificationLogs?.some(
-                            (log) => log.userId === user?.userId,
-                          ) && (
-                            <button
-                              onClick={(e) => handleVerify(e, item.propertyId)}
-                              className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
-                            >
-                              2nd Verify
-                            </button>
-                          )}
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
-                        <FiMapPin className="text-[#EE2529]" />
-                        {item.city}, {item.state}
-                      </div>
-
-                      {item.salesAgent && (
-                        <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold uppercase mb-4 bg-indigo-50 px-2 py-1 rounded w-fit">
-                          <FiInfo size={10} />
-                          Assigned to: {item.salesAgent.firstName}{" "}
-                          {item.salesAgent.lastName}
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 gap-2">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase">
-                            Price
-                          </p>
-                          <p className="text-sm font-black text-gray-800">
-                            ₹{item.sellingPrice} Cr
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          {item.verificationLogs?.some(
-                            (log) => log.userId === user?.userId,
-                          ) ? (
-                            <button
-                              onClick={(e) =>
-                                handleUnverify(e, item.propertyId)
-                              }
-                              className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-200 transition"
-                            >
-                              Unverify
-                            </button>
-                          ) : (
-                            <>
-                              {item.isVerified !== "completed" &&
-                                item.isVerified !== "partial" && (
-                                  <button
-                                    onClick={(e) =>
-                                      handleVerify(e, item.propertyId)
-                                    }
-                                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
-                                  >
-                                    Verify
-                                  </button>
-                                )}
-                            </>
-                          )}
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
+                        {item.microMarket ||
+                          `Commercial Space ${item.propertyId.slice(0, 4)}`}
+                      </h3>
+                      {item.isVerified === "partial" &&
+                        !item.verificationLogs?.some(
+                          (log) => log.userId === user?.userId,
+                        ) && (
                           <button
-                            onClick={() =>
-                              navigate(
-                                `/property/property-details/${item.propertyId}`,
-                              )
-                            }
-                            className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
+                            onClick={(e) => handleVerify(e, item.propertyId)}
+                            className="px-2 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded uppercase tracking-tighter hover:bg-yellow-500 transition shrink-0 ml-2"
                           >
-                            View <MdArrowForward />
+                            2nd Verify
                           </button>
-                        </div>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
+                      <FiMapPin className="text-[#EE2529]" />
+                      {item.city}, {item.state}
+                    </div>
+
+                    {item.salesAgent && (
+                      <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold uppercase mb-4 bg-indigo-50 px-2 py-1 rounded w-fit">
+                        <FiInfo size={10} />
+                        Assigned to: {item.salesAgent.firstName}{" "}
+                        {item.salesAgent.lastName}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 gap-2">
+                      <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">
+                          Price
+                        </p>
+                        <p className="text-sm font-black text-gray-800">
+                          ₹{item.sellingPrice} Cr
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {item.verificationLogs?.some(
+                          (log) => log.userId === user?.userId,
+                        ) ? (
+                          <button
+                            onClick={(e) => handleUnverify(e, item.propertyId)}
+                            className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-200 transition"
+                          >
+                            Unverify
+                          </button>
+                        ) : (
+                          <>
+                            {item.isVerified !== "completed" &&
+                              item.isVerified !== "partial" && (
+                                <button
+                                  onClick={(e) =>
+                                    handleVerify(e, item.propertyId)
+                                  }
+                                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition"
+                                >
+                                  Verify
+                                </button>
+                              )}
+                          </>
+                        )}
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/property/property-details/${item.propertyId}`,
+                            )
+                          }
+                          className="flex items-center gap-2 bg-[#EE2529] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#D32F2F] transition"
+                        >
+                          View <MdArrowForward />
+                        </button>
                       </div>
                     </div>
                   </div>
-                ))
+                </div>
+              ))
             )}
           </div>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12 pb-10">
+              <button
+                disabled={!pagination.hasPrevPage}
+                onClick={() => fetchPropertyList(pagination.currentPage - 1)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 font-extrabold text-xs uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <div className="flex items-center gap-1">
+                {[...Array(pagination.totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => fetchPropertyList(i + 1)}
+                    className={`w-10 h-10 rounded-lg font-black text-xs transition-all ${
+                      pagination.currentPage === i + 1
+                        ? "bg-[#EE2529] text-white shadow-lg shadow-red-200"
+                        : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                disabled={!pagination.hasNextPage}
+                onClick={() => fetchPropertyList(pagination.currentPage + 1)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 font-extrabold text-xs uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
