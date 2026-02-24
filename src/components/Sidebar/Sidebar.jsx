@@ -44,7 +44,7 @@ const buildMenuItems = (role) => {
   const isInternalStaff =
     isAdmin || isSalesManager || isSalesPropertyDealer || isSalesClientDealer;
 
-  const analyticsSubmenu = isInternalStaff
+  const analyticsSubmenu = isSalesManager
     ? [
         {
           title: "Analytics",
@@ -170,12 +170,12 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          ...analyticsSubmenu,
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
             link: "/dashboard/work-board",
           },
+          ...analyticsSubmenu,
           {
             title: "Property Notes",
             icon: <FiEdit3 className="w-4 h-4" />,

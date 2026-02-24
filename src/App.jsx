@@ -40,6 +40,20 @@ import SalesBoard from "./components/Sidebar/Pages/SalesBoard/SalesBoard";
 const AppRoutes = () => {
   const { login, isLoggedIn, user } = useAuth();
 
+  const getRedirectPath = (role) => {
+    const r = role?.toLowerCase() || "";
+    if (r === "sales manager") return "/dashboard/analytics";
+    if (r.includes("client dealer")) return "/enquiry";
+    if (
+      r.includes("property manager") ||
+      r.includes("property dealer") ||
+      role === "Sales Executive - Property Manager"
+    )
+      return "/dashboard/sales-board";
+    if (r === "admin" || r === "super admin") return "/dashboard/work-board";
+    return "/property/property-details";
+  };
+
   return (
     <Routes>
       {/* Public Authentication Routes */}
@@ -47,7 +61,7 @@ const AppRoutes = () => {
         path="/login"
         element={
           isLoggedIn ? (
-            <Navigate to="/dashboard/analytics" replace />
+            <Navigate to={getRedirectPath(user?.role)} replace />
           ) : (
             <Login onLogin={login} />
           )
@@ -66,10 +80,10 @@ const AppRoutes = () => {
           <Route
             path="/dashboard/analytics"
             element={
-              ["Investor", "Broker", "Owner"].includes(user?.role) ? (
-                <Navigate to="/property/property-details" replace />
-              ) : (
+              user?.role === "Sales Manager" ? (
                 <Analytics />
+              ) : (
+                <Navigate to={getRedirectPath(user?.role)} replace />
               )
             }
           />
@@ -162,11 +176,11 @@ const AppRoutes = () => {
           {/* Redirects */}
           <Route
             path="/"
-            element={<Navigate to="/dashboard/analytics" replace />}
+            element={<Navigate to={getRedirectPath(user?.role)} replace />}
           />
           <Route
             path="/dashboard"
-            element={<Navigate to="/dashboard/analytics" replace />}
+            element={<Navigate to={getRedirectPath(user?.role)} replace />}
           />
           <Route
             path="/property"
