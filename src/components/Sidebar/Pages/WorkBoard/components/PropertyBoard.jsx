@@ -133,6 +133,20 @@ const PropertyBoard = ({
   properties,
   openAssignModal,
 }) => {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredProperties.length, viewType]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProperties = filteredProperties.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
   if (!showProperties) return null;
 
   return (
@@ -194,8 +208,8 @@ const PropertyBoard = ({
                   </td>
                 </tr>
               ) : (
-                <AnimatePresence>
-                  {filteredProperties.map((prop, idx) => (
+                <AnimatePresence mode="wait">
+                  {paginatedProperties.map((prop, idx) => (
                     <PropertyRow
                       key={prop.propertyId}
                       prop={prop}
@@ -215,6 +229,73 @@ const PropertyBoard = ({
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + itemsPerPage, filteredProperties.length)}{" "}
+              of {filteredProperties.length}
+            </p>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-slate-100 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all font-black uppercase tracking-widest"
+              >
+                Prev
+              </button>
+
+              <div className="flex items-center gap-1">
+                {[...Array(totalPages)].map((_, i) => {
+                  const page = i + 1;
+                  // Show current page, its neighbors, first and last page
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${
+                          currentPage === page
+                            ? "bg-red-500 text-white shadow-md shadow-red-100"
+                            : "bg-white text-slate-400 hover:bg-slate-50 border border-slate-100"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
+                    return (
+                      <span key={page} className="text-slate-300 px-1">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded-lg border border-slate-100 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all font-black uppercase tracking-widest"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

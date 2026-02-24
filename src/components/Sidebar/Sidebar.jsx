@@ -13,6 +13,7 @@ import {
   FiLogOut,
   FiBarChart2,
   FiBriefcase,
+  FiEdit3,
 } from "react-icons/fi";
 import {
   MdDashboard,
@@ -39,6 +40,19 @@ const buildMenuItems = (role) => {
   const isSalesClientDealer =
     role === "Sales Executive - Client Dealer" ||
     roleLower.includes("client dealer");
+
+  const isInternalStaff =
+    isAdmin || isSalesManager || isSalesPropertyDealer || isSalesClientDealer;
+
+  const analyticsSubmenu = isInternalStaff
+    ? [
+        {
+          title: "Analytics",
+          icon: <MdAnalytics className="w-4 h-4" />,
+          link: "/dashboard/analytics",
+        },
+      ]
+    : [];
 
   // ── Shared sections ──────────────────────────────────────────────
   const customersMenu = {
@@ -82,11 +96,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          {
-            title: "Analytics",
-            icon: <MdAnalytics className="w-4 h-4" />,
-            link: "/dashboard/analytics",
-          },
+          ...analyticsSubmenu,
           {
             title: "Sales Board",
             icon: <FiBarChart2 className="w-4 h-4" />,
@@ -123,11 +133,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          {
-            title: "Analytics",
-            icon: <MdAnalytics className="w-4 h-4" />,
-            link: "/dashboard/analytics",
-          },
+          ...analyticsSubmenu,
           {
             title: "Enquiry Board",
             icon: <FiMessageSquare className="w-4 h-4" />,
@@ -164,11 +170,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          {
-            title: "Analytics",
-            icon: <MdAnalytics className="w-4 h-4" />,
-            link: "/dashboard/analytics",
-          },
+          ...analyticsSubmenu,
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
@@ -176,7 +178,7 @@ const buildMenuItems = (role) => {
           },
           {
             title: "Property Notes",
-            icon: <MdWorkOutline className="w-4 h-4" />,
+            icon: <FiEdit3 className="w-4 h-4" />,
             link: "/dashboard/property-notes",
           },
           {
@@ -215,11 +217,7 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          {
-            title: "Analytics",
-            icon: <MdAnalytics className="w-4 h-4" />,
-            link: "/dashboard/analytics",
-          },
+          ...analyticsSubmenu,
           {
             title: "Work Board",
             icon: <MdWorkOutline className="w-4 h-4" />,
@@ -260,11 +258,7 @@ const buildMenuItems = (role) => {
       title: "Dashboard",
       icon: <MdDashboard className="w-5 h-5" />,
       submenus: [
-        {
-          title: "Analytics",
-          icon: <MdAnalytics className="w-4 h-4" />,
-          link: "/dashboard/analytics",
-        },
+        ...analyticsSubmenu,
         {
           title: "Agent",
           icon: <MdRealEstateAgent className="w-4 h-4" />,

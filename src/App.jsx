@@ -11,6 +11,7 @@ import PrivateRoute from "./helpers/PrivateRoute";
 
 // Page Imports
 import AnalyticsPage from "./components/Sidebar/Pages/Dashboard/Analytics/AnalyticsPage";
+import Analytics from "./components/Sidebar/Pages/Dashboard/NewAnalytics/Analytics";
 import PropertyNotes from "./components/Sidebar/Pages/PropertyNotes/PropertyNotes";
 import Agent from "./components/Sidebar/Pages/Dashboard/Agent/Agent";
 import PropertyGrid from "./components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid";
@@ -61,12 +62,28 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route element={<MainLayout />}>
           {/* Dashboard */}
-          <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+          {/* <Route path="/dashboard/analytics" element={<AnalyticsPage />} /> */}
+          <Route
+            path="/dashboard/analytics"
+            element={
+              ["Investor", "Broker", "Owner"].includes(user?.role) ? (
+                <Navigate to="/property/property-details" replace />
+              ) : (
+                <Analytics />
+              )
+            }
+          />
           {/* <Route path="/dashboard/agent" element={<Agent />} /> */}
           <Route path="/dashboard/work-board" element={<WorkBoard />} />
           <Route path="/dashboard/agent" element={<SalesAgents />} />
-          <Route path="/dashboard/agent/property-dealer" element={<SalesAgents />} />
-          <Route path="/dashboard/agent/client-dealer" element={<SalesAgents />} />
+          <Route
+            path="/dashboard/agent/property-dealer"
+            element={<SalesAgents />}
+          />
+          <Route
+            path="/dashboard/agent/client-dealer"
+            element={<SalesAgents />}
+          />
           <Route path="/dashboard/sales-board" element={<SalesBoard />} />
           <Route path="/dashboard/property-notes" element={<PropertyNotes />} />
 
@@ -97,15 +114,30 @@ const AppRoutes = () => {
           />
           <Route
             path="/customers/sales-manager"
-            element={<CustomerGrid roleTitle="Sales Manager" roleName="Sales Manager" />}
+            element={
+              <CustomerGrid
+                roleTitle="Sales Manager"
+                roleName="Sales Manager"
+              />
+            }
           />
           <Route
             path="/customers/sales-executive-client-dealer"
-            element={<CustomerGrid roleTitle="Sales Executive - Client Dealer" roleName="Sales Executive - Client Dealer" />}
+            element={
+              <CustomerGrid
+                roleTitle="Sales Executive - Client Dealer"
+                roleName="Sales Executive - Client Dealer"
+              />
+            }
           />
           <Route
             path="/customers/sales-executive-property-manager"
-            element={<CustomerGrid roleTitle="Sales Executive - Property Manager" roleName="Sales Executive - Property Manager" />}
+            element={
+              <CustomerGrid
+                roleTitle="Sales Executive - Property Manager"
+                roleName="Sales Executive - Property Manager"
+              />
+            }
           />
           <Route path="/customers/grid-view" element={<GridView />} />
           <Route
