@@ -48,6 +48,8 @@ import {
 } from "react-icons/fa";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PropertyBrochure from "./PropertyBrochure";
 
 // --- Helper Components ---
 
@@ -677,9 +679,21 @@ const PropertyDetails = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600 transition">
-              <FiDownload size={14} /> Download Brochure
-            </button>
+            <PDFDownloadLink
+              document={<PropertyBrochure property={property} />}
+              fileName={`Brochure-${property.propertyId || "Property"}.pdf`}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs font-bold uppercase tracking-wider transition shadow-sm"
+            >
+              {({ loading }) =>
+                loading ? (
+                  "Preparing..."
+                ) : (
+                  <>
+                    <FiDownload size={14} /> Download Brochure
+                  </>
+                )
+              }
+            </PDFDownloadLink>
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600 transition">
               <FiShare2 size={14} /> Share
             </button>
