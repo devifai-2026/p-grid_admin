@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header";
 import BreadCrumbs from "../BreadCrumbs";
@@ -10,6 +10,17 @@ const MainLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const { logout } = useAuth();
+  const { pathname } = useLocation();
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,7 +87,10 @@ const MainLayout = () => {
         <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto p-4 md:p-6 pb-20"
+        >
           <BreadCrumbs />
           <Outlet />
         </div>

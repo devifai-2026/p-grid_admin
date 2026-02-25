@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./components/Layout/MainLayout";
@@ -38,6 +39,20 @@ import ResetEmail from "./components/auth/ResetEmail";
 import ResetOtp from "./components/auth/ResetOtp";
 import ConfirmPassword from "./components/auth/ConfirmPassword";
 import SalesBoard from "./components/Sidebar/Pages/SalesBoard/SalesBoard";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [pathname]);
+
+  return null;
+};
 
 const AppRoutes = () => {
   const { login, isLoggedIn, user } = useAuth();
@@ -203,6 +218,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <AppRoutes />
       </Router>
     </AuthProvider>

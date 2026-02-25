@@ -136,15 +136,16 @@ const PropertyCard = ({
         {item.salesAgent && (
           <div className="flex items-center gap-2 text-indigo-700 text-[9px] font-black uppercase mb-4 bg-indigo-50/30 p-2 rounded-xl border border-indigo-100/30 w-full group/agent hover:bg-indigo-50 transition-colors cursor-default">
             <div className="w-6 h-6 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-black text-[9px] shrink-0">
-              {item.salesAgent.firstName[0]}
-              {item.salesAgent.lastName[0]}
+              {item.salesAgent.firstName?.[0] || "?"}
+              {item.salesAgent.lastName?.[0] || ""}
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-[8px] text-indigo-400 font-bold leading-none mb-0.5">
                 Assigned
               </span>
               <span className="truncate leading-none">
-                {item.salesAgent.firstName} {item.salesAgent.lastName}
+                {item.salesAgent.firstName || ""}{" "}
+                {item.salesAgent.lastName || ""}
               </span>
             </div>
           </div>
