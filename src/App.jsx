@@ -28,6 +28,7 @@ import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
+import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -103,6 +104,7 @@ const AppRoutes = () => {
 
           {/* Properties */}
           <Route path="/property/property-grid" element={<PropertyGrid />} />
+          <Route path="/property/hot-property" element={<HotProperty />} />
           <Route
             path="/property/property-details/:id"
             element={<PropertyDetails />}

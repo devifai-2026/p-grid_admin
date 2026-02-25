@@ -29,10 +29,11 @@ const PropertyGrid = () => {
     forRent: false,
     forSale: false,
     allProperty: true,
-    cottage: false,
-    villa: false,
-    apartment: false,
-    duplex: false,
+    residential: false,
+    retail: false,
+    offices: false,
+    industrial: false,
+    others: false,
     balcony: false,
     parking: false,
     spa: false,
@@ -97,10 +98,11 @@ const PropertyGrid = () => {
     // Property Types
     let types = [];
     if (!activeFilters.allProperty) {
-      if (activeFilters.cottage) types.push("Cottage");
-      if (activeFilters.villa) types.push("Villa");
-      if (activeFilters.apartment) types.push("Apartment");
-      if (activeFilters.duplex) types.push("Duplex Bungalow");
+      if (activeFilters.residential) types.push("Residential");
+      if (activeFilters.retail) types.push("Retail");
+      if (activeFilters.offices) types.push("Offices");
+      if (activeFilters.industrial) types.push("Industrial");
+      if (activeFilters.others) types.push("Others");
     }
     if (types.length > 0) {
       query += `&propertyTypes=${types.join(",")}`;
@@ -140,7 +142,13 @@ const PropertyGrid = () => {
       nextState = { ...prev, [key]: !prev[key] };
 
       // Mutual exclusivity for property types
-      const propertySubTypes = ["cottage", "villa", "apartment", "duplex"];
+      const propertySubTypes = [
+        "residential",
+        "retail",
+        "offices",
+        "industrial",
+        "others",
+      ];
 
       if (key === "allProperty" && nextState.allProperty) {
         // If "All Properties" is checked, uncheck sub-types
@@ -310,47 +318,31 @@ const PropertyGrid = () => {
               />
               <span className="text-sm text-gray-600">All Properties</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.cottage}
-                onChange={() => handleFilterChange("cottage")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Cottage</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.villa}
-                onChange={() => handleFilterChange("villa")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Villas</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.apartment}
-                onChange={() => handleFilterChange("apartment")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Apartment</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedFilters.duplex}
-                onChange={() => handleFilterChange("duplex")}
-                className="w-4 h-4"
-              />
-              <span className="text-sm text-gray-600">Duplex Bungalow</span>
-            </label>
+            {[
+              { label: "Residential", value: "residential" },
+              { label: "Retail", value: "retail" },
+              { label: "Offices", value: "offices" },
+              { label: "Industrial", value: "industrial" },
+              { label: "Others", value: "others" },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedFilters[option.value]}
+                  onChange={() => handleFilterChange(option.value)}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm text-gray-600">{option.label}</span>
+              </label>
+            ))}
           </div>
         </div>
 
         {/* Bedrooms */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">
             Bedrooms :
           </h4>
@@ -369,7 +361,7 @@ const PropertyGrid = () => {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Accessibility Features - Amenities */}
         <div className="mb-8">

@@ -197,7 +197,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "Hot Property", link: "/property/property-details" },
+          { title: "Hot Property", link: "/property/hot-property" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
@@ -239,7 +239,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "Hot Property", link: "/property/property-details" },
+          { title: "Hot Property", link: "/property/hot-property" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],
