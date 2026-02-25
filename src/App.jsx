@@ -29,6 +29,7 @@ import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifi
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
 import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
+import HelpandSupport from "./components/Sidebar/Pages/HelpandSupport/HelpandSupport";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -171,6 +172,7 @@ const AppRoutes = () => {
           <Route path="/users" element={<Users />} />
           <Route path="/enquiry" element={<Enquiry />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/help-and-support" element={<HelpandSupport />} />
 
           {/* Placeholder Routes */}
           <Route path="/notifications" element={<AllNotifications />} />

@@ -80,7 +80,7 @@ const buildMenuItems = (role) => {
   const helpItem = {
     title: "Help & Support",
     icon: <FiHelpCircle className="w-5 h-5" />,
-    link: "/enquiry",
+    link: "/help-and-support",
   };
 
   const logoutItem = {
