@@ -110,13 +110,16 @@ const HotProperty = () => {
   return (
     <div className="bg-gray-50 min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 uppercase tracking-tight mb-2">
-            Hot Properties
-          </h1>
-          <p className="text-gray-600">
-            View the latest properties that have been recently updated.
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-2">
+              Hot Properties
+            </h1>
+            <p className="text-gray-500 font-medium max-w-2xl">
+              Experience our handpicked selection of the latest properties that
+              have been recently updated in our ecosystem.
+            </p>
+          </div>
         </div>
 
         {/* Verification Filters */}
