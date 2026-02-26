@@ -1,3 +1,5 @@
+import { showError } from "../swalHelper";
+
 export const onError = (r) => {
   let error_msg = "Something Went Wrong! Please Try again Later!";
 
@@ -16,8 +18,9 @@ export const onError = (r) => {
   }
 
   console.error("Error:", error_msg);
-  alert(error_msg);
+  showError(error_msg);
 };
+
 export const throwError = (r) => {
   throw new Error(
     r?.data?.message || "Something Went Wrong! Please Try again Later!",

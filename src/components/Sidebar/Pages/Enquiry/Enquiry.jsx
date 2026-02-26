@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMessageSquare } from "react-icons/fi";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useAuth } from "../../../../context/AuthContext";
+import { showError } from "../../../../helpers/swalHelper";
+
 
 // Sub-components
 import EnquiryHeader from "./components/EnquiryHeader";
@@ -85,7 +87,7 @@ const Enquiry = () => {
       },
       onError: (err) => {
         setAssignLoading(false);
-        alert(err.message || "Failed to assign inquiry");
+        showError(err.message || "Failed to assign inquiry");
       },
     });
   };
@@ -102,7 +104,7 @@ const Enquiry = () => {
       },
       onError: (err) => {
         setAutoAssignLoading(null);
-        alert(err.message || "Failed to auto-assign inquiry");
+        showError(err.message || "Failed to auto-assign inquiry");
       },
     });
   };

@@ -44,15 +44,16 @@ const buildMenuItems = (role) => {
   const isInternalStaff =
     isAdmin || isSalesManager || isSalesPropertyDealer || isSalesClientDealer;
 
-  const analyticsSubmenu = isSalesManager
-    ? [
-        {
-          title: "Analytics",
-          icon: <MdAnalytics className="w-4 h-4" />,
-          link: "/dashboard/analytics",
-        },
-      ]
-    : [];
+  const analyticsSubmenu =
+    isSalesManager || isSalesPropertyDealer
+      ? [
+          {
+            title: "Analytics",
+            icon: <MdAnalytics className="w-4 h-4" />,
+            link: "/dashboard/analytics",
+          },
+        ]
+      : [];
 
   // ── Shared sections ──────────────────────────────────────────────
   const customersMenu = {
@@ -96,12 +97,18 @@ const buildMenuItems = (role) => {
         title: "Dashboard",
         icon: <MdDashboard className="w-5 h-5" />,
         submenus: [
-          // ...analyticsSubmenu,
+          ...analyticsSubmenu,
+          {
+            title: "Work Board",
+            icon: <MdWorkOutline className="w-4 h-4" />,
+            link: "/dashboard/workboard",
+          },
           {
             title: "Sales Board",
             icon: <FiBarChart2 className="w-4 h-4" />,
             link: "/dashboard/sales-board",
           },
+
           {
             title: "Sales Agent",
             icon: <MdRealEstateAgent className="w-4 h-4" />,

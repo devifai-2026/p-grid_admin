@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FiPhone, FiLock, FiCheck } from "react-icons/fi";
 import { apiCall } from "../../helpers/apicall/apiCall";
+import { showToast } from "../../helpers/swalHelper";
 import AOS from "aos";
+
 import "aos/dist/aos.css";
 
 const Login = ({ onLogin }) => {
@@ -56,7 +58,7 @@ const Login = ({ onLogin }) => {
           if (formData.otp === "1111") {
             // keep it
           } else {
-            alert("OTP sent to your mobile number");
+            showToast("success", "OTP sent to your mobile number");
           }
         } else {
           setError(res.message || "Failed to send OTP");

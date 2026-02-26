@@ -4,6 +4,8 @@ import { useUserStorage } from "../../useUserStorage";
 import { apiCall } from "../../apicall/apiCall";
 import { onError } from "../../converters/onError";
 import { formatUser } from "../../converters/user";
+import { showSuccess, showError } from "../../swalHelper";
+
 
 const base = "auth";
 
@@ -22,10 +24,10 @@ export const useAuthApi = () => {
           const userData = formatUser(response.data);
           setUser(userData);
           window.dispatchEvent(new Event("userLoginStatusChanged"));
-          alert("Login successful! Welcome back.");
+          showSuccess("Login successful! Welcome back.");
           navigate("/");
         },
-        onError: () => alert("Invalid Name or Email!"),
+        onError: () => showError("Invalid Name or Email!"),
         setLoading,
       });
     },
@@ -47,7 +49,7 @@ export const useAuthApi = () => {
           clearUser();
           if (onLogout) onLogout();
           window.dispatchEvent(new Event("userLoginStatusChanged"));
-          alert("Logged out successfully");
+          showSuccess("Logged out successfully");
           navigate("/login");
         },
         onError: (err) => {
