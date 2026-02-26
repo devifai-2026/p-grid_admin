@@ -1,0 +1,339 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  FiSearch, FiFilter, FiPlus, FiGrid, FiList, 
+  FiEye, FiMessageSquare, FiUserPlus, FiCheckCircle,
+  FiMapPin, FiClock, FiActivity, FiTag, FiMoreVertical,
+  FiTrendingUp, FiCheck, FiX
+} from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+
+import { showSuccess, showError, confirmAction, showToast } from '../../../../helpers/swalHelper';
+import { apiCall } from '../../../../helpers/apicall/apiCall';
+import { useUserStorage } from '../../../../helpers/useUserStorage';
+
+
+
+
+const ExecutiveWorkBoard = () => {
+  const navigate = useNavigate();
+  const { user } = useUserStorage();
+  const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [properties, setProperties] = useState([]);
+
+
+
+  const fetchProperties = () => {
+    setLoading(true);
+    apiCall.get({
+      route: '/properties/assigned',
+      onSuccess: (res) => {
+        setLoading(false);
+        if (res.success) {
+          setProperties(res.data || []);
+        }
+      },
+      onError: (err) => {
+        setLoading(false);
+        console.error('Error fetching properties:', err);
+      }
+    });
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  // Compute Real counts for KPIs and Pills
+  const counts = useMemo(() => {
+    return {
+      total: properties.length,
+      yetToVerify: properties.filter(p => !p.isVerified || p.isVerified === 'false').length,
+      underReview: properties.filter(p => p.isVerified === 'partial').length,
+      hasNotes: properties.filter(p => p.verificationLogs?.length > 0).length,
+      ownerUpdates: properties.filter(p => p.updatedByRole === 'Owner').length, // Assuming this field exists
+      unread: properties.filter(p => p.hasUnreadNotes).length // Assuming this flag exists
+    };
+  }, [properties]);
+
+  const filteredProperties = useMemo(() => {
+    return properties.filter(p => {
+        const matchesSearch = (p.propertyId + (p.propertyType || '') + (p.city || '') + (p.microMarket || '')).toLowerCase().includes(searchTerm.toLowerCase());
+        
+        let matchesTab = true;
+        if (activeFilter === 'yet-to-verify') {
+          matchesTab = !p.isVerified || p.isVerified === 'false';
+        } else if (activeFilter === 'under-review') {
+          matchesTab = p.isVerified === 'partial';
+        } else if (activeFilter === 'has-notes') {
+          matchesTab = p.verificationLogs?.length > 0;
+        } else if (activeFilter === 'owner-updates') {
+          matchesTab = p.updatedByRole === 'Owner';
+        }
+
+        return matchesSearch && matchesTab;
+    });
+  }, [properties, searchTerm, activeFilter]);
+
+
+  const handleVerify = async (e, id) => {
+    e.stopPropagation();
+    const confirmed = await confirmAction("Verify Property", "Are you sure you want to verify this property?", "Yes, Verify");
+    if (confirmed) {
+        showSuccess("Property Verified Successfully");
+        fetchProperties();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 space-y-8 pb-20 animate-fade-in">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Property Work Board</h1>
+          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm shadow-red-200 text-nowrap">
+            Sales Executive
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search properties by ID, address or owner..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl w-full md:w-80 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none shadow-sm transition-all"
+            />
+          </div>
+          <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+            <FiFilter />
+            <span className="text-sm font-bold hidden md:inline">Filters</span>
+          </button>
+          <div className="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center font-bold shadow-md shadow-red-200">
+            {user?.firstName?.charAt(0) || 'S'}{user?.lastName?.charAt(0) || 'E'}
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'TOTAL ASSIGNED', value: counts.total, sub: 'Total assigned for you', color: 'border-red-500', icon: <FiActivity /> },
+          { label: 'YET TO VERIFY', value: counts.yetToVerify, sub: 'Needs your attention', color: 'border-yellow-500', icon: <FiClock /> },
+          { label: 'UNDER REVIEW', value: counts.underReview, sub: 'Waiting for manager', color: 'border-blue-500', icon: <FiCheckCircle /> },
+          { label: 'NOTES GIVEN', value: counts.hasNotes, sub: 'Updates from team', color: 'border-green-500', icon: <FiMessageSquare /> },
+        ].map((kpi, idx) => (
+
+          <div key={idx} className={`bg-white p-6 rounded-2xl border-t-4 ${kpi.color} shadow-sm hover:shadow-md transition-all`}>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{kpi.label}</span>
+              <div className="p-2 bg-slate-50 rounded-lg text-slate-400">{kpi.icon}</div>
+            </div>
+            <div className="text-3xl font-black text-slate-800 mb-2">{kpi.value}</div>
+            <div className="text-xs font-bold text-green-500 flex items-center gap-1">
+              <FiTrendingUp className="w-3 h-3" /> {kpi.sub}
+            </div>
+          </div>
+        ))}
+      </div>
+
+
+
+
+      <div className="flex flex-wrap items-center gap-3">
+        {[
+          { id: 'all', label: 'All Projects', count: counts.total, color: 'bg-slate-900' },
+          { id: 'yet-to-verify', label: 'Yet to Verify', count: counts.yetToVerify, color: 'bg-red-600' },
+          { id: 'under-review', label: 'Under Review', count: counts.underReview, color: 'bg-blue-600' },
+          { id: 'has-notes', label: 'Has Notes', count: counts.hasNotes, color: 'bg-orange-600' },
+          { id: 'owner-updates', label: 'Owner Updates', count: counts.ownerUpdates, color: 'bg-emerald-600' }
+        ].map((pill) => (
+          <button
+            key={pill.id}
+            onClick={() => setActiveFilter(pill.id)}
+            className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm ${
+              activeFilter === pill.id 
+                ? `${pill.color} text-white ring-4 ring-${pill.id === 'all' ? 'slate' : 'red'}-100` 
+                : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50'
+            }`}
+          >
+            {pill.label} ({pill.count})
+          </button>
+        ))}
+      </div>
+
+
+      {/* Main Pipeline Section */}
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-slate-900 text-white rounded-xl">
+              <FiTag />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase">Property Pipeline</h2>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-1 flex shadow-sm">
+                <button 
+                  onClick={() => setViewMode('card')}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'card' ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-400'}`}
+                >
+                    <FiGrid /> Card View
+                </button>
+                <button 
+                  onClick={() => setViewMode('table')}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'table' ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-400'}`}
+                >
+                    <FiList /> Table View
+                </button>
+            </div>
+            <button 
+              onClick={() => navigate('/property/add-property')}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-200 transition-all active:scale-95"
+            >
+              <FiPlus /> Onboard New Property
+            </button>
+          </div>
+        </div>
+
+        {/* List Content */}
+        {viewMode === 'card' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {filteredProperties.length > 0 ? (
+              filteredProperties.map((p, idx) => {
+                const statusColor = 
+                  p.isVerified === 'partial' ? 'bg-blue-400' :
+                  p.isVerified === 'completed' || p.isVerified === 'verified' ? 'bg-green-500' :
+                  'bg-yellow-500';
+
+                return (
+                  <div key={idx} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all group relative overflow-hidden">
+                    {/* Card Top Border */}
+                    <div className={`absolute top-0 left-0 w-full h-1 ${statusColor}`}></div>
+                    
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                            #{p.propertyId}
+                        </div>
+                        <div className="flex gap-2">
+                            {p.isVerified === 'partial' && (
+                              <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Under Review</span>
+                            )}
+                            {p.verificationLogs?.length > 0 && (
+                              <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                  <FiTag className="w-2.5 h-2.5" /> Notes
+                              </span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="text-xl font-black text-slate-800 mb-2 truncate uppercase">
+                          {p.propertyType || 'Property'} Space - {p.microMarket || 'Location'}
+                        </h4>
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <FiMapPin className="shrink-0" />
+                            <p className="text-xs font-medium truncate italic">{p.address || `${p.city || ''}, ${p.state || ''}`}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                        <button 
+                          onClick={() => navigate(`/property/property-details/${p.propertyId}`)}
+                          className="text-xs font-black text-red-600 uppercase tracking-widest flex items-center gap-2 bg-red-50 px-4 py-2 rounded-xl hover:bg-red-100 transition-all"
+                        >
+                            <FiEye /> View Details
+                        </button>
+                        <div className="flex gap-2">
+                            {(!p.isVerified || p.isVerified === 'false') && (
+                              <button 
+                                onClick={(e) => handleVerify(e, p.propertyId)}
+                                className="px-4 py-2 bg-green-50 text-green-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-100 transition-all font-bold"
+                              >
+                                  Verify
+                              </button>
+                            )}
+                        </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-100">
+                  <FiActivity className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                  <p className="text-slate-400 font-bold uppercase tracking-widest">No matching properties found</p>
+              </div>
+            )}
+          </div>
+
+        ) : (
+          /* Table View */
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 p-2">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-50 uppercase">
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Property ID</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Property Name</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Address</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Status</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Notes</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 tracking-widest">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filteredProperties.map((p, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-5">
+                        <span className="text-xs font-black text-red-600 uppercase tracking-widest">#{p.propertyId}</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="text-sm font-black text-slate-700 uppercase tracking-tight">{p.propertyType || 'Lakeside Villa'}</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="text-xs font-bold text-slate-400 italic">{p.city || 'Beverly Hills, CA'}</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-[10px] font-black uppercase tracking-widest">Yet to Verify</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="text-xs font-bold text-red-500">{idx % 2 === 0 ? '2 New' : 'No notes'}</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex gap-2">
+                          <button className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all" title="Notes"><FiMessageSquare size={14} /></button>
+                          <button className="p-2 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition-all font-bold" title="Reassign">Reassign</button>
+                          <button 
+                            onClick={(e) => handleVerify(e, p.propertyId)}
+                            className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-all flex items-center gap-1 font-bold"
+                          >
+                            <FiCheck size={14} /> Verify
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Button for Mobile */}
+      <button 
+        onClick={() => navigate('/property/add-property')}
+        className="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center z-50 animate-bounce"
+      >
+        <FiPlus size={24} />
+      </button>
+    </div>
+  );
+};
+
+export default ExecutiveWorkBoard;

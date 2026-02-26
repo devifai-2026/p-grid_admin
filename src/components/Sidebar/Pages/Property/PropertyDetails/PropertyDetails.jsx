@@ -52,6 +52,8 @@ import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PropertyBrochure from "./PropertyBrochure";
+import { showSuccess, showError, showWarning, confirmAction } from "../../../../../helpers/swalHelper";
+
 
 // --- Helper Components ---
 
@@ -133,16 +135,20 @@ const PropertyDetails = () => {
   const isAdminOrSuperAdmin = ["Admin", "Super Admin"].includes(user?.role);
   const isSalesManager = user?.role === "Sales Manager";
   const canAssignProperty = isAdminOrSuperAdmin || isSalesManager;
-  const handleVerify = (e, propertyId) => {
+  const handleVerify = async (e, propertyId) => {
     e.stopPropagation();
-    if (!window.confirm("Are you sure you want to verify this property?"))
-      return;
+    const isConfirmed = await confirmAction(
+      "Verify Property?",
+      "Are you sure you want to verify this property?",
+      "Yes, verify it!"
+    );
+    if (!isConfirmed) return;
 
     apiCall.post({
       route: `/admin/properties/${propertyId}/verify`,
       onSuccess: (res) => {
         if (res.success) {
-          alert("Property verified successfully!");
+          showSuccess("Property verified successfully!");
           const updatedData = res.data;
           // Refresh the list
           if (!id || id === "undefined" || id === "null") {
@@ -167,25 +173,26 @@ const PropertyDetails = () => {
         }
       },
       onError: (err) => {
-        alert(err.message || "Failed to verify property");
+        showError(err.message || "Failed to verify property");
       },
     });
   };
 
-  const handleUnverify = (e, propertyId) => {
+
+  const handleUnverify = async (e, propertyId) => {
     e.stopPropagation();
-    if (
-      !window.confirm(
-        "Are you sure you want to remove your verification from this property?",
-      )
-    )
-      return;
+    const isConfirmed = await confirmAction(
+      "Remove Verification?",
+      "Are you sure you want to remove your verification from this property?",
+      "Yes, remove it!"
+    );
+    if (!isConfirmed) return;
 
     apiCall.delete({
       route: `/admin/properties/${propertyId}/verify`,
       onSuccess: (res) => {
         if (res.success) {
-          alert("Verification removed successfully!");
+          showSuccess("Verification removed successfully!");
           const updatedData = res.data;
           // Refresh the list
           if (!id || id === "undefined" || id === "null") {
@@ -210,10 +217,11 @@ const PropertyDetails = () => {
         }
       },
       onError: (err) => {
-        alert(err.message || "Failed to remove verification");
+        showError(err.message || "Failed to remove verification");
       },
     });
   };
+
 
   const fetchAssignableUsers = () => {
     apiCall.get({
@@ -238,9 +246,10 @@ const PropertyDetails = () => {
 
   const handleAssignSubmit = () => {
     if (!selectedUserId) {
-      alert("Please select a user to assign the property to.");
+      showWarning("Please select a user to assign the property to.");
       return;
     }
+
 
     setAssignLoading(true);
     apiCall.put({
@@ -249,7 +258,7 @@ const PropertyDetails = () => {
       onSuccess: (res) => {
         setAssignLoading(false);
         if (res.success) {
-          alert("Property assigned successfully!");
+          showSuccess("Property assigned successfully!");
           setIsAssignModalOpen(false);
           // Update local state
           const assignedUser = assignableUsers.find(
@@ -272,7 +281,7 @@ const PropertyDetails = () => {
       },
       onError: (err) => {
         setAssignLoading(false);
-        alert(err.message || "Failed to assign property");
+        showError(err.message || "Failed to assign property");
       },
     });
   };
@@ -402,7 +411,7 @@ const PropertyDetails = () => {
       },
       onError: (err) => {
         setIsSubmittingNote(false);
-        alert(err.message || "Failed to add note");
+        showError(err.message || "Failed to add note");
       },
     });
   };

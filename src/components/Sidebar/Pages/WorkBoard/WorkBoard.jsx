@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useAuth } from "../../../../context/AuthContext";
+import { showError, showSuccess } from "../../../../helpers/swalHelper";
+
 
 // Sub-components
 import AnalyticsSummary from "./components/AnalyticsSummary";
@@ -213,7 +215,7 @@ const WorkBoard = () => {
       },
       onError: (err) => {
         setAssignInquiryLoading(false);
-        alert(err.message || "Failed to assign inquiry");
+        showError(err.message || "Failed to assign inquiry");
       },
     });
   };
@@ -229,7 +231,7 @@ const WorkBoard = () => {
       },
       onError: (err) => {
         setAutoAssignLoading(null);
-        alert(err.message || "Failed to auto-assign inquiry");
+        showError(err.message || "Failed to auto-assign inquiry");
       },
     });
   };
@@ -246,11 +248,11 @@ const WorkBoard = () => {
         setAssignPropertyLoading(false);
         setIsAssignModalOpen(false);
         setRefreshKey((prev) => prev + 1);
-        alert("Property assigned successfully!");
+        showSuccess("Property assigned successfully!");
       },
       onError: (err) => {
         setAssignPropertyLoading(false);
-        alert(err.message || "Failed to assign property");
+        showError(err.message || "Failed to assign property");
       },
     });
   };

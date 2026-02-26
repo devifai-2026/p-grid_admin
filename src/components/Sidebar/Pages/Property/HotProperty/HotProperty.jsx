@@ -5,6 +5,8 @@ import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
 import PropertyCard from "../Common/PropertyCard";
 import VerificationFilter from "../Common/VerificationFilter";
+import { showSuccess, showError, confirmAction } from "../../../../../helpers/swalHelper";
+
 
 const HotProperty = () => {
   const navigate = useNavigate();
@@ -54,47 +56,53 @@ const HotProperty = () => {
     return () => clearTimeout(timer);
   }, [verificationFilter]);
 
-  const handleVerify = (e, propertyId) => {
+  const handleVerify = async (e, propertyId) => {
     e.stopPropagation();
-    if (!window.confirm("Are you sure you want to verify this property?"))
-      return;
+    const isConfirmed = await confirmAction(
+      "Verify Property?",
+      "Are you sure you want to verify this property?",
+      "Yes, verify it!"
+    );
+    if (!isConfirmed) return;
 
     apiCall.post({
       route: `/admin/properties/${propertyId}/verify`,
       onSuccess: (res) => {
         if (res.success) {
-          alert("Property verified successfully!");
+          showSuccess("Property verified successfully!");
           fetchHotProperties(pagination.currentPage); // Refresh list
         }
       },
       onError: (err) => {
-        alert(err.message || "Failed to verify property");
+        showError(err.message || "Failed to verify property");
       },
     });
   };
 
-  const handleUnverify = (e, propertyId) => {
+
+  const handleUnverify = async (e, propertyId) => {
     e.stopPropagation();
-    if (
-      !window.confirm(
-        "Are you sure you want to remove your verification from this property?",
-      )
-    )
-      return;
+    const isConfirmed = await confirmAction(
+      "Remove Verification?",
+      "Are you sure you want to remove your verification from this property?",
+      "Yes, remove it!"
+    );
+    if (!isConfirmed) return;
 
     apiCall.delete({
       route: `/admin/properties/${propertyId}/verify`,
       onSuccess: (res) => {
         if (res.success) {
-          alert("Verification removed successfully!");
+          showSuccess("Verification removed successfully!");
           fetchHotProperties(pagination.currentPage); // Refresh list
         }
       },
       onError: (err) => {
-        alert(err.message || "Failed to remove verification");
+        showError(err.message || "Failed to remove verification");
       },
     });
   };
+
 
   if (loading && propertyList.length === 0) {
     return (

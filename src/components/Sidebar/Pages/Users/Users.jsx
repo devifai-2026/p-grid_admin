@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { useUserStorage } from "../../../../helpers/useUserStorage";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
+import { showWarning, showError, confirmAction } from "../../../../helpers/swalHelper";
+
 
 // Sub-components
 import UserHeader from "./components/UserHeader";
@@ -158,14 +160,20 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     const userToDelete = users.find((u) => u.userId === userId);
     if (userToDelete?.role === "Super Admin") {
-      alert("Super Admin accounts cannot be deleted.");
+      showWarning("Super Admin accounts cannot be deleted.");
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this user?")) {
+    const isConfirmed = await confirmAction(
+      "Are you sure?",
+      "You are about to delete this user!",
+      "Yes, delete it!"
+    );
+
+    if (isConfirmed) {
       apiCall.delete({
         route: `/admin/users/${userId}`,
         onSuccess: () => {
@@ -175,11 +183,12 @@ const Users = () => {
           setUsers((prev) => prev.filter((u) => u.userId !== userId));
         },
         onError: (err) => {
-          alert(err.message || "Failed to delete user");
+          showError(err.message || "Failed to delete user");
         },
       });
     }
   };
+
 
   const handleSaveUser = (e) => {
     e.preventDefault();
@@ -190,10 +199,11 @@ const Users = () => {
       formData.roleName.startsWith("Sales Executive") &&
       !formData.salesManagerId
     ) {
-      alert("Please select a Sales Manager for the Sales Executive.");
+      showWarning("Please select a Sales Manager for the Sales Executive.");
       setActionLoading(false);
       return;
     }
+
 
     const payload = { ...formData };
 
@@ -216,8 +226,9 @@ const Users = () => {
         },
         onError: (err) => {
           setActionLoading(false);
-          alert(err.message || "Failed to update user");
+          showError(err.message || "Failed to update user");
         },
+
       });
     } else {
       apiCall.post({
@@ -232,8 +243,9 @@ const Users = () => {
         },
         onError: (err) => {
           setActionLoading(false);
-          alert(err.message || "Failed to create user");
+          showError(err.message || "Failed to create user");
         },
+
       });
     }
   };

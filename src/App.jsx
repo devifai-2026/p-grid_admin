@@ -29,8 +29,12 @@ import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
+import ExecutiveWorkBoard from "./components/Sidebar/Pages/WorkBoard/ExecutiveWorkBoard";
 import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
+
 import HelpandSupport from "./components/Sidebar/Pages/HelpandSupport/HelpandSupport";
+
+import ExecutiveAnalytics from "./components/Sidebar/Pages/Dashboard/NewAnalytics/ExecutiveAnalytics";
 
 // Auth Imports
 import Login from "./components/auth/login";
@@ -66,7 +70,7 @@ const AppRoutes = () => {
       r.includes("property dealer") ||
       role === "Sales Executive - Property Manager"
     )
-      return "/dashboard/sales-board";
+      return "/dashboard/workboard";
     if (r === "admin" || r === "super admin") return "/dashboard/work-board";
     return "/property/property-details";
   };
@@ -99,6 +103,8 @@ const AppRoutes = () => {
             element={
               user?.role === "Sales Manager" ? (
                 <Analytics />
+              ) : user?.role === "Sales Executive - Property Manager" ? (
+                <ExecutiveAnalytics />
               ) : (
                 <Navigate to={getRedirectPath(user?.role)} replace />
               )
@@ -115,7 +121,9 @@ const AppRoutes = () => {
             path="/dashboard/agent/client-dealer"
             element={<SalesAgents />}
           />
+          <Route path="/dashboard/workboard" element={<ExecutiveWorkBoard />} />
           <Route path="/dashboard/sales-board" element={<SalesBoard />} />
+
           <Route path="/dashboard/property-notes" element={<PropertyNotes />} />
 
           {/* Properties */}

@@ -7,6 +7,8 @@ import LegalDetails from './components/LegalDetails';
 import LeaseDetails from './components/LeaseDetails';
 import FinancialDetails from './components/FinancialDetails';
 import { usePropertyAPIs } from '../../../../../helpers/hooks/usePropertyAPIs';
+import { showSuccess, showError } from '../../../../../helpers/swalHelper';
+
 
 const STEPS = [
   { id: 1, title: 'Personal Details', component: PersonalDetails },
@@ -214,20 +216,20 @@ const AddProperty = () => {
         apiFormData,
         (response) => {
           setLoading(false);
-          alert('Property Listed Successfully!');
+          showSuccess('Property Listed Successfully!');
           navigate('/property/view-property'); // Redirect to list page
         },
         (error) => {
           setLoading(false);
           console.error('Submission error:', error);
-          alert(error?.message || 'Failed to list property. Please try again.');
+          showError(error?.message || 'Failed to list property. Please try again.');
         }
       );
 
     } catch (error) {
       setLoading(false);
       console.error('Error submitting property:', error);
-      alert('An unexpected error occurred.');
+      showError('An unexpected error occurred.');
     }
   };
 

@@ -10,8 +10,9 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
-
+import { confirmAction } from "../../../../helpers/swalHelper";
 import { useNotifications } from "../../../../context/NotificationContext";
+
 
 const AllNotifications = () => {
   const navigate = useNavigate();
@@ -87,7 +88,12 @@ const AllNotifications = () => {
   };
 
   const handleClearAll = async () => {
-    if (window.confirm("Are you sure you want to clear all notifications?")) {
+    const isConfirmed = await confirmAction(
+      "Clear All Notifications?",
+      "Are you sure you want to clear all notifications?",
+      "Yes, clear all!"
+    );
+    if (isConfirmed) {
       try {
         apiCall.delete({
           route: "/admin/notifications/clear-all",
@@ -102,6 +108,7 @@ const AllNotifications = () => {
       }
     }
   };
+
 
   const handleDelete = async (id) => {
     try {

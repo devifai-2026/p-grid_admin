@@ -9,8 +9,10 @@ import {
   FiBriefcase,
 } from "react-icons/fi";
 import { apiCall } from "../../helpers/apicall/apiCall";
+import { showToast } from "../../helpers/swalHelper";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -68,7 +70,7 @@ const SignUp = () => {
             verificationId: res.data.verificationId,
           }));
           setShowOtpField(true);
-          alert("OTP sent to your mobile number");
+          showToast("success", "OTP sent to your mobile number");
         } else {
           setError(res.message || "Failed to send OTP");
         }
