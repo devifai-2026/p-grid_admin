@@ -27,59 +27,77 @@ import { useNavigate } from "react-router-dom";
 const ExecutiveAnalytics = () => {
   const { user } = useUserStorage();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [updatingData, setUpdatingData] = useState(false);
   const [timeframe, setTimeframe] = useState("This Month");
   const [data, setData] = useState({
-    summary: { total: 5832, partial: 1247, pending: 892, completed: 3421 },
-    trends: [
-      { month: 'JAN', onboarding: 180, reassigned: 60, verified: 120, partial: 40 },
-      { month: 'FEB', onboarding: 210, reassigned: 90, verified: 150, partial: 70 },
-      { month: 'MAR', onboarding: 160, reassigned: 70, verified: 130, partial: 110 },
-      { month: 'APR', onboarding: 220, reassigned: 140, verified: 180, partial: 80 },
-      { month: 'MAY', onboarding: 190, reassigned: 110, verified: 140, partial: 120 },
-      { month: 'JUN', onboarding: 240, reassigned: 150, verified: 210, partial: 150 },
-      { month: 'JUL', onboarding: 220, reassigned: 130, verified: 190, partial: 130 },
-    ],
+    summary: { total: 0, partial: 0, pending: 0, completed: 0 },
+    trends: [],
     updates: [],
-    ranking: [
-      { name: "Sarah Johnson", props: 1247, icon: "👑" },
-      { name: "Michael Chen", props: 1156, icon: "🥈" },
-      { name: "You", props: 1012, icon: "🥉", isUser: true },
-      { name: "David Williams", props: 989, icon: "4" },
-      { name: "Lisa Rodriguez", props: 954, icon: "5" },
-    ],
-    locations: [
-      { name: "Downtown", count: 2450, percentage: 90, color: "bg-red-500" },
-      { name: "Suburbs", count: 1890, percentage: 70, color: "bg-orange-500" },
-      { name: "Rural Areas", count: 1150, percentage: 40, color: "bg-green-600" },
-      { name: "Coastal Region", count: 1590, percentage: 60, color: "bg-red-400" },
-    ]
+    ranking: [],
+    locations: [],
+    averageDaysToVerify: "0.0",
+    verificationMetrics: {
+      avgDays: "0.0",
+      diff: 0,
+      isFaster: true,
+      target: 5.0,
+    },
+    userRank: {
+      rank: "0",
+      props: 0,
+      propsToNext: 0,
+    },
   });
 
-  const fetchAnalytics = () => {
-    setLoading(true);
+  const fetchAnalytics = (isInitial = false) => {
+    if (isInitial) setPageLoading(true);
+    else setUpdatingData(true);
+
     apiCall.get({
       route: `/admin/analytics?timeframe=${timeframe}`,
       onSuccess: (res) => {
-        setLoading(false);
+        setPageLoading(false);
+        setUpdatingData(false);
         if (res.success && res.data) {
-          setData(prev => ({
+          // Identify "You" in ranking
+          const updatedRanking = (res.data.ranking || []).map((r) => ({
+            ...r,
+            isUser: r.userId === user?.userId,
+            name: r.userId === user?.userId ? "You" : r.name,
+          }));
+
+          setData((prev) => ({
             ...prev,
             summary: res.data.summary || prev.summary,
             trends: res.data.trends || prev.trends,
             updates: res.data.updates || prev.updates,
+            ranking: updatedRanking,
+            locations: res.data.locations || prev.locations,
+            verificationMetrics:
+              res.data.verificationMetrics || prev.verificationMetrics,
+            userRank: res.data.userRank || prev.userRank,
+            averageDaysToVerify:
+              res.data.verificationMetrics?.avgDays || prev.averageDaysToVerify,
           }));
         }
       },
       onError: (err) => {
-        setLoading(false);
+        setPageLoading(false);
+        setUpdatingData(false);
         console.error("Analytics fetch error:", err);
       },
     });
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    fetchAnalytics(true);
+  }, []);
+
+  useEffect(() => {
+    if (!pageLoading) {
+      fetchAnalytics(false);
+    }
   }, [timeframe]);
 
   const formatRelativeTime = (dateString) => {
@@ -96,69 +114,119 @@ const ExecutiveAnalytics = () => {
     return `${diffInDays}d ago`;
   };
 
+  if (pageLoading) {
+    return <AnalyticsSkeleton />;
+  }
+
   return (
-    <div className="p-2 bg-[#FDFEFE] min-h-screen">
+    <div
+      className={`p-2 bg-[#FDFEFE] min-h-screen transition-opacity duration-500 ${updatingData ? "opacity-60 pointer-events-none" : "opacity-100"}`}
+    >
+      {updatingData && (
+        <div className="fixed top-20 right-10 z-[100] flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-slate-100 animate-pulse">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Updating Analytics...
+          </span>
+        </div>
+      )}
       <div className="max-w-[1600px] mx-auto space-y-8">
-        
         {/* Top Summary Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <TopStatCard 
-            title="Partial Property" 
-            value={data.summary.partial.toLocaleString()} 
-            icon={<div className="p-2 bg-orange-50 rounded-lg"><FiClock className="text-orange-400" /></div>}
+          <TopStatCard
+            title="Partial Property"
+            value={data.summary.partial.toLocaleString()}
+            icon={
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <FiClock className="text-orange-400" />
+              </div>
+            }
             imageIcon="https://cdn-icons-png.flaticon.com/512/1055/1055644.png"
           />
-          <TopStatCard 
-            title="Total Property" 
-            value={data.summary.total.toLocaleString()} 
-            icon={<div className="p-2 bg-blue-50 rounded-lg"><FiHome className="text-blue-400" /></div>}
+          <TopStatCard
+            title="Total Property"
+            value={data.summary.total.toLocaleString()}
+            icon={
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <FiHome className="text-blue-400" />
+              </div>
+            }
             imageIcon="https://cdn-icons-png.flaticon.com/512/619/619153.png"
           />
-          <TopStatCard 
-            title="Pending Property" 
-            value={data.summary.pending.toLocaleString()} 
-            icon={<div className="p-2 bg-yellow-50 rounded-lg"><FiAlertCircle className="text-yellow-400" /></div>}
+          <TopStatCard
+            title="Pending Property"
+            value={data.summary.pending.toLocaleString()}
+            icon={
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <FiAlertCircle className="text-yellow-400" />
+              </div>
+            }
             imageIcon="https://cdn-icons-png.flaticon.com/512/2972/2972531.png"
           />
-          <TopStatCard 
-            title="Verified Property" 
-            value={data.summary.completed.toLocaleString()} 
-            icon={<div className="p-2 bg-green-50 rounded-lg"><FiCheckCircle className="text-green-400" /></div>}
+          <TopStatCard
+            title="Verified Property"
+            value={data.summary.completed.toLocaleString()}
+            icon={
+              <div className="p-2 bg-green-50 rounded-lg">
+                <FiCheckCircle className="text-green-400" />
+              </div>
+            }
             imageIcon="https://cdn-icons-png.flaticon.com/512/190/190411.png"
           />
         </div>
 
         {/* Middle Row: Metrics, Ranking, Locations */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Average Days to Verify */}
           <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between min-h-[400px]">
             <div>
               <div className="flex items-center gap-2 mb-8">
                 <FiCalendar className="text-blue-500" />
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Average Days to Verify</h3>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  Average Days to Verify
+                </h3>
               </div>
               <div className="space-y-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-slate-800">4.5</span>
+                  <span className="text-5xl font-black text-slate-800">
+                    {data.averageDaysToVerify}
+                  </span>
                   <span className="text-lg font-bold text-slate-400">days</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-green-500 flex items-center bg-green-50 px-2 py-0.5 rounded-full">
-                    <FiTrendingUp className="mr-1" /> 0.8 days
+                  <span
+                    className={`text-xs font-bold ${data.verificationMetrics.isFaster ? "text-green-500 bg-green-50" : "text-red-500 bg-red-50"} flex items-center px-2 py-0.5 rounded-full`}
+                  >
+                    <FiTrendingUp
+                      className={`mr-1 ${data.verificationMetrics.isFaster ? "" : "rotate-180"}`}
+                    />{" "}
+                    {data.verificationMetrics.diff} days
                   </span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">from last month</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    from last month
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex justify-between items-end">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Target: 5 days</span>
-                <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded-md">10% FASTER</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Target: {data.verificationMetrics.target} days
+                </span>
+                <span
+                  className={`text-[10px] font-black ${data.verificationMetrics.isFaster ? "text-green-500 bg-green-50" : "text-orange-500 bg-orange-50"} px-2 py-1 rounded-md`}
+                >
+                  {data.verificationMetrics.isFaster ? "FASTER" : "BEHIND"}
+                </span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-red-500 w-[90%] rounded-full shadow-lg shadow-red-100"></div>
+                <div
+                  className={`h-full ${data.verificationMetrics.isFaster ? "bg-green-500" : "bg-orange-500"} rounded-full shadow-lg transition-all duration-1000`}
+                  style={{
+                    width: `${Math.min(100, (data.verificationMetrics.target / (parseFloat(data.averageDaysToVerify) || 1)) * 100)}%`,
+                  }}
+                ></div>
               </div>
             </div>
           </div>
@@ -167,31 +235,85 @@ const ExecutiveAnalytics = () => {
           <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 min-h-[400px]">
             <div className="flex items-center gap-2 mb-6">
               <FiAward className="text-orange-400" />
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Ranking</h3>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                Executive Ranking
+              </h3>
             </div>
-            
+
             <div className="bg-red-50/50 p-4 rounded-2xl flex items-center justify-between mb-8 border border-red-50">
-              <span className="text-sm font-bold text-slate-700">Your Rank</span>
+              <span className="text-sm font-bold text-slate-700">
+                Your Rank
+              </span>
               <div className="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center font-black shadow-lg shadow-red-200 text-lg">
-                #3
+                #{data.userRank.rank}
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {data.ranking.map((rank, idx) => (
-                <div key={idx} className={`flex items-center justify-between ${rank.isUser ? 'scale-105 transform translate-x-2 transition-all' : ''}`}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg w-6 text-center">{rank.icon}</span>
-                    <span className={`text-sm font-bold ${rank.isUser ? 'text-red-600' : 'text-slate-600'}`}>{rank.name}</span>
+                <div
+                  key={idx}
+                  className={`flex items-center justify-between p-2 rounded-2xl transition-all ${
+                    rank.isUser
+                      ? "bg-red-50/50 border border-red-100/50 shadow-sm"
+                      : "hover:bg-slate-50 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-sm ${
+                        idx === 0
+                          ? "bg-yellow-100 text-yellow-600"
+                          : idx === 1
+                            ? "bg-slate-100 text-slate-500"
+                            : idx === 2
+                              ? "bg-orange-100 text-orange-600"
+                              : "bg-slate-50 text-slate-400"
+                      }`}
+                    >
+                      {idx === 0
+                        ? "1st"
+                        : idx === 1
+                          ? "2nd"
+                          : idx === 2
+                            ? "3rd"
+                            : idx + 1}
+                    </div>
+                    <div className="flex flex-col">
+                      <span
+                        className={`text-[13px] font-bold ${rank.isUser ? "text-red-700 font-black" : "text-slate-700"}`}
+                      >
+                        {rank.name}
+                      </span>
+                      {rank.isUser && (
+                        <span className="text-[9px] font-black text-red-400 uppercase tracking-widest leading-none">
+                          Active
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-xs font-black text-slate-800">{rank.props.toLocaleString()} props</span>
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-black ${rank.isUser ? "text-red-600" : "text-slate-800"}`}
+                    >
+                      {rank.props.toLocaleString()}
+                    </p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                      Properties
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="mt-8 pt-4 border-t border-slate-50 text-center">
               <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest flex items-center justify-center gap-2">
-                <FiZap /> 144 properties to reach #2
+                <FiZap />{" "}
+                {data.userRank.propsToNext > 0
+                  ? `${data.userRank.propsToNext} properties to reach #${data.userRank.rank - 1}`
+                  : data.userRank.rank === 1
+                    ? "You are the top performer!"
+                    : "Keep up the great work!"}
               </p>
             </div>
           </div>
@@ -200,18 +322,27 @@ const ExecutiveAnalytics = () => {
           <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 min-h-[400px]">
             <div className="flex items-center gap-2 mb-8">
               <FiMapPin className="text-red-500" />
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Properties by Location</h3>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                Properties by Location
+              </h3>
             </div>
 
             <div className="space-y-8">
               {data.locations.map((loc, idx) => (
                 <div key={idx} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-600">{loc.name}</span>
-                    <span className="text-xs font-black text-slate-800">{loc.count.toLocaleString()}</span>
+                    <span className="text-xs font-bold text-slate-600">
+                      {loc.name}
+                    </span>
+                    <span className="text-xs font-black text-slate-800">
+                      {loc.count.toLocaleString()}
+                    </span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className={`h-full ${loc.color} rounded-full transition-all duration-1000`} style={{ width: `${loc.percentage}%` }}></div>
+                    <div
+                      className={`h-full ${loc.color} rounded-full transition-all duration-1000`}
+                      style={{ width: `${loc.percentage}%` }}
+                    ></div>
                   </div>
                 </div>
               ))}
@@ -219,11 +350,13 @@ const ExecutiveAnalytics = () => {
 
             <div className="mt-12 flex items-center justify-between">
               <div className="text-[10px] font-bold text-blue-500 uppercase flex items-center gap-1">
-                <div className="w-4 h-4 bg-blue-100 rounded text-blue-600 flex items-center justify-center">🏙️</div>
-                4 regions active
+                <div className="w-4 h-4 bg-blue-100 rounded text-blue-600 flex items-center justify-center">
+                  🏙️
+                </div>
+                {data.locations.length} regions active
               </div>
               <div className="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full uppercase">
-                Hotspot: Downtown
+                Hotspot: {data.locations[0]?.name || "N/A"}
               </div>
             </div>
           </div>
@@ -231,15 +364,18 @@ const ExecutiveAnalytics = () => {
 
         {/* Bottom Row: Trends & Updates */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
-          
           {/* Property Onboarding Trends */}
           <div className="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-50">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">📊</div>
-                <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Property Onboarding Trends</h3>
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  📊
+                </div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                  Property Onboarding Trends
+                </h3>
               </div>
-              
+
               <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
                 {["This Month", "Last 6 Months", "This Year"].map((t) => (
                   <button
@@ -267,25 +403,53 @@ const ExecutiveAnalytics = () => {
             <div className="h-[350px] w-full mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.trends}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F8FAFC" />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false} 
-                    tickLine={false} 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#F8FAFC"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
                     tick={{ fill: "#94A3B8", fontSize: 10, fontWeight: 700 }}
                     dy={15}
                   />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
                     tick={{ fill: "#94A3B8", fontSize: 10, fontWeight: 700 }}
-                    domain={[0, 250]}
+                    domain={[0, "auto"]}
                   />
                   <Tooltip content={<CustomTrendsTooltip />} />
-                  <Line type="monotone" dataKey="onboarding" stroke="#EE2529" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#EE2529" }} />
-                  <Line type="monotone" dataKey="reassigned" stroke="#FF6B35" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#FF6B35" }} />
-                  <Line type="monotone" dataKey="verified" stroke="#2D6A4F" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#2D6A4F" }} />
-                  <Line type="monotone" dataKey="partial" stroke="#4A4E69" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#4A4E69" }} />
+                  <Line
+                    type="monotone"
+                    dataKey="onboarding"
+                    stroke="#EE2529"
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 0, fill: "#EE2529" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="reassigned"
+                    stroke="#FF6B35"
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 0, fill: "#FF6B35" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="verified"
+                    stroke="#2D6A4F"
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 0, fill: "#2D6A4F" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="partial"
+                    stroke="#4A4E69"
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 0, fill: "#4A4E69" }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -295,42 +459,57 @@ const ExecutiveAnalytics = () => {
           <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-50 flex flex-col">
             <div className="flex items-center gap-2 mb-8">
               <FiZap className="text-orange-500" />
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Quick Updates</h3>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                Quick Updates
+              </h3>
             </div>
 
             <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar max-h-[400px]">
-              {data.updates.length > 0 ? data.updates.map((update, idx) => (
-                <div key={idx} className="bg-slate-50/30 hover:bg-slate-50 border border-slate-50 p-4 rounded-3xl transition-all group">
-                  <div className="flex justify-between items-start gap-3">
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-slate-700 leading-relaxed mb-1">{update.notificationText}</p>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                        <FiClock size={10} /> {formatRelativeTime(update.createdAt)}
-                      </span>
+              {data.updates.length > 0 ? (
+                data.updates.map((update, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-slate-50/30 hover:bg-slate-50 border border-slate-50 p-4 rounded-3xl transition-all group"
+                  >
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-slate-700 leading-relaxed mb-1">
+                          {update.notificationText}
+                        </p>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                          <FiClock size={10} />{" "}
+                          {formatRelativeTime(update.createdAt)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/property/property-details/${update.propertyId}`,
+                          )
+                        }
+                        className="px-4 py-1.5 bg-red-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-md shadow-red-100"
+                      >
+                        View
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => navigate(`/property/property-details/${update.propertyId}`)}
-                      className="px-4 py-1.5 bg-red-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-md shadow-red-100"
-                    >
-                      View
-                    </button>
                   </div>
-                </div>
-              )) : (
-                <div className="space-y-4">
-                  <UpdateItem text="New property listing added in Downtown area" time="2 minutes ago" />
-                  <UpdateItem text="Property verification completed for Lakeside Residency" time="15 minutes ago" />
-                  <UpdateItem text="3 properties reassigned to senior executive" time="1 hour ago" />
-                  <UpdateItem text="Partial verification pending for 5 properties" time="3 hours ago" />
-                  <UpdateItem text="Monthly target achieved: 85% completion" time="5 hours ago" />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full py-10 text-slate-300">
+                  <FiClock size={48} className="mb-4 opacity-20" />
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    No recent updates
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-              <span className="text-[10px] font-black text-slate-400 uppercase">5 new updates</span>
-              <button 
-                onClick={() => navigate('/notifications')}
+              <span className="text-[10px] font-black text-slate-400 uppercase">
+                {data.updates.length} new updates
+              </span>
+              <button
+                onClick={() => navigate("/notifications")}
                 className="text-[10px] font-black text-red-500 hover:text-red-600 uppercase tracking-widest flex items-center gap-1"
               >
                 View all <FiArrowRight />
@@ -338,7 +517,6 @@ const ExecutiveAnalytics = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -348,11 +526,19 @@ const ExecutiveAnalytics = () => {
 const TopStatCard = ({ title, value, icon, imageIcon }) => (
   <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex items-center justify-between hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500 group relative overflow-hidden">
     <div className="space-y-2 z-10">
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
-      <h3 className="text-3xl font-black text-slate-800 tracking-tight">{value}</h3>
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+        {title}
+      </p>
+      <h3 className="text-3xl font-black text-slate-800 tracking-tight">
+        {value}
+      </h3>
     </div>
     <div className="relative z-10">
-      <img src={imageIcon} alt={title} className="w-12 h-12 object-contain opacity-80 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500" />
+      <img
+        src={imageIcon}
+        alt={title}
+        className="w-12 h-12 object-contain opacity-80 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500"
+      />
     </div>
     {/* Subtle decorative background circle */}
     <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-slate-50 rounded-full group-hover:scale-150 transition-all duration-700 opacity-50"></div>
@@ -361,15 +547,22 @@ const TopStatCard = ({ title, value, icon, imageIcon }) => (
 
 const TrendLegend = ({ color, label }) => (
   <div className="flex items-center gap-2">
-    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></div>
-    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
+    <div
+      className="w-2.5 h-2.5 rounded-full"
+      style={{ backgroundColor: color }}
+    ></div>
+    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+      {label}
+    </span>
   </div>
 );
 
 const UpdateItem = ({ text, time }) => (
   <div className="bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-100 p-4 rounded-3xl transition-all group flex justify-between items-center gap-4">
     <div className="flex-1 min-w-0">
-      <p className="text-[11px] font-bold text-slate-700 truncate mb-1">{text}</p>
+      <p className="text-[11px] font-bold text-slate-700 truncate mb-1">
+        {text}
+      </p>
       <span className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1">
         <FiClock size={10} /> {time}
       </span>
@@ -384,12 +577,24 @@ const CustomTrendsTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-50 min-w-[150px]">
-        <p className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 border-b border-slate-50 pb-2">{label}</p>
+        <p className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 border-b border-slate-50 pb-2">
+          {label}
+        </p>
         <div className="space-y-2">
           {payload.map((entry, index) => (
-            <div key={index} className="flex items-center justify-between gap-4">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">{entry.name}</span>
-              <span className="text-xs font-black" style={{ color: entry.color }}>{entry.value}</span>
+            <div
+              key={index}
+              className="flex items-center justify-between gap-4"
+            >
+              <span className="text-[10px] font-bold text-slate-400 uppercase">
+                {entry.name}
+              </span>
+              <span
+                className="text-xs font-black"
+                style={{ color: entry.color }}
+              >
+                {entry.value}
+              </span>
             </div>
           ))}
         </div>
@@ -398,5 +603,26 @@ const CustomTrendsTooltip = ({ active, payload, label }) => {
   }
   return null;
 };
+
+const AnalyticsSkeleton = () => (
+  <div className="p-8 bg-[#FDFEFE] min-h-screen space-y-8 animate-pulse">
+    <div className="max-w-[1600px] mx-auto space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 bg-slate-100 rounded-[2rem]"></div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-[400px] bg-slate-100 rounded-[2rem]"></div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 h-[450px] bg-slate-100 rounded-[3rem]"></div>
+        <div className="h-[450px] bg-slate-100 rounded-[3rem]"></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default ExecutiveAnalytics;
