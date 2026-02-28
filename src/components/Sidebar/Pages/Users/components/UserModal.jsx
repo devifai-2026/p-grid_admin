@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiUser, FiInfo, FiCheckCircle, FiShield } from "react-icons/fi";
+import {
+  FiX,
+  FiUser,
+  FiInfo,
+  FiCheckCircle,
+  FiShield,
+  FiEdit2,
+} from "react-icons/fi";
+import { apiCall } from "../../../../../helpers/apicall/apiCall";
+import { showWarning, showError } from "../../../../../helpers/swalHelper";
 
 const UserModal = ({
   isOpen,
@@ -15,6 +24,90 @@ const UserModal = ({
   isSalesManager,
   salesManagers,
 }) => {
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const [mobileStep, setMobileStep] = useState("phone"); // phone, otp
+  const [newMobile, setNewMobile] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verificationId, setVerificationId] = useState("");
+  const [mobileApiLoading, setMobileApiLoading] = useState(false);
+  const [mobileApiError, setMobileApiError] = useState("");
+
+  const handleSendOtp = () => {
+    setMobileApiError("");
+    if (newMobile.length !== 10) {
+      setMobileApiError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    if (newMobile === formData.mobileNumber) {
+      setMobileApiError("New mobile number must be different from current one");
+      return;
+    }
+    setMobileApiLoading(true);
+    // Note: Route to 'userrouter' might be unauthenticated if public
+    apiCall.post({
+      route: "/send-otp",
+      payload: { mobileNumber: newMobile },
+      onSuccess: (res) => {
+        setMobileApiLoading(false);
+        if (res.success && res.data?.verificationId) {
+          setVerificationId(res.data.verificationId);
+          setMobileStep("otp");
+          setMobileApiError("");
+        } else {
+          setMobileApiError(res.message || "Failed to send OTP");
+        }
+      },
+      onError: (err) => {
+        setMobileApiLoading(false);
+        setMobileApiError(
+          err?.response?.data?.message || err?.message || "Failed to send OTP",
+        );
+      },
+    });
+  };
+
+  const handleChangeMobile = () => {
+    setMobileApiError("");
+    if (otp.length < 6) {
+      setMobileApiError("Please enter a valid OTP");
+      return;
+    }
+    setMobileApiLoading(true);
+    apiCall.patch({
+      route: `/change-mobile`,
+      payload: {
+        newMobileNumber: newMobile,
+        otp,
+        verificationId,
+        userId: editingId,
+      },
+      onSuccess: (res) => {
+        setMobileApiLoading(false);
+        if (res.success) {
+          setIsMobileModalOpen(false);
+          setMobileStep("phone");
+          setNewMobile("");
+          setOtp("");
+          setMobileApiError("");
+          // Update the input field in parent so it saves the new number eventually if they click update
+          handleInputChange({
+            target: { name: "mobileNumber", value: newMobile },
+          });
+        } else {
+          setMobileApiError(res.message || "Failed to update mobile number");
+        }
+      },
+      onError: (err) => {
+        setMobileApiLoading(false);
+        setMobileApiError(
+          err?.data?.message ||
+            err?.message ||
+            "Failed to update mobile number",
+        );
+      },
+    });
+  };
+
   const content = (
     <AnimatePresence>
       {isOpen && (
@@ -155,17 +248,34 @@ const UserModal = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
-                      Mobile Number
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex justify-between items-center w-full">
+                      <span>Mobile Number</span>
+                      {editingId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileStep("phone");
+                            setNewMobile("");
+                            setOtp("");
+                            setMobileApiError("");
+                            setIsMobileModalOpen(true);
+                          }}
+                          className="text-red-500 hover:text-red-600 flex items-center gap-1"
+                        >
+                          <FiEdit2 size={10} />{" "}
+                          <span className="text-[9px]">Change</span>
+                        </button>
+                      )}
                     </label>
                     <input
                       type="text"
                       name="mobileNumber"
                       value={formData.mobileNumber}
-                      onChange={handleInputChange}
+                      onChange={editingId ? undefined : handleInputChange}
+                      readOnly={!!editingId}
                       required
                       maxLength={10}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold"
+                      className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold ${editingId ? "opacity-70 cursor-not-allowed" : ""}`}
                       placeholder="9876543210"
                     />
                   </div>
@@ -289,6 +399,118 @@ const UserModal = ({
               </motion.div>
             </form>
           </motion.div>
+
+          {/* Sub Modal for Mobile Number Change */}
+          <AnimatePresence>
+            {isMobileModalOpen && (
+              <div className="absolute inset-0 z-[100000] flex items-center justify-center">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileModalOpen(false)}
+                  className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden mx-4"
+                >
+                  <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 className="text-sm font-black uppercase tracking-widest">
+                      Change Mobile
+                    </h3>
+                    <button
+                      onClick={() => setIsMobileModalOpen(false)}
+                      className="text-slate-400 hover:text-white transition-colors"
+                    >
+                      <FiX size={18} />
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-4">
+                    {mobileStep === "phone" ? (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
+                          New Mobile Number
+                        </label>
+                        <input
+                          type="text"
+                          value={newMobile}
+                          onChange={(e) => setNewMobile(e.target.value)}
+                          maxLength={10}
+                          placeholder="Enter 10-digit number"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold"
+                        />
+                        {mobileApiError ? (
+                          <p className="text-red-500 text-xs font-semibold text-center mt-2">
+                            {mobileApiError}
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={mobileApiLoading}
+                          className="w-full py-3 bg-red-500 text-white flex items-center justify-center rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-all disabled:opacity-70 mt-4"
+                        >
+                          {mobileApiLoading ? (
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            "Send OTP"
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
+                          Enter OTP
+                        </label>
+                        <input
+                          type="text"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          maxLength={6}
+                          placeholder="Enter 6-digit OTP"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold tracking-[0.2em] text-center"
+                        />
+                        {mobileApiError ? (
+                          <p className="text-red-500 text-xs font-semibold text-center mt-2">
+                            {mobileApiError}
+                          </p>
+                        ) : null}
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMobileStep("phone");
+                              setMobileApiError("");
+                            }}
+                            className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                          >
+                            Back
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleChangeMobile}
+                            disabled={mobileApiLoading}
+                            className="w-full py-3 bg-green-500 text-white flex items-center justify-center rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-600 transition-all disabled:opacity-70"
+                          >
+                            {mobileApiLoading ? (
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              "Verify"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </AnimatePresence>
