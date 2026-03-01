@@ -348,6 +348,7 @@ const Users = () => {
         isAdminOrSuperAdmin={isAdminOrSuperAdmin}
         isSalesManager={isSalesManager}
         salesManagers={salesManagers}
+        refetch={() => setRefreshKey((prev) => prev + 1)}
       />
     </div>
   );

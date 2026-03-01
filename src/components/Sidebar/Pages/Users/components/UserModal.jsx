@@ -23,6 +23,7 @@ const UserModal = ({
   isAdminOrSuperAdmin,
   isSalesManager,
   salesManagers,
+  refetch,
 }) => {
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const [mobileStep, setMobileStep] = useState("phone"); // phone, otp
@@ -88,6 +89,7 @@ const UserModal = ({
           setMobileStep("phone");
           setNewMobile("");
           setOtp("");
+          refetch?.();
           setMobileApiError("");
           // Update the input field in parent so it saves the new number eventually if they click update
           handleInputChange({
