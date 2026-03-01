@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FiSearch,
   FiFilter,
@@ -29,6 +29,7 @@ import {
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../helpers/useUserStorage";
 import NotesAndActivityModal from "./NotesAndActivityModal";
+import AssignPropertyModal from "./components/AssignPropertyModal";
 
 const ExecutiveWorkBoard = () => {
   const navigate = useNavigate();
@@ -41,6 +42,14 @@ const ExecutiveWorkBoard = () => {
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [selectedPropertyForNotes, setSelectedPropertyForNotes] =
     useState(null);
+
+  // --- Assignment Modal States ---
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [targetProperty, setTargetProperty] = useState(null);
+  const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+  const [assignPropertyLoading, setAssignPropertyLoading] = useState(false);
 
   const fetchProperties = () => {
     setLoading(true);
@@ -62,6 +71,91 @@ const ExecutiveWorkBoard = () => {
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  const searchUsers = useCallback(async (term) => {
+    setSearchingUsers(true);
+    const params = {
+      roleName: "Sales Executive - Property Manager",
+      limit: 100,
+    };
+
+    if (term) {
+      params.search = term;
+      params.q = term;
+      params.query = term;
+    }
+
+    apiCall.get({
+      route: "/admin/users",
+      params,
+      onSuccess: (res) => {
+        setSearchingUsers(false);
+        if (res.success && res.data) {
+          let results = Array.isArray(res.data) ? res.data : [];
+          if (term) {
+            const tokens = term
+              .toLowerCase()
+              .trim()
+              .split(/\s+/)
+              .filter(Boolean);
+            results = results.filter((u) => {
+              const fullName =
+                `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+              const name = (u.name || "").toLowerCase();
+              const email = (u.email || "").toLowerCase();
+              return tokens.every(
+                (t) =>
+                  fullName.includes(t) || name.includes(t) || email.includes(t),
+              );
+            });
+          }
+          setUserSearchResults(results);
+        }
+      },
+      onError: () => {
+        setSearchingUsers(false);
+        console.error("User search failed");
+      },
+    });
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (userSearchTerm) {
+        searchUsers(userSearchTerm);
+      } else {
+        searchUsers("");
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [userSearchTerm, searchUsers]);
+
+  const openAssignModal = (prop) => {
+    setTargetProperty(prop);
+    setIsAssignModalOpen(true);
+    setUserSearchTerm("");
+    searchUsers("");
+  };
+
+  const handleAssignProperty = (propertyId, userId) => {
+    if (!userId) return;
+    if (targetProperty?.salesId === userId) return;
+    setAssignPropertyLoading(true);
+    apiCall.put({
+      route: `/admin/properties/${propertyId}/assign`,
+      payload: { userId },
+      onSuccess: () => {
+        setAssignPropertyLoading(false);
+        setIsAssignModalOpen(false);
+        fetchProperties();
+        showSuccess("Property reassigned successfully!");
+      },
+      onError: (err) => {
+        setAssignPropertyLoading(false);
+        showError(err.message || "Failed to reassign property");
+      },
+    });
+  };
 
   // Compute Real counts for KPIs and Pills
   const counts = useMemo(() => {
@@ -366,7 +460,13 @@ const ExecutiveWorkBoard = () => {
                         View Notes
                       </button>
                       <div className="flex gap-2">
-                        <button className="px-5 py-2.5 bg-[#FFF4E5] text-[#E67E22] rounded-full text-sm font-semibold hover:bg-[#FFE8CC] transition-all">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openAssignModal(p);
+                          }}
+                          className="px-5 py-2.5 bg-[#FFF4E5] text-[#E67E22] rounded-full text-sm font-semibold hover:bg-[#FFE8CC] transition-all"
+                        >
                           Reassign
                         </button>
                         {(!p.isVerified ||
@@ -514,6 +614,18 @@ const ExecutiveWorkBoard = () => {
           setSelectedPropertyForNotes(null);
         }}
         property={selectedPropertyForNotes}
+      />
+
+      <AssignPropertyModal
+        isAssignModalOpen={isAssignModalOpen}
+        setIsAssignModalOpen={setIsAssignModalOpen}
+        targetProperty={targetProperty}
+        userSearchTerm={userSearchTerm}
+        setUserSearchTerm={setUserSearchTerm}
+        searchingUsers={searchingUsers}
+        userSearchResults={userSearchResults}
+        assignPropertyLoading={assignPropertyLoading}
+        handleAssignProperty={handleAssignProperty}
       />
     </div>
   );
