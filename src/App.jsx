@@ -6,7 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import MainLayout from "./components/Layout/MainLayout";
 import PrivateRoute from "./helpers/PrivateRoute";
 
@@ -224,12 +224,10 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <ScrollToTop />
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <Router>
+      <ScrollToTop />
+      <AppRoutes />
+    </Router>
   );
 };
 

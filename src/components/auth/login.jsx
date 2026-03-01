@@ -101,7 +101,6 @@ const Login = ({ onLogin }) => {
       onSuccess: (res) => {
         setIsSubmitting(false);
         if (res.success) {
-          console.log("Login successful:", res.data);
           if (
             res.data.role === "Owner" ||
             res.data.role === "Broker" ||
