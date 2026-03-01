@@ -28,6 +28,7 @@ import {
 } from "../../../../helpers/swalHelper";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../helpers/useUserStorage";
+import NotesAndActivityModal from "./NotesAndActivityModal";
 
 const ExecutiveWorkBoard = () => {
   const navigate = useNavigate();
@@ -37,6 +38,9 @@ const ExecutiveWorkBoard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState([]);
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [selectedPropertyForNotes, setSelectedPropertyForNotes] =
+    useState(null);
 
   const fetchProperties = () => {
     setLoading(true);
@@ -300,68 +304,77 @@ const ExecutiveWorkBoard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {filteredProperties.length > 0 ? (
               filteredProperties.map((p, idx) => {
-                const statusColor =
-                  p.isVerified === "partial"
-                    ? "bg-blue-400"
-                    : p.isVerified === "completed" ||
-                        p.isVerified === "verified"
-                      ? "bg-green-500"
-                      : "bg-yellow-500";
-
                 return (
                   <div
                     key={idx}
-                    className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all group relative overflow-hidden"
+                    className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all relative overflow-hidden"
                   >
-                    {/* Card Top Border */}
-                    <div
-                      className={`absolute top-0 left-0 w-full h-1 ${statusColor}`}
-                    ></div>
-
-                    <div className="flex justify-between items-start mb-6">
+                    <div className="flex justify-between items-center mb-5">
                       <div className="flex gap-2">
-                        {p.isVerified === "partial" && (
-                          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                            Under Review
+                        {p.isVerified === "partial" &&
+                          p.updatedByRole !== "Owner" && (
+                            <span className="bg-blue-500 text-white shadow-md shadow-blue-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                              Under Review
+                            </span>
+                          )}
+                        {p.updatedByRole === "Owner" ? (
+                          <span className="bg-[#e05252] text-white shadow-md shadow-red-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                            <span role="img" aria-label="megaphone">
+                              📢
+                            </span>{" "}
+                            Owner Update
                           </span>
-                        )}
-                        {p.verificationLogs?.length > 0 && (
-                          <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <FiTag className="w-2.5 h-2.5" /> Notes
-                          </span>
+                        ) : (
+                          p.verificationLogs?.length > 0 && (
+                            <span className="bg-orange-500 text-white shadow-md shadow-orange-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                              <span role="img" aria-label="memo">
+                                📝
+                              </span>{" "}
+                              Notes Added
+                            </span>
+                          )
                         )}
                       </div>
                     </div>
 
                     <div className="mb-6">
-                      <h4 className="text-xl font-black text-slate-800 mb-2 truncate uppercase">
+                      <h4 className="text-[22px] font-bold text-slate-800 mb-2 truncate">
                         {p.propertyType || "Property"} Space -{" "}
                         {p.microMarket || "Location"}
                       </h4>
                       <div className="flex items-center gap-2 text-slate-400">
-                        <FiMapPin className="shrink-0" />
-                        <p className="text-xs font-medium truncate italic">
+                        <span className="text-[#e05252] flex-shrink-0 text-sm">
+                          📍
+                        </span>
+                        <p className="text-[15px] font-medium truncate text-slate-500">
                           {p.address || `${p.city || ""}, ${p.state || ""}`}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                    <div className="flex items-center justify-between pt-5 border-t border-slate-100/60">
                       <button
-                        onClick={() =>
-                          navigate(`/property/property-details/${p.propertyId}`)
-                        }
-                        className="text-xs font-black text-red-600 uppercase tracking-widest flex items-center gap-2 bg-red-50 px-4 py-2 rounded-xl hover:bg-red-100 transition-all"
+                        onClick={() => {
+                          setSelectedPropertyForNotes(p);
+                          setIsNotesModalOpen(true);
+                        }}
+                        className="text-sm font-semibold text-slate-600 flex items-center gap-2 border border-slate-200 bg-white px-5 py-2.5 rounded-full hover:bg-slate-50 transition-all shadow-sm"
                       >
-                        <FiEye /> View Details
+                        <span role="img" aria-label="memo">
+                          📝
+                        </span>{" "}
+                        View Notes
                       </button>
                       <div className="flex gap-2">
+                        <button className="px-5 py-2.5 bg-[#FFF4E5] text-[#E67E22] rounded-full text-sm font-semibold hover:bg-[#FFE8CC] transition-all">
+                          Reassign
+                        </button>
                         {(!p.isVerified ||
                           p.isVerified === "false" ||
                           p.isVerified === "pending") && (
                           <button
                             onClick={(e) => handleVerify(e, p.propertyId)}
-                            className="px-4 py-2 bg-green-50 text-green-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-100 transition-all font-bold"
+                            className="px-5 py-2.5 bg-[#E8F5E9] text-[#2E7D32] rounded-full text-sm font-semibold hover:bg-[#D4EED6] transition-all"
                           >
                             Verify
                           </button>
@@ -437,7 +450,15 @@ const ExecutiveWorkBoard = () => {
                         )}
                       </td>
                       <td className="px-6 py-5">
-                        <span className="text-xs font-bold text-slate-500">
+                        <span
+                          className="text-xs font-bold text-slate-500 cursor-pointer hover:text-red-500 transition-colors flex items-center gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPropertyForNotes(p);
+                            setIsNotesModalOpen(true);
+                          }}
+                        >
+                          <FiMessageSquare />
                           {p.verificationLogs?.length > 0
                             ? `${p.verificationLogs.length} Notes`
                             : "No notes"}
@@ -484,6 +505,16 @@ const ExecutiveWorkBoard = () => {
       >
         <FiPlus size={24} />
       </button>
+
+      {/* Modal */}
+      <NotesAndActivityModal
+        isOpen={isNotesModalOpen}
+        onClose={() => {
+          setIsNotesModalOpen(false);
+          setSelectedPropertyForNotes(null);
+        }}
+        property={selectedPropertyForNotes}
+      />
     </div>
   );
 };
