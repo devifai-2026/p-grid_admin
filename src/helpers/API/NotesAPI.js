@@ -52,9 +52,10 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
               updatedAt: record.updatedAt || record.createdAt || new Date().toISOString(),
               senderId: sId,
               senderName: senderName,
-              senderRole: senderRole,
+              senderRole: record.isOwnerNote ? "Client" : senderRole,
               status: record.status || "pending_review",
               isEdited: record.isEdited,
+              isOwnerNote: record.isOwnerNote || false,
               editedMessage: record.adminNote || null,
               adminName: record.approvedBy || record.updatedBy ? "Admin" : null,
               declineReason: record.status === "denied" ? "Admin declined the note" : undefined

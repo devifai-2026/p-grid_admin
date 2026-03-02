@@ -218,11 +218,13 @@ const NoteCard = ({ note, userRole, onAction, currentUserId }) => {
   return (
     <div
       className={`relative rounded-[20px] border transition-all ${
-        note.status === "denied"
-          ? "border-red-100 bg-red-50/30"
-          : note.status === "approved" || note.status === "edited_approved"
-            ? "border-emerald-100 bg-emerald-50/20"
-            : "border-amber-100 bg-amber-50/20"
+        note.isOwnerNote
+          ? "border-violet-100 bg-violet-50/20"
+          : note.status === "denied"
+            ? "border-red-100 bg-red-50/30"
+            : note.status === "approved" || note.status === "edited_approved"
+              ? "border-emerald-100 bg-emerald-50/20"
+              : "border-amber-100 bg-amber-50/20"
       } p-4`}
     >
       {/* Header row */}
@@ -243,7 +245,14 @@ const NoteCard = ({ note, userRole, onAction, currentUserId }) => {
             )}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <StatusBadge status={note.status} />
+            {note.isOwnerNote ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border bg-violet-50 text-violet-600 border-violet-200">
+                <FiMessageSquare size={11} />
+                Client Note
+              </span>
+            ) : (
+              <StatusBadge status={note.status} />
+            )}
             <span className="text-[11px] text-slate-400 font-medium">
               {formatTime(note.createdAt)}
             </span>
