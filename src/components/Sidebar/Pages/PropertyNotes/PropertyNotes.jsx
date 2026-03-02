@@ -176,7 +176,7 @@ const PropertyNotes = () => {
 
                   <div className="flex items-center justify-between">
                     <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {group.notes.length} {group.notes.length === 1 ? "Note" : "Notes"}
+                      {"Notes"}
                     </span>
                     <span className="text-[10px] text-gray-400 font-medium">
                       Last: {formatDate(group.latestDate)}
