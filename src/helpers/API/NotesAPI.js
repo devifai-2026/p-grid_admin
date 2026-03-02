@@ -43,21 +43,44 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
             const senderRole = (exec.roles && Array.isArray(exec.roles)) ? (exec.roles[0]?.roleName || "Sales") : (record.senderRole || "Sales");
             const sId = record.salesExecutiveId || record.sales_executive_id || exec.userId || rIdx;
 
-            const chatLog = Array.isArray(record.notes) ? record.notes : [];
-            chatLog.forEach((item, iIdx) => {
-              allChatItems.push({
-                id: item.id || item._id || `${sId}-${rIdx}-${iIdx}`,
-                note: item.note || (typeof item === 'string' ? item : ""),
-                message: item.note || item.message || "",
-                createdAt: item.createdAt || record.createdAt || new Date().toISOString(),
-                senderId: sId,
-                senderName: item.senderName || senderName,
-                senderRole: item.senderRole || senderRole,
-                status: item.status || "pending_review",
-              });
-            });
+            const chatItem = {
+              id: record.id || record._id || `${sId}-${rIdx}`,
+              note: record.originalNote || (typeof record.note === 'string' ? record.note : ""),
+              message: record.originalNote || (typeof record.note === 'string' ? record.note : ""),
+              createdAt: record.createdAt || new Date().toISOString(),
+              updatedAt: record.updatedAt || record.createdAt || new Date().toISOString(),
+              senderId: sId,
+              senderName: senderName,
+              senderRole: senderRole,
+              status: record.status || "pending_review",
+              isEdited: record.isEdited,
+              editedMessage: record.adminNote || null,
+              adminName: record.approvedBy || record.updatedBy ? "Admin" : null,
+              declineReason: record.status === "denied" ? "Admin declined the note" : undefined
+            };
+            allChatItems.push(chatItem);
           });
         }
+      }
+      
+      // Attempt 2: sometimes we might just get property objects in array (like from /notes/properties)
+      if (allChatItems.length === 0 && res.success && res.data && Array.isArray(res.data)) {
+         res.data.forEach((item, rIdx) => {
+           if (item.originalNote) {
+             allChatItems.push({
+                id: item.id || item._id || rIdx.toString(),
+                note: item.originalNote,
+                message: item.originalNote,
+                createdAt: item.createdAt || new Date().toISOString(),
+                updatedAt: item.updatedAt || item.createdAt || new Date().toISOString(),
+                status: item.status || "pending_review",
+                isEdited: item.isEdited,
+                editedMessage: item.adminNote || null,
+                senderRole: "Sales",
+                senderName: "Team Member"
+             });
+           }
+         });
       }
 
       console.log("[NotesAPI] FINAL CHAT ITEMS COUNT:", allChatItems.length);
@@ -71,13 +94,36 @@ export const submitNote = ({ propertyId, message, onSuccess, onError }) => {
   apiCall.post({
     route: `/properties/${propertyId}/notes`,
     payload: { 
-      notes: [{ note: message, createdAt: new Date().toISOString() }] 
+      notes: message 
     },
     onSuccess,
     onError,
   });
 };
 
-export const approveNote = (p) => p.onSuccess({ success: true, message: "Simulated Success" });
-export const declineNote = (p) => p.onSuccess({ success: true, message: "Simulated Success" });
-export const editAndApproveNote = (p) => p.onSuccess({ success: true, message: "Simulated Success" });
+export const approveNote = ({ propertyId, salesExecutiveId, onSuccess, onError }) => {
+  apiCall.patch({
+    route: `/notes/${propertyId}/review`,
+    payload: { action: "approve", salesExecutiveId },
+    onSuccess,
+    onError,
+  });
+};
+
+export const declineNote = ({ propertyId, salesExecutiveId, onSuccess, onError }) => {
+  apiCall.patch({
+    route: `/notes/${propertyId}/review`,
+    payload: { action: "deny", salesExecutiveId },
+    onSuccess,
+    onError,
+  });
+};
+
+export const editAndApproveNote = ({ propertyId, salesExecutiveId, message, onSuccess, onError }) => {
+  apiCall.patch({
+    route: `/notes/${propertyId}/review`,
+    payload: { action: "approve", salesExecutiveId, editedNote: message },
+    onSuccess,
+    onError,
+  });
+};

@@ -35,7 +35,7 @@ const ROLES = {
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const isAdminRole = (role) =>
   role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN;
-const isDealerRole = (role) => 
+const isDealerRole = (role) =>
   role === ROLES.DEALER || role === ROLES.PROPERTY_MANAGER;
 const isManagerRole = (role) => role === ROLES.SALES_MANAGER;
 
@@ -60,7 +60,7 @@ const getInitials = (name = "") =>
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  pending_review: {
+  pending: {
     label: "Pending Review",
     icon: <FiClock size={11} />,
     cls: "bg-amber-50 text-amber-600 border-amber-200",
@@ -72,7 +72,7 @@ const STATUS_CONFIG = {
     cls: "bg-emerald-50 text-emerald-600 border-emerald-200",
     dot: "bg-emerald-400",
   },
-  declined: {
+  denied: {
     label: "Declined",
     icon: <FiXCircle size={11} />,
     cls: "bg-red-50 text-red-500 border-red-200",
@@ -108,7 +108,7 @@ const RoleAvatar = ({ role, name }) => {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending_review;
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${cfg.cls}`}
@@ -120,28 +120,23 @@ const StatusBadge = ({ status }) => {
 };
 
 // ─── Single Note Card ─────────────────────────────────────────────────────────
-const NoteCard = ({
-  note,
-  propertyId,
-  userRole,
-  onAction,
-  currentUserId,
-}) => {
+const NoteCard = ({ note, propertyId, userRole, onAction, currentUserId }) => {
   const [editMode, setEditMode] = useState(false);
-  const [editedMsg, setEditedMsg] = useState(note.editedMessage || note.note || note.message || "");
+  const [editedMsg, setEditedMsg] = useState(
+    note.editedMessage || note.note || note.message || "",
+  );
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineInput, setShowDeclineInput] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
   const canAdmin = isAdminRole(userRole);
-  const showAdminActions =
-    canAdmin && note.status === "pending_review";
+  const showAdminActions = canAdmin && note.status === "pending";
 
   const handleApprove = () => {
     setActionLoading("approve");
     approveNote({
       propertyId,
-      noteId: note.id,
+      salesExecutiveId: note.senderId,
       onSuccess: (res) => {
         setActionLoading(null);
         if (res.success) {
@@ -153,7 +148,9 @@ const NoteCard = ({
       },
       onError: (err) => {
         setActionLoading(null);
-        showError(err?.data?.message || err?.message || "Failed to approve note");
+        showError(
+          err?.data?.message || err?.message || "Failed to approve note",
+        );
       },
     });
   };
@@ -166,12 +163,11 @@ const NoteCard = ({
     setActionLoading("decline");
     declineNote({
       propertyId,
-      noteId: note.id,
-      reason: declineReason,
+      salesExecutiveId: note.senderId,
       onSuccess: (res) => {
         setActionLoading(null);
         if (res.success) {
-          showSuccess("Note declined.");
+          showSuccess("Note denied.");
           setShowDeclineInput(false);
           onAction();
         } else {
@@ -180,7 +176,9 @@ const NoteCard = ({
       },
       onError: (err) => {
         setActionLoading(null);
-        showError(err?.data?.message || err?.message || "Failed to decline note");
+        showError(
+          err?.data?.message || err?.message || "Failed to decline note",
+        );
       },
     });
   };
@@ -193,7 +191,7 @@ const NoteCard = ({
     setActionLoading("edit-approve");
     editAndApproveNote({
       propertyId,
-      noteId: note.id,
+      salesExecutiveId: note.senderId,
       message: editedMsg,
       onSuccess: (res) => {
         setActionLoading(null);
@@ -207,22 +205,24 @@ const NoteCard = ({
       },
       onError: (err) => {
         setActionLoading(null);
-        showError(err?.data?.message || err?.message || "Failed to edit & approve note");
+        showError(
+          err?.data?.message || err?.message || "Failed to edit & approve note",
+        );
       },
     });
   };
 
   const isMyNote = note.senderId === currentUserId;
-  const cfg = STATUS_CONFIG[note.status] || STATUS_CONFIG.pending_review;
+  const cfg = STATUS_CONFIG[note.status] || STATUS_CONFIG.pending;
 
   return (
     <div
       className={`relative rounded-[20px] border transition-all ${
-        note.status === "declined"
+        note.status === "denied"
           ? "border-red-100 bg-red-50/30"
           : note.status === "approved" || note.status === "edited_approved"
-          ? "border-emerald-100 bg-emerald-50/20"
-          : "border-amber-100 bg-amber-50/20"
+            ? "border-emerald-100 bg-emerald-50/20"
+            : "border-amber-100 bg-amber-50/20"
       } p-4`}
     >
       {/* Header row */}
@@ -252,7 +252,7 @@ const NoteCard = ({
       </div>
 
       {/* Note message body */}
-      {note.status === "edited_approved" ? (
+      {note.isEdited ? (
         <div className="space-y-2">
           {/* Show original (struck through) */}
           <div className="bg-white rounded-xl p-3 border border-slate-100">
@@ -274,19 +274,22 @@ const NoteCard = ({
           </div>
           {note.adminName && (
             <p className="text-[11px] text-slate-400 font-medium">
-              Approved by <span className="text-slate-600 font-bold">{note.adminName}</span>{" "}
+              Approved by{" "}
+              <span className="text-slate-600 font-bold">{note.adminName}</span>{" "}
               · {formatTime(note.updatedAt)}
             </p>
           )}
         </div>
       ) : (
         <div className="bg-white rounded-xl p-3 border border-slate-100/80">
-          <p className="text-slate-700 text-sm leading-relaxed">{note.note || note.message}</p>
+          <p className="text-slate-700 text-sm leading-relaxed">
+            {note.note || note.message}
+          </p>
         </div>
       )}
 
       {/* Decline reason */}
-      {note.status === "declined" && note.declineReason && (
+      {note.status === "denied" && note.declineReason && (
         <div className="mt-2 bg-red-50 rounded-xl p-3 border border-red-100">
           <p className="text-[11px] text-red-500 font-bold mb-0.5 uppercase tracking-wider">
             Decline Reason
@@ -476,7 +479,10 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
           // If already flattened by API helper, res.data is an array
           // If not, it might be { property, notes, totalNotes }
           const received = res.data;
-          const finalArray = Array.isArray(received) ? received : (received?.notes || received?.managerNotes || []);
+          console.log(res);
+          const finalArray = Array.isArray(received)
+            ? received
+            : received?.notes || received?.managerNotes || [];
           console.log("[DEBUG] Final Notes for UI:", finalArray);
           setNotes(finalArray);
         } else {
@@ -524,7 +530,9 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
       },
       onError: (err) => {
         setSubmitting(false);
-        showError(err?.data?.message || err?.message || "Failed to submit note");
+        showError(
+          err?.data?.message || err?.message || "Failed to submit note",
+        );
       },
     });
   };
@@ -543,11 +551,11 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
 
   const tabCounts = {
     all: notes.length,
-    pending_review: notes.filter((n) => n.status === "pending_review").length,
+    pending: notes.filter((n) => n.status === "pending").length,
     approved: notes.filter(
-      (n) => n.status === "approved" || n.status === "edited_approved"
+      (n) => n.status === "approved" || n.status === "edited_approved",
     ).length,
-    declined: notes.filter((n) => n.status === "declined").length,
+    denied: notes.filter((n) => n.status === "denied").length,
   };
 
   if (!isOpen) return null;
@@ -575,7 +583,8 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
             {property && (
               <p className="text-xs text-slate-400 font-semibold ml-10">
                 {property.propertyType || "Property"} ·{" "}
-                {property.microMarket || property.city || "—"} (ID: {propertyId})
+                {property.microMarket || property.city || "—"} (ID: {propertyId}
+                )
               </p>
             )}
           </div>
@@ -609,10 +618,10 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
               isAdmin
                 ? "bg-purple-100 text-purple-700"
                 : isManager
-                ? "bg-blue-100 text-blue-700"
-                : canWrite
-                ? "bg-red-100 text-red-700"
-                : "bg-slate-100 text-slate-600"
+                  ? "bg-blue-100 text-blue-700"
+                  : canWrite
+                    ? "bg-red-100 text-red-700"
+                    : "bg-slate-100 text-slate-600"
             }`}
           >
             {userRole || "Viewer"}
@@ -625,12 +634,14 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
           )}
           {canWrite && (
             <span className="flex items-center gap-1 text-[11px] text-amber-500 font-medium">
-              <FiAlertCircle size={12} /> Notes need admin approval before reaching client
+              <FiAlertCircle size={12} /> Notes need admin approval before
+              reaching client
             </span>
           )}
           {isAdmin && (
             <span className="flex items-center gap-1 text-[11px] text-purple-500 font-medium">
-              <FiCheckCircle size={12} /> You can approve, edit & approve, or decline notes
+              <FiCheckCircle size={12} /> You can approve, edit & approve, or
+              decline notes
             </span>
           )}
         </div>
@@ -639,9 +650,9 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
         <div className="px-6 pt-3 pb-0 flex gap-1.5 shrink-0 border-b border-slate-50">
           {[
             { id: "all", label: "All" },
-            { id: "pending_review", label: "Pending" },
+            { id: "pending", label: "Pending" },
             { id: "approved", label: "Approved" },
-            { id: "declined", label: "Declined" },
+            { id: "denied", label: "Declined" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -730,17 +741,20 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
               </button>
             </div>
             <p className="text-[10px] text-slate-400 mt-2 font-medium">
-              {isAdmin ? "🛡️ Your note as Admin will be automatically approved." : "🛡️ This note will be reviewed by an Admin before it reaches the client."}
+              {isAdmin
+                ? "🛡️ Your note as Admin will be automatically approved."
+                : "🛡️ This note will be reviewed by an Admin before it reaches the client."}
             </p>
           </div>
         )}
 
         {/* ── Admin view info strip ── */}
-        {isAdmin && notes.filter((n) => n.status === "pending_review").length > 0 && (
+        {isAdmin && notes.filter((n) => n.status === "pending").length > 0 && (
           <div className="px-6 py-3 border-t border-amber-100 bg-amber-50/60 shrink-0">
             <p className="text-[11px] text-amber-600 font-bold flex items-center gap-2">
               <FiAlertCircle size={13} />
-              {notes.filter((n) => n.status === "pending_review").length} note(s) awaiting your review
+              {notes.filter((n) => n.status === "pending").length} note(s)
+              awaiting your review
             </p>
           </div>
         )}
