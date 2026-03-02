@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
 import {
-  FiFileText,
   FiMessageSquare,
-  FiCalendar,
   FiUser,
   FiMapPin,
-  FiSearch,
-  FiFilter,
   FiChevronRight,
-  FiHash,
 } from "react-icons/fi";
 import { MdOutlineNotes, MdVerified } from "react-icons/md";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../helpers/useUserStorage";
+import NotesAndActivityModal from "../WorkBoard/NotesAndActivityModal";
 
 const PropertyNotes = () => {
-  const navigate = useNavigate();
   const { user } = useUserStorage();
   const [loading, setLoading] = useState(true);
   const [notesData, setNotesData] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -55,11 +50,33 @@ const PropertyNotes = () => {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
+
+  // Group flat notes by propertyId
+  const grouped = useMemo(() => {
+    const map = {};
+    notesData.forEach((note) => {
+      const pid = note.propertyId;
+      if (!map[pid]) {
+        map[pid] = {
+          propertyId: pid,
+          property: note.property || {},
+          salesExecutive: note.salesExecutive || {},
+          notes: [],
+          latestDate: note.updatedAt || note.createdAt,
+        };
+      }
+      map[pid].notes.push(note);
+      // Track latest date
+      const noteDate = note.updatedAt || note.createdAt;
+      if (noteDate > map[pid].latestDate) {
+        map[pid].latestDate = noteDate;
+      }
+    });
+    return Object.values(map);
+  }, [notesData]);
 
   if (loading && notesData.length === 0) {
     return (
@@ -112,137 +129,88 @@ const PropertyNotes = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {notesData.map((record) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {grouped.map((group) => (
               <div
-                key={`${record.propertyId}-${record.salesExecutiveId}`}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col group"
+                key={group.propertyId}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
+                onClick={() =>
+                  setSelectedProperty({
+                    propertyId: group.propertyId,
+                    propertyType: group.property?.propertyType,
+                    microMarket: group.property?.microMarket,
+                    city: group.property?.city,
+                  })
+                }
               >
                 {/* Property Header */}
-                <div className="p-5 bg-gray-50 border-b border-gray-100 flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-white px-2 py-0.5 rounded text-[10px] font-black text-gray-400 border border-gray-200 uppercase tracking-tighter">
-                        #{record.propertyId.slice(-6).toUpperCase()}
-                      </span>
-                      {record.property?.isVerified === "completed" && (
-                        <div className="flex items-center gap-1 text-green-600 text-[10px] font-bold uppercase">
-                          <MdVerified size={12} /> Verified
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-black text-gray-900 truncate uppercase tracking-tight">
-                      {record.property?.microMarket || "Property Details"}
-                    </h3>
-                    <div className="flex items-center gap-1 text-gray-500 text-xs font-bold uppercase tracking-tighter">
-                      <FiMapPin className="text-[#EE2529]" />
-                      {record.property?.city}, {record.property?.state}
-                    </div>
+                <div className="p-5 bg-gray-50 border-b border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-white px-2 py-0.5 rounded text-[10px] font-black text-gray-400 border border-gray-200 uppercase tracking-tighter">
+                      #{group.propertyId.slice(-6).toUpperCase()}
+                    </span>
+                    {group.property?.isVerified === "completed" && (
+                      <div className="flex items-center gap-1 text-green-600 text-[10px] font-bold uppercase">
+                        <MdVerified size={12} /> Verified
+                      </div>
+                    )}
                   </div>
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/property/property-details/${record.propertyId}`,
-                      )
-                    }
-                    className="p-2 bg-white text-gray-400 hover:text-[#EE2529] hover:bg-red-50 rounded-xl transition-all shadow-sm border border-gray-100"
-                  >
-                    <FiChevronRight size={20} />
-                  </button>
+                  <h3 className="text-lg font-black text-gray-900 truncate uppercase tracking-tight">
+                    {group.property?.microMarket || "Property Details"}
+                  </h3>
+                  <div className="flex items-center gap-1 text-gray-500 text-xs font-bold uppercase tracking-tighter mt-1">
+                    <FiMapPin className="text-[#EE2529]" size={12} />
+                    {group.property?.city}, {group.property?.state}
+                  </div>
                 </div>
 
-                {/* Notes Section */}
-                <div className="p-6 flex-1 flex flex-col gap-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <FiUser className="text-[#EE2529]" />
-                      <span className="text-xs font-black text-gray-800 uppercase tracking-wider">
-                        Added By: {record.salesExecutive?.firstName}{" "}
-                        {record.salesExecutive?.lastName}
-                      </span>
-                    </div>
-                    <span className="bg-indigo-50 text-indigo-600 text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest">
-                      {record.totalNotesCount} Logs
+                {/* Info */}
+                <div className="p-5 flex-1 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <FiUser className="text-[#EE2529]" size={14} />
+                    <span className="text-xs font-bold text-gray-700">
+                      {group.salesExecutive?.firstName}{" "}
+                      {group.salesExecutive?.lastName}
                     </span>
                   </div>
 
-                  {/* Latest Note Highlight */}
-                  <div className="bg-red-50/50 rounded-2xl p-4 border border-red-100 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-2 opacity-5">
-                      <FiMessageSquare size={48} />
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-[#EE2529] uppercase mb-2">
-                      <FiCalendar /> Latest Activity:{" "}
-                      {formatDate(record.updatedAt)}
-                    </div>
-                    <p className="text-sm font-bold text-gray-800 leading-relaxed italic">
-                      "{record.notes?.[0]?.note || "No note content"}"
+                  <div className="flex items-center justify-between">
+                    <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {group.notes.length} {group.notes.length === 1 ? "Note" : "Notes"}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-medium">
+                      Last: {formatDate(group.latestDate)}
+                    </span>
+                  </div>
+
+                  {/* Latest note preview */}
+                  <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <p className="text-xs text-gray-600 line-clamp-2 italic">
+                      "{group.notes[0]?.originalNote || "No note content"}"
                     </p>
                   </div>
-
-                  {/* Note History Preview */}
-                  {record.notes?.length > 1 && (
-                    <div className="mt-2 space-y-3">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-1">
-                        Previous Logs
-                      </p>
-                      {record.notes.slice(1, 3).map((note, idx) => (
-                        <div
-                          key={idx}
-                          className="flex gap-3 items-start group/note"
-                        >
-                          <div className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-200 group-hover/note:bg-[#EE2529] transition-colors shadow-sm"></div>
-                          <div className="flex-1">
-                            <p className="text-xs font-semibold text-gray-600 line-clamp-2">
-                              {note.note}
-                            </p>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase mt-1">
-                              {formatDate(note.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Footer Info */}
-                <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase">
-                        Type
-                      </p>
-                      <p className="text-[11px] font-black text-gray-700 uppercase">
-                        {record.property?.propertyType}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase">
-                        Price
-                      </p>
-                      <p className="text-[11px] font-black text-gray-700">
-                        ₹{record.property?.sellingPrice} Cr
-                      </p>
-                    </div>
+                {/* Footer */}
+                <div className="px-5 py-3 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-[10px] text-gray-400 font-bold uppercase">
+                    {group.property?.propertyType && (
+                      <span>{group.property.propertyType}</span>
+                    )}
+                    {group.property?.sellingPrice && (
+                      <span>₹{group.property.sellingPrice} Cr</span>
+                    )}
                   </div>
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/property/property-details/${record.propertyId}`,
-                      )
-                    }
-                    className="text-[10px] font-black text-[#EE2529] uppercase hover:underline flex items-center gap-1"
-                  >
-                    View Property <FiChevronRight />
-                  </button>
+                  <span className="text-[10px] font-black text-[#EE2529] uppercase flex items-center gap-1">
+                    View Logs <FiChevronRight size={12} />
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Pagination placeholder */}
+        {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-12 pb-10">
             <button
@@ -277,6 +245,13 @@ const PropertyNotes = () => {
           </div>
         )}
       </div>
+
+      {/* Notes Modal */}
+      <NotesAndActivityModal
+        isOpen={!!selectedProperty}
+        onClose={() => setSelectedProperty(null)}
+        property={selectedProperty}
+      />
     </div>
   );
 };
