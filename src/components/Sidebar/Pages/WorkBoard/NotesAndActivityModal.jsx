@@ -555,16 +555,19 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
   // ── Tab filtering ──────────────────────────────────────────────────────────
   const filteredNotes = notes.filter((n) => {
     if (activeTab === "all") return true;
+    if (activeTab === "client") return n.isOwnerNote;
+    if (n.isOwnerNote) return false;
     return n.status === activeTab;
   });
 
   const tabCounts = {
     all: notes.length,
-    pending: notes.filter((n) => n.status === "pending").length,
+    pending: notes.filter((n) => !n.isOwnerNote && n.status === "pending").length,
     approved: notes.filter(
-      (n) => n.status === "approved" || n.status === "edited_approved",
+      (n) => !n.isOwnerNote && (n.status === "approved" || n.status === "edited_approved"),
     ).length,
-    denied: notes.filter((n) => n.status === "denied").length,
+    denied: notes.filter((n) => !n.isOwnerNote && n.status === "denied").length,
+    client: notes.filter((n) => n.isOwnerNote).length,
   };
 
   if (!isOpen) return null;
@@ -662,6 +665,7 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
             { id: "pending", label: "Pending" },
             { id: "approved", label: "Approved" },
             { id: "denied", label: "Declined" },
+            { id: "client", label: "Client Note" },
           ].map((tab) => (
             <button
               key={tab.id}
