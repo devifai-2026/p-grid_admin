@@ -1178,11 +1178,11 @@ const PropertyDetails = () => {
                   { id: "lease", label: "Lease", icon: FiFileText },
                   { id: "analytics", label: "Analytics", icon: FaChartLine },
                   { id: "location", label: "Location", icon: FiMapPin },
-                  user?.role === "Sales Executive - Property Manager" && {
-                    id: "notes",
-                    label: "Notes",
-                    icon: FiMessageSquare,
-                  },
+                  // user?.role === "Sales Executive - Property Manager" && {
+                  //   id: "notes",
+                  //   label: "Notes",
+                  //   icon: FiMessageSquare,
+                  // },
                   { id: "faqs", label: "FAQs", icon: FiHelpCircle },
                 ]
                   .filter(Boolean)

@@ -44,7 +44,8 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
             const sId = record.salesExecutiveId || record.sales_executive_id || exec.userId || rIdx;
 
             const chatItem = {
-              id: record.id || record._id || `${sId}-${rIdx}`,
+              id: record.noteId || record.id || record._id || `${sId}-${rIdx}`,
+              noteId: record.noteId || record.id || record._id || null,
               note: record.originalNote || (typeof record.note === 'string' ? record.note : ""),
               message: record.originalNote || (typeof record.note === 'string' ? record.note : ""),
               createdAt: record.createdAt || new Date().toISOString(),
@@ -68,7 +69,8 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
          res.data.forEach((item, rIdx) => {
            if (item.originalNote) {
              allChatItems.push({
-                id: item.id || item._id || rIdx.toString(),
+                id: item.noteId || item.id || item._id || rIdx.toString(),
+                noteId: item.noteId || item.id || item._id || null,
                 note: item.originalNote,
                 message: item.originalNote,
                 createdAt: item.createdAt || new Date().toISOString(),
@@ -101,27 +103,27 @@ export const submitNote = ({ propertyId, message, onSuccess, onError }) => {
   });
 };
 
-export const approveNote = ({ propertyId, salesExecutiveId, onSuccess, onError }) => {
+export const approveNote = ({ noteId, salesExecutiveId, onSuccess, onError }) => {
   apiCall.patch({
-    route: `/notes/${propertyId}/review`,
+    route: `/notes/${noteId}/review`,
     payload: { action: "approve", salesExecutiveId },
     onSuccess,
     onError,
   });
 };
 
-export const declineNote = ({ propertyId, salesExecutiveId, onSuccess, onError }) => {
+export const declineNote = ({ noteId, salesExecutiveId, onSuccess, onError }) => {
   apiCall.patch({
-    route: `/notes/${propertyId}/review`,
+    route: `/notes/${noteId}/review`,
     payload: { action: "deny", salesExecutiveId },
     onSuccess,
     onError,
   });
 };
 
-export const editAndApproveNote = ({ propertyId, salesExecutiveId, message, onSuccess, onError }) => {
+export const editAndApproveNote = ({ noteId, salesExecutiveId, message, onSuccess, onError }) => {
   apiCall.patch({
-    route: `/notes/${propertyId}/review`,
+    route: `/notes/${noteId}/review`,
     payload: { action: "approve", salesExecutiveId, editedNote: message },
     onSuccess,
     onError,

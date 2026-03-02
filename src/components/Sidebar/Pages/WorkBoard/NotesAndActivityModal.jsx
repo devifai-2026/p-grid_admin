@@ -120,7 +120,7 @@ const StatusBadge = ({ status }) => {
 };
 
 // ─── Single Note Card ─────────────────────────────────────────────────────────
-const NoteCard = ({ note, propertyId, userRole, onAction, currentUserId }) => {
+const NoteCard = ({ note, userRole, onAction, currentUserId }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedMsg, setEditedMsg] = useState(
     note.editedMessage || note.note || note.message || "",
@@ -135,7 +135,7 @@ const NoteCard = ({ note, propertyId, userRole, onAction, currentUserId }) => {
   const handleApprove = () => {
     setActionLoading("approve");
     approveNote({
-      propertyId,
+      noteId: note.noteId || note.id,
       salesExecutiveId: note.senderId,
       onSuccess: (res) => {
         setActionLoading(null);
@@ -162,7 +162,7 @@ const NoteCard = ({ note, propertyId, userRole, onAction, currentUserId }) => {
     }
     setActionLoading("decline");
     declineNote({
-      propertyId,
+      noteId: note.noteId || note.id,
       salesExecutiveId: note.senderId,
       onSuccess: (res) => {
         setActionLoading(null);
@@ -190,7 +190,7 @@ const NoteCard = ({ note, propertyId, userRole, onAction, currentUserId }) => {
     }
     setActionLoading("edit-approve");
     editAndApproveNote({
-      propertyId,
+      noteId: note.noteId || note.id,
       salesExecutiveId: note.senderId,
       message: editedMsg,
       onSuccess: (res) => {
@@ -463,7 +463,7 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
   const canWrite = isDealerRole(userRole) || isAdminRole(userRole);
   const isAdmin = isAdminRole(userRole);
   const isManager = isManagerRole(userRole);
-  const isReadOnly = isManager; // Sales Manager = read-only
+  const isReadOnly = isManager || isAdmin; // Sales Manager = read-only
 
   const propertyId = property?.propertyId || property?._id;
 
@@ -484,7 +484,10 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
             ? received
             : received?.notes || received?.managerNotes || [];
           console.log("[DEBUG] Final Notes for UI:", finalArray);
-          setNotes(finalArray);
+          const sorted = [...finalArray].sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+          setNotes(sorted);
         } else {
           setNotes([]);
         }
@@ -697,7 +700,6 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
               <NoteCard
                 key={note.id}
                 note={note}
-                propertyId={propertyId}
                 userRole={userRole}
                 currentUserId={currentUserId}
                 onAction={loadNotes}
