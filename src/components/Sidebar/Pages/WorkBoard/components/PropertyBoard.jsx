@@ -1,8 +1,8 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiHome, FiMapPin, FiUser, FiArrowRight } from "react-icons/fi";
+import { FiHome, FiMapPin, FiUser, FiArrowRight, FiMessageSquare } from "react-icons/fi";
 
-const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal }) => {
+const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal, openNotesModal }) => {
   return (
     <motion.tr
       key={prop.propertyId}
@@ -108,15 +108,32 @@ const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal }) => {
       )}
 
       <td className="px-6 py-4 text-right">
-        <button
-          className="p-2 border border-slate-100 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all group-hover:scale-110 active:scale-90"
-          title="View Details"
-          onClick={() =>
-            (window.location.href = `/property/property-details/${prop.propertyId}`)
-          }
-        >
-          <FiArrowRight size={16} />
-        </button>
+        <div className="flex items-center justify-end gap-2">
+          <button
+            className="p-2 border border-slate-100 rounded-xl text-slate-400 hover:bg-amber-50 hover:text-amber-500 hover:border-amber-100 transition-all group-hover:scale-110 active:scale-90"
+            title="View Notes"
+            onClick={(e) => {
+              e.stopPropagation();
+              openNotesModal(prop);
+            }}
+          >
+            <div className="relative">
+              <FiMessageSquare size={16} />
+              {prop.hasUnreadNotes && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+              )}
+            </div>
+          </button>
+          <button
+            className="p-2 border border-slate-100 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all group-hover:scale-110 active:scale-90"
+            title="View Details"
+            onClick={() =>
+              (window.location.href = `/property/property-details/${prop.propertyId}`)
+            }
+          >
+            <FiArrowRight size={16} />
+          </button>
+        </div>
       </td>
     </motion.tr>
   );
@@ -132,6 +149,7 @@ const PropertyBoard = ({
   loading,
   properties,
   openAssignModal,
+  openNotesModal,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 8;
@@ -214,8 +232,8 @@ const PropertyBoard = ({
                       key={prop.propertyId}
                       prop={prop}
                       idx={idx}
-                      isAdminOrManager={isAdminOrManager}
                       openAssignModal={openAssignModal}
+                      openNotesModal={openNotesModal}
                     />
                   ))}
                 </AnimatePresence>
