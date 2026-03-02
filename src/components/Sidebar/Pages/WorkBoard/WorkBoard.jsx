@@ -10,6 +10,7 @@ import WorkBoardHeader from "./components/WorkBoardHeader";
 import EnquirySection from "./components/EnquirySection";
 import PropertyBoard from "./components/PropertyBoard";
 import AssignPropertyModal from "./components/AssignPropertyModal";
+import NotesAndActivityModal from "./NotesAndActivityModal";
 
 const WorkBoard = () => {
   const { user } = useAuth();
@@ -29,6 +30,10 @@ const WorkBoard = () => {
   const [properties, setProperties] = useState([]);
   const [viewType, setViewType] = useState("all"); // all, assigned, unassigned
   const [assignPropertyLoading, setAssignPropertyLoading] = useState(false);
+
+  // Notes Modal States
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [selectedPropertyForNotes, setSelectedPropertyForNotes] = useState(null);
 
   // --- Assignment Modal States & Handlers ---
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -196,6 +201,11 @@ const WorkBoard = () => {
     searchUsers("");
   };
 
+  const openNotesModal = (prop) => {
+    setSelectedPropertyForNotes(prop);
+    setIsNotesModalOpen(true);
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData, refreshKey]);
@@ -321,6 +331,7 @@ const WorkBoard = () => {
         loading={loading}
         properties={properties}
         openAssignModal={openAssignModal}
+        openNotesModal={openNotesModal}
       />
 
       <AssignPropertyModal
@@ -333,6 +344,15 @@ const WorkBoard = () => {
         userSearchResults={userSearchResults}
         assignPropertyLoading={assignPropertyLoading}
         handleAssignProperty={handleAssignProperty}
+      />
+
+      <NotesAndActivityModal
+        isOpen={isNotesModalOpen}
+        onClose={() => {
+          setIsNotesModalOpen(false);
+          setSelectedPropertyForNotes(null);
+        }}
+        property={selectedPropertyForNotes}
       />
     </div>
   );

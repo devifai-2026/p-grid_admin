@@ -52,8 +52,12 @@ import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PropertyBrochure from "./PropertyBrochure";
-import { showSuccess, showError, showWarning, confirmAction } from "../../../../../helpers/swalHelper";
-
+import {
+  showSuccess,
+  showError,
+  showWarning,
+  confirmAction,
+} from "../../../../../helpers/swalHelper";
 
 // --- Helper Components ---
 
@@ -140,7 +144,7 @@ const PropertyDetails = () => {
     const isConfirmed = await confirmAction(
       "Verify Property?",
       "Are you sure you want to verify this property?",
-      "Yes, verify it!"
+      "Yes, verify it!",
     );
     if (!isConfirmed) return;
 
@@ -178,13 +182,12 @@ const PropertyDetails = () => {
     });
   };
 
-
   const handleUnverify = async (e, propertyId) => {
     e.stopPropagation();
     const isConfirmed = await confirmAction(
       "Remove Verification?",
       "Are you sure you want to remove your verification from this property?",
-      "Yes, remove it!"
+      "Yes, remove it!",
     );
     if (!isConfirmed) return;
 
@@ -222,7 +225,6 @@ const PropertyDetails = () => {
     });
   };
 
-
   const fetchAssignableUsers = () => {
     apiCall.get({
       route: "/admin/users?limit=100",
@@ -249,7 +251,6 @@ const PropertyDetails = () => {
       showWarning("Please select a user to assign the property to.");
       return;
     }
-
 
     setAssignLoading(true);
     apiCall.put({
@@ -395,12 +396,7 @@ const PropertyDetails = () => {
     apiCall.post({
       route: `/properties/${id}/notes`,
       payload: {
-        notes: [
-          {
-            note: newNote.trim(),
-            createdAt: new Date().toISOString(),
-          },
-        ],
+        notes: newNote.trim(),
       },
       onSuccess: (res) => {
         setIsSubmittingNote(false);
@@ -1182,11 +1178,11 @@ const PropertyDetails = () => {
                   { id: "lease", label: "Lease", icon: FiFileText },
                   { id: "analytics", label: "Analytics", icon: FaChartLine },
                   { id: "location", label: "Location", icon: FiMapPin },
-                  user?.role === "Sales Executive - Property Manager" && {
-                    id: "notes",
-                    label: "Notes",
-                    icon: FiMessageSquare,
-                  },
+                  // user?.role === "Sales Executive - Property Manager" && {
+                  //   id: "notes",
+                  //   label: "Notes",
+                  //   icon: FiMessageSquare,
+                  // },
                   { id: "faqs", label: "FAQs", icon: FiHelpCircle },
                 ]
                   .filter(Boolean)
