@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import ReactDOM from "react-dom";
 import {
   FiX,
   FiSend,
@@ -484,16 +485,11 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
       propertyId,
       onSuccess: (res) => {
         setLoadingNotes(false);
-        console.log("[DEBUG] Fetch Success. Raw Response Data:", res.data);
         if (res.success) {
-          // If already flattened by API helper, res.data is an array
-          // If not, it might be { property, notes, totalNotes }
           const received = res.data;
-          console.log(res);
           const finalArray = Array.isArray(received)
             ? received
             : received?.notes || received?.managerNotes || [];
-          console.log("[DEBUG] Final Notes for UI:", finalArray);
           const sorted = [...finalArray].sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
           );
@@ -573,12 +569,12 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl relative overflow-hidden animate-fade-in">
+      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] m-4 flex flex-col shadow-2xl relative overflow-hidden animate-fade-in">
         {/* ── Gradient accent ── */}
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-slate-50 to-white pointer-events-none rounded-t-[28px]" />
 
@@ -781,7 +777,8 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
