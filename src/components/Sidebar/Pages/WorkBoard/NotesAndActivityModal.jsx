@@ -468,11 +468,12 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
   const textareaRef = useRef(null);
 
   const userRole = user?.role || "";
-  const currentUserId = user?.id || user?._id;
+  const currentUserId = user?.userId || user?.id || user?._id;
   const canWrite = isDealerRole(userRole) || isAdminRole(userRole);
   const isAdmin = isAdminRole(userRole);
   const isManager = isManagerRole(userRole);
-  const isReadOnly = isManager || isAdmin; // Sales Manager = read-only
+  const isReadOnly = isManager; // Sales Manager = read-only
+  const isPropertyManager = userRole === ROLES.PROPERTY_MANAGER;
 
   const propertyId = property?.propertyId || property?._id;
 
@@ -719,7 +720,7 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
         </div>
 
         {/* ── Compose area (only dealers) ── */}
-        {canWrite && !isReadOnly && (
+        {canWrite && !isReadOnly && !(isPropertyManager && notes.length > 0 && notes[notes.length - 1]?.senderId === currentUserId) && (
           <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
             <div className="flex items-center gap-2 mb-2">
               <FiEdit3 size={12} className="text-slate-400" />
