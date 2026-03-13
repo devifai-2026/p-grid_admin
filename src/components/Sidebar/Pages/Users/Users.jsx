@@ -120,7 +120,7 @@ const Users = () => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isAdminOrSuperAdmin]);
+  }, [isAdminOrSuperAdmin, refreshKey]);
 
   // --- Handlers ---
 

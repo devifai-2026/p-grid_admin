@@ -31,10 +31,10 @@ const EnquiryCard = ({
   handleAssign,
   assignLoading,
 }) => {
-  const isPending = item.status === "pending";
+  const isPending = item.status === "pending" || !item.status;
   const isAutoAssigning = autoAssignLoading === (item.propertyId + item.inquirerId);
   const isCurrentAssigning = assigningId === (item.id || item.propertyId);
-
+console.log(item)
   return (
     <motion.div
       layout
@@ -92,7 +92,7 @@ const EnquiryCard = ({
                 ) : (
                   <FiLayers size={14} />
                 )}
-                <span>Smart Assign</span>
+                <span>Auto Assign</span>
               </button>
               <button
                 onClick={() => setAssigningId(isCurrentAssigning ? null : (item.id || item.propertyId))}
@@ -197,7 +197,24 @@ const EnquiryCard = ({
           </div>
           
           <div className="space-y-3">
-            {item.inquiries?.map((note, idx) => (
+            {item.inquiry ? (
+              <div
+                className="relative p-5 rounded-3xl bg-white border border-slate-100 shadow-sm group/note hover:border-red-100 transition-all duration-300"
+              >
+                <p className="text-slate-600 text-xs leading-relaxed font-bold">
+                  {item.inquiry}
+                </p>
+                <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <FiClock size={10} />
+                    {new Date(item.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover/note:bg-red-50 group-hover/note:text-red-500 transition-all">
+                    <FiUser size={12} />
+                  </div>
+                </div>
+              </div>
+            ) : item.inquiries?.map((note, idx) => (
               <div
                 key={idx}
                 className="relative p-5 rounded-3xl bg-white border border-slate-100 shadow-sm group/note hover:border-red-100 transition-all duration-300"
@@ -208,7 +225,7 @@ const EnquiryCard = ({
                 <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                     <FiClock size={10} />
-                    {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(note.createdAt || item.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover/note:bg-red-50 group-hover/note:text-red-500 transition-all">
                     <FiUser size={12} />
@@ -217,7 +234,7 @@ const EnquiryCard = ({
               </div>
             ))}
 
-            {(!item.inquiries || item.inquiries.length === 0) && (
+            {!item.inquiry && (!item.inquiries || item.inquiries.length === 0) && (
               <div className="py-12 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200 text-center">
                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-sm">
                   <FiLayers size={24} />

@@ -232,6 +232,7 @@ const PropertyBoard = ({
                       key={prop.propertyId}
                       prop={prop}
                       idx={idx}
+                      isAdminOrManager={isAdminOrManager}
                       openAssignModal={openAssignModal}
                       openNotesModal={openNotesModal}
                     />
