@@ -86,7 +86,7 @@ export const NotificationProvider = ({ children }) => {
             const formattedAlerts = res.data.map((n) => ({
               id: n.id,
               propertyId: n.propertyId,
-              title: "Notification",
+              title: n.title ?? "Notification",
               message: n.notificationText,
               time: formatTimeAgo(n.createdAt),
               read: n.isRead,

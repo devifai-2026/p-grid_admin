@@ -56,4 +56,36 @@ export const subscribeToNotifications = (cb) => {
   socket.on("inquiry:assigned", (data) => {
     cb({ ...data, type: "success", title: "Inquiry Assigned" });
   });
+
+  socket.on("property:note_pending_approval", (data) => {
+    cb({ ...data, type: "info", title: "Note Pending" });
+  });
+
+  socket.on("property:note_added", (data) => {
+    cb({ ...data, type: "success", title: "Note Added" });
+  });
+
+  socket.on("property:note_approved", (data) => {
+    cb({ ...data, type: "success", title: "Note Accepted" });
+  });
+
+  socket.on("property:note_denied", (data) => {
+    cb({ ...data, type: "warning", title: "Note Declined" });
+  });
+
+  socket.on("property:owner_note_added", (data) => {
+    cb({ ...data, type: "info", title: "Client Note" });
+  });
+
+  socket.on("property:assigned", (data) => {
+    cb({ ...data, type: "success", title: "Property Assigned" });
+  });
+
+  socket.on("property:unassigned", (data) => {
+    cb({ ...data, type: "warning", title: "Property Unassigned" });
+  });
+
+  socket.on("property:verified", (data) => {
+    cb({ ...data, type: "success", title: "Property Verified" });
+  });
 };
