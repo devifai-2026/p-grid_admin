@@ -22,11 +22,12 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
   const fetchCustomers = useCallback(() => {
     // Fetch users filtered by roleName
     apiCall.get({
-      route: `/get-client-users?roleName=${roleName}&limit=50`,
+      route: `/get-client-users?roleName=${roleName}&limit=50&isActive=all`,
       onSuccess: (res) => {
         if (res.success) {
           // Normalize data to ensure it's always an array
           const users = Array.isArray(res.data) ? res.data : [];
+          console.log(res)
           setCustomers(users);
         }
       },
@@ -192,7 +193,11 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                             alt={customer.name}
                             className="w-11 h-11 rounded-xl object-cover shadow-sm ring-2 ring-white group-hover:ring-red-50 transition-all border border-slate-100"
                           />
-                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                          <div
+                            className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${
+                              customer.isActive ? "bg-emerald-500" : "bg-slate-400"
+                            }`}
+                          ></div>
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-slate-900 truncate">

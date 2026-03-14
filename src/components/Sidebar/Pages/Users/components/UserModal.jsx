@@ -300,7 +300,7 @@ const UserModal = ({
                       value={formData.roleName}
                       onChange={handleInputChange}
                       disabled={!!editingId}
-                      className={`w-full px-4 py-3 bg-slate-900 text-white rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 border-0 transition-all text-xs font-black uppercase tracking-widest shadow-lg ${!!editingId ? "opacity-70 cursor-not-allowed" : ""}`}
+                      className={`w-full px-4 py-2 bg-slate-900 text-white rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 border-0 transition-all text-[10px] font-black uppercase tracking-widest shadow-lg ${!!editingId ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       <option value="Admin">Admin</option>
                       <option value="Sales Manager">Sales Manager</option>
@@ -312,8 +312,8 @@ const UserModal = ({
                       </option>
                     </select>
                     {editingId && (
-                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-2 ml-1 flex items-center gap-1">
-                        <FiInfo size={10} className="text-red-500" /> Role
+                      <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-2 ml-1 flex items-center gap-1">
+                        <FiInfo size={9} className="text-red-500" /> Role
                         cannot be changed after creation.
                       </p>
                     )}

@@ -152,15 +152,39 @@ const PropertyBoard = ({
   openNotesModal,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const itemsPerPage = 8;
-  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+  // Filter properties based on search term
+  const displayedProperties = React.useMemo(() => {
+    if (!searchTerm.trim()) return filteredProperties;
+    const term = searchTerm.toLowerCase().trim();
+    return filteredProperties.filter((prop) => {
+      const city = (prop.city || "").toLowerCase();
+      const state = (prop.state || "").toLowerCase();
+      const microMarket = (prop.microMarket || "").toLowerCase();
+      const type = (prop.propertyType || "").toLowerCase();
+      const agent = (prop.salesAgent?.name || 
+                   `${prop.salesAgent?.firstName || ""} ${prop.salesAgent?.lastName || ""}`).toLowerCase();
+
+      return (
+        city.includes(term) ||
+        state.includes(term) ||
+        microMarket.includes(term) ||
+        type.includes(term) ||
+        agent.includes(term)
+      );
+    });
+  }, [filteredProperties, searchTerm]);
+
+  const totalPages = Math.ceil(displayedProperties.length / itemsPerPage);
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [filteredProperties.length, viewType]);
+  }, [displayedProperties.length, viewType]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedProperties = filteredProperties.slice(
+  const paginatedProperties = displayedProperties.slice(
     startIndex,
     startIndex + itemsPerPage,
   );
@@ -169,24 +193,54 @@ const PropertyBoard = ({
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <h2 className="flex items-center gap-3 text-lg font-black text-slate-800 uppercase tracking-tight">
-          <FiHome className="text-red-500" />
-          {isPropertyManager ? "Your Assigned Properties" : "Property Board"}
-          <span className="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">
-            {filteredProperties.length}
-          </span>
-        </h2>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6 flex-1">
+          <h2 className="flex items-center gap-3 text-lg font-black text-slate-800 uppercase tracking-tight shrink-0">
+            <FiHome className="text-red-500" />
+            {isPropertyManager ? "Your Assigned Properties" : "Property Board"}
+            <span className="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">
+              {displayedProperties.length}
+            </span>
+          </h2>
+
+          {/* Search Bar */}
+          <div className="relative group flex-1 max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-slate-400 group-focus-within:text-red-500 transition-colors">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </span>
+            </div>
+            <input
+              type="text"
+              placeholder="Search by city, micro-market, type or agent..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white border border-slate-100 rounded-2xl pl-11 pr-4 py-2.5 text-[11px] font-bold text-slate-700 placeholder:text-slate-300 outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500/30 transition-all shadow-sm"
+            />
+          </div>
+        </div>
 
         {isAdminOrManager && (
-          <div className="flex bg-white p-1 rounded-xl border border-slate-100 shadow-sm self-start">
+          <div className="flex bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm self-start">
             {["all", "assigned", "unassigned"].map((type) => (
               <button
                 key={type}
                 onClick={() => setViewType(type)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
                   viewType === type
-                    ? "bg-slate-900 text-white shadow-lg"
+                    ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
                     : "text-slate-500 hover:bg-slate-50"
                 }`}
               >
@@ -242,9 +296,9 @@ const PropertyBoard = ({
             </tbody>
           </table>
 
-          {filteredProperties.length === 0 && !loading && (
+          {displayedProperties.length === 0 && !loading && (
             <div className="p-20 text-center text-slate-400 font-black uppercase tracking-widest text-xs">
-              No properties found matching criteria
+              No properties found matching "{searchTerm}"
             </div>
           )}
         </div>
@@ -254,8 +308,8 @@ const PropertyBoard = ({
           <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
             <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">
               Showing {startIndex + 1} to{" "}
-              {Math.min(startIndex + itemsPerPage, filteredProperties.length)}{" "}
-              of {filteredProperties.length}
+              {Math.min(startIndex + itemsPerPage, displayedProperties.length)}{" "}
+              of {displayedProperties.length}
             </p>
 
             <div className="flex items-center gap-1">

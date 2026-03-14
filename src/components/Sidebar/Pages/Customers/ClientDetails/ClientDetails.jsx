@@ -42,6 +42,25 @@ const ClientDetails = () => {
     }
   }, [id]);
 
+  const toggleUserStatus = () => {
+    if (!client) return;
+    const userId = client.userId;
+    const newStatus = !client.isActive;
+
+    apiCall.put({
+      route: `/admin/users/${userId}`,
+      payload: { isActive: newStatus },
+      onSuccess: (res) => {
+        if (res.success) {
+          setClient((prev) => ({ ...prev, isActive: newStatus }));
+        }
+      },
+      onError: (err) => {
+        console.error("Error toggling user status:", err);
+      },
+    });
+  };
+
   const fetchClientProperties = (userId) => {
     apiCall.get({
       route: `/admin/properties?userId=${userId}`,
@@ -111,9 +130,21 @@ const ClientDetails = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <div className="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-widest flex items-center gap-2">
-              <FiActivity size={14} /> Active Connection
-            </div>
+            <button
+              onClick={toggleUserStatus}
+              className={`px-3 py-1.5 border text-[10px] md:text-xs font-bold rounded-full uppercase tracking-widest flex items-center gap-2 transition-all ${
+                client.isActive
+                  ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100"
+                  : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+              }`}
+            >
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${
+                  client.isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                }`}
+              />
+              {client.isActive ? "Active Account" : "Inactive Account"}
+            </button>
           </div>
         </div>
 

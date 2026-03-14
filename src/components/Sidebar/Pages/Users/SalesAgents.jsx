@@ -198,7 +198,11 @@ const SalesAgents = () => {
                             alt={agent.name}
                             className="w-11 h-11 rounded-xl object-cover shadow-sm ring-2 ring-white group-hover:ring-red-50 transition-all border border-slate-100"
                           />
-                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                           <div
+                            className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${
+                              agent.isActive !== false ? "bg-emerald-500" : "bg-slate-400"
+                            }`}
+                          ></div>
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-slate-900 truncate">

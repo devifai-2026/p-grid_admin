@@ -559,7 +559,7 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
     if (n.isOwnerNote) return false;
     return n.status === activeTab;
   });
-
+console.log(notes)
   const tabCounts = {
     all: notes.length,
     pending: notes.filter((n) => !n.isOwnerNote && n.status === "pending").length,
@@ -720,7 +720,7 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
         </div>
 
         {/* ── Compose area (only dealers) ── */}
-        {canWrite && !isReadOnly && !(isPropertyManager && notes.length > 0 && notes[notes.length - 1]?.senderId === currentUserId) && (
+        {canWrite && !isReadOnly && !isAdmin && !(isPropertyManager && notes.length > 0 && notes[notes.length - 1]?.senderId === currentUserId) && (
           <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
             <div className="flex items-center gap-2 mb-2">
               <FiEdit3 size={12} className="text-slate-400" />
