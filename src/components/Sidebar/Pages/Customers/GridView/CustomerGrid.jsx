@@ -10,8 +10,10 @@ import {
 } from "react-icons/fi";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
+import { useAuth } from "../../../../../context/AuthContext";
 
 const CustomerGrid = ({ roleTitle, roleName }) => {
+  const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +48,11 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
     e.stopPropagation(); // Prevent navigation to details page
     const userId = customer.userId || customer.id;
     if (!userId) return;
+
+    if (userId === currentUser?.userId) {
+      alert("You cannot deactivate your own account.");
+      return;
+    }
 
     setStatusLoadingId(userId);
     const newStatus = !customer.isActive;
@@ -261,16 +268,16 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                         const isToggleLoading = statusLoadingId === custId;
 
                         return (
-                          <button
-                            onClick={(e) => toggleUserStatus(e, customer)}
-                            disabled={isToggleLoading}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
-                              isToggleLoading
-                                ? "bg-slate-50 text-slate-400 border-slate-100 cursor-wait"
-                                : customer.isActive
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
-                                  : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
-                            }`}
+                            <button
+                              onClick={(e) => toggleUserStatus(e, customer)}
+                              disabled={isToggleLoading || custId === currentUser?.userId}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
+                                isToggleLoading || custId === currentUser?.userId
+                                  ? "bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-70"
+                                  : customer.isActive
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+                                    : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+                              }`}
                             title={
                               isToggleLoading
                                 ? ""

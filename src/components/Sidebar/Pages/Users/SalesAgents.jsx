@@ -9,13 +9,16 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
+import { useAuth } from "../../../../context/AuthContext";
 
 const SalesAgents = () => {
+  const { user: currentUser } = useAuth();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [agents, setAgents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [statusLoadingId, setStatusLoadingId] = useState(null);
 
   const fetchAgents = useCallback(async () => {
     setLoading(true);
@@ -42,7 +45,7 @@ const SalesAgents = () => {
             new Promise((resolve, reject) => {
               apiCall.get({
                 route: "/admin/users",
-                params: { roleName: role, limit: 100 },
+                params: { roleName: role, limit: 100, isActive: "all" },
                 onSuccess: (res) => resolve(res.success ? res.data : []),
                 onError: (err) => reject(err),
               });
@@ -62,6 +65,40 @@ const SalesAgents = () => {
   useEffect(() => {
     fetchAgents();
   }, [fetchAgents, refreshKey]);
+
+  const toggleUserStatus = (e, agent) => {
+    e.stopPropagation();
+    const userId = agent.userId || agent.id;
+    if (!userId) return;
+
+    if (userId === currentUser?.userId) {
+      alert("You cannot deactivate your own account.");
+      return;
+    }
+
+    setStatusLoadingId(userId);
+    const newStatus = !agent.isActive;
+
+    apiCall.put({
+      route: `/admin/users/${userId}`,
+      payload: { isActive: newStatus },
+      onSuccess: (res) => {
+        if (res.success) {
+          setAgents((prev) =>
+            prev.map((a) => {
+              const currentId = a.userId || a.id;
+              return currentId === userId ? { ...a, isActive: newStatus } : a;
+            }),
+          );
+        }
+        setStatusLoadingId(null);
+      },
+      onError: (err) => {
+        console.error("Error toggling user status:", err);
+        setStatusLoadingId(null);
+      },
+    });
+  };
 
   const filteredAgents = agents.filter((agent) => {
     const name = (agent.name || "").toLowerCase();
@@ -174,7 +211,7 @@ const SalesAgents = () => {
                     Specific Role
                   </th>
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
-                    Status
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -264,9 +301,61 @@ const SalesAgents = () => {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span className="text-[10px] font-bold">ACTIVE</span>
+                      <div className="flex items-center justify-end gap-3">
+                        {(() => {
+                          const agId = agent.userId || agent.id;
+                          const isToggleLoading = statusLoadingId === agId;
+
+                          return (
+                            <button
+                              onClick={(e) => toggleUserStatus(e, agent)}
+                              disabled={isToggleLoading || agId === currentUser?.userId}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
+                                isToggleLoading || agId === currentUser?.userId
+                                  ? "bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-70"
+                                  : agent.isActive !== false
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+                                    : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+                              }`}
+                              title={
+                                isToggleLoading
+                                  ? ""
+                                  : `Click to mark as ${agent.isActive !== false ? "Inactive" : "Active"}`
+                              }
+                            >
+                              {isToggleLoading ? (
+                                <FiRefreshCw className="w-2.5 h-2.5 animate-spin" />
+                              ) : (
+                                <div
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    agent.isActive !== false
+                                      ? "bg-emerald-500 animate-pulse"
+                                      : "bg-slate-400"
+                                  }`}
+                                ></div>
+                              )}
+                              <span className="text-[10px] font-bold uppercase tracking-wider">
+                                {isToggleLoading
+                                  ? "UPDATING"
+                                  : agent.isActive !== false
+                                    ? "ACTIVE"
+                                    : "INACTIVE"}
+                              </span>
+                            </button>
+                          );
+                        })()}
+
+                        <button
+                          onClick={() => {
+                            const id = agent.userId || agent.id;
+                            // Add a special flag or handle in ClientDetails if needed
+                            window.location.href = `/client-details/${id}`;
+                          }}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title="View Profile"
+                        >
+                          <FiUsers size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
