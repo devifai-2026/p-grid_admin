@@ -20,6 +20,8 @@ const PropertyGrid = () => {
   const [priceRange, setPriceRange] = useState([6000, 10000000]);
   const [loading, setLoading] = useState(true);
   const [propertyList, setPropertyList] = useState([]);
+  const [likedPropertyIds, setLikedPropertyIds] = useState([]);
+  const [likingPropertyIds, setLikingPropertyIds] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -64,6 +66,22 @@ const PropertyGrid = () => {
         }
       },
     });
+  }, []);
+
+  const fetchWishlist = () => {
+    apiCall.get({
+      route: "/wishlist?limit=1000",
+      onSuccess: (res) => {
+        if (res.success && res.data) {
+          const ids = res.data.map(p => p.propertyId);
+          setLikedPropertyIds(ids);
+        }
+      },
+    });
+  };
+
+  useEffect(() => {
+    fetchWishlist();
   }, []);
 
   const fetchProperties = (
@@ -135,6 +153,27 @@ const PropertyGrid = () => {
     fetchProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const toggleWishlist = (propertyId) => {
+    setLikingPropertyIds((prev) => [...prev, propertyId]);
+    apiCall.post({
+      route: `/properties/${propertyId}/like`,
+      onSuccess: (res) => {
+        if (res.success) {
+          setLikedPropertyIds((prev) => 
+            prev.includes(propertyId) 
+              ? prev.filter(id => id !== propertyId)
+              : [...prev, propertyId]
+          );
+        }
+        setLikingPropertyIds((prev) => prev.filter(id => id !== propertyId));
+      },
+      onError: (err) => {
+        console.error("Error toggling wishlist:", err);
+        setLikingPropertyIds((prev) => prev.filter(id => id !== propertyId));
+      }
+    });
+  };
 
   const handleFilterChange = (key) => {
     let nextState;
@@ -480,8 +519,21 @@ const PropertyGrid = () => {
                     </div>
 
                     {/* Favorite Icon */}
-                    <button className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white text-gray-400 hover:text-[#EE2529] transition-all shadow-md">
-                      <FiHeart className="w-4 h-4" />
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!likingPropertyIds.includes(property.propertyId)) {
+                          toggleWishlist(property.propertyId);
+                        }
+                      }}
+                      disabled={likingPropertyIds.includes(property.propertyId)}
+                      className={`absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-all shadow-md z-20 ${likingPropertyIds.includes(property.propertyId) ? 'opacity-70 cursor-not-allowed' : ''} ${likedPropertyIds.includes(property.propertyId) ? 'text-[#EE2529]' : 'text-gray-400 hover:text-[#EE2529]'}`}
+                    >
+                      {likingPropertyIds.includes(property.propertyId) ? (
+                        <div className="w-4 h-4 border-[1.5px] border-gray-300 border-t-[#EE2529] rounded-full animate-spin"></div>
+                      ) : (
+                        <FiHeart className={`w-4 h-4 ${likedPropertyIds.includes(property.propertyId) ? "fill-[#EE2529]" : ""}`} />
+                      )}
                     </button>
                   </div>
 

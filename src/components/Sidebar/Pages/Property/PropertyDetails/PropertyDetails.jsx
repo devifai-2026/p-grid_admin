@@ -114,6 +114,8 @@ const PropertyDetails = () => {
   const [activeTab, setActiveTab] = useState("property");
   const [activeFaq, setActiveFaq] = useState(null);
   const [verificationFilter, setVerificationFilter] = useState("all");
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
 
   // Assignment States
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -349,6 +351,7 @@ const PropertyDetails = () => {
           setLoading(false);
           const data = res.data || res;
           setProperty(data);
+          checkLikedStatus(id);
         },
         onError: (err) => {
           console.error("PropertyDetails API Error:", err);
@@ -388,6 +391,34 @@ const PropertyDetails = () => {
       fetchNotes();
     }
   }, [activeTab, id]);
+
+  const checkLikedStatus = (propertyId) => {
+    apiCall.get({
+      route: `/properties/${propertyId}/like`,
+      onSuccess: (res) => {
+        if (res.success && res.data) {
+          setIsLiked(res.data.isLiked);
+        }
+      }
+    });
+  };
+
+  const toggleWishlist = () => {
+    setIsLikeLoading(true);
+    apiCall.post({
+      route: `/properties/${id}/like`,
+      onSuccess: (res) => {
+        setIsLikeLoading(false);
+        if (res.success) {
+          setIsLiked(!isLiked);
+        }
+      },
+      onError: (err) => {
+        setIsLikeLoading(false);
+        showWarning("Failed to toggle wishlist");
+      }
+    });
+  };
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -1143,9 +1174,17 @@ const PropertyDetails = () => {
                     </span>
                   </div>
                 )}
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 text-[#EE2529]">
-                  <FiHeart className="fill-current" />
-                </div>
+                <button 
+                  onClick={toggleWishlist}
+                  disabled={isLikeLoading}
+                  className={`absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 hover:bg-white transition-all shadow-md z-20 ${isLikeLoading ? 'opacity-70 cursor-not-allowed' : ''} ${isLiked ? 'text-[#EE2529]' : 'text-gray-400 hover:text-[#EE2529]'}`}
+                >
+                  {isLikeLoading ? (
+                    <div className="w-5 h-5 border-2 border-gray-300 border-t-[#EE2529] rounded-full animate-spin"></div>
+                  ) : (
+                    <FiHeart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                  )}
+                </button>
               </div>
             </div>
 
