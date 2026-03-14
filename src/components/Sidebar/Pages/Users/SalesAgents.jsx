@@ -7,6 +7,7 @@ import {
   FiPhone,
   FiMapPin,
   FiUsers,
+  FiArrowRight,
 } from "react-icons/fi";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useAuth } from "../../../../context/AuthContext";
@@ -95,6 +96,11 @@ const SalesAgents = () => {
       },
       onError: (err) => {
         console.error("Error toggling user status:", err);
+        const msg =
+          err?.data?.message ||
+          err?.message ||
+          "Failed to update user status.";
+        alert(msg);
         setStatusLoadingId(null);
       },
     });
@@ -354,7 +360,7 @@ const SalesAgents = () => {
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                           title="View Profile"
                         >
-                          <FiUsers size={16} />
+                          <FiArrowRight size={16} />
                         </button>
                       </div>
                     </td>

@@ -7,6 +7,8 @@ import {
   FiPhone,
   FiMapPin,
   FiUsers,
+  FiTrash2,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
@@ -21,6 +23,8 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [statusLoadingId, setStatusLoadingId] = useState(null);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // holds the customer object to delete
   const fetchCustomers = useCallback(() => {
     // Fetch users filtered by roleName
     apiCall.get({
@@ -74,6 +78,33 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
       onError: (err) => {
         console.error("Error toggling user status:", err);
         setStatusLoadingId(null);
+      },
+    });
+  };
+
+  const deleteUser = (customer) => {
+    const userId = customer.userId || customer.id;
+    if (!userId) return;
+    setDeleteLoadingId(userId);
+    setConfirmDelete(null);
+    apiCall.delete({
+      route: `/admin/users/${userId}`,
+      onSuccess: (res) => {
+        if (res.success) {
+          setCustomers((prev) =>
+            prev.filter((c) => (c.userId || c.id) !== userId)
+          );
+        }
+        setDeleteLoadingId(null);
+      },
+      onError: (err) => {
+        console.error("Error deleting user:", err);
+        const msg =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to delete user.";
+        alert(msg);
+        setDeleteLoadingId(null);
       },
     });
   };
@@ -171,7 +202,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                     Role
                   </th>
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
-                    Status
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -266,8 +297,10 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                       {(() => {
                         const custId = customer.userId || customer.id;
                         const isToggleLoading = statusLoadingId === custId;
+                        const isDeleteLoading = deleteLoadingId === custId;
 
                         return (
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={(e) => toggleUserStatus(e, customer)}
                               disabled={isToggleLoading || custId === currentUser?.userId}
@@ -278,31 +311,49 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
                                     : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
                               }`}
-                            title={
-                              isToggleLoading
-                                ? ""
-                                : `Click to mark as ${customer.isActive ? "Inactive" : "Active"}`
-                            }
-                          >
-                            {isToggleLoading ? (
-                              <FiRefreshCw className="w-2.5 h-2.5 animate-spin" />
-                            ) : (
-                              <div
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  customer.isActive
-                                    ? "bg-emerald-500 animate-pulse"
-                                    : "bg-slate-400"
-                                }`}
-                              ></div>
-                            )}
-                            <span className="text-[10px] font-bold uppercase tracking-wider">
-                              {isToggleLoading
-                                ? "UPDATING"
-                                : customer.isActive
-                                  ? "ACTIVE"
-                                  : "INACTIVE"}
-                            </span>
-                          </button>
+                              title={
+                                isToggleLoading
+                                  ? ""
+                                  : `Click to mark as ${customer.isActive ? "Inactive" : "Active"}`
+                              }
+                            >
+                              {isToggleLoading ? (
+                                <FiRefreshCw className="w-2.5 h-2.5 animate-spin" />
+                              ) : (
+                                <div
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    customer.isActive
+                                      ? "bg-emerald-500 animate-pulse"
+                                      : "bg-slate-400"
+                                  }`}
+                                ></div>
+                              )}
+                              <span className="text-[10px] font-bold uppercase tracking-wider">
+                                {isToggleLoading
+                                  ? "UPDATING"
+                                  : customer.isActive
+                                    ? "ACTIVE"
+                                    : "INACTIVE"}
+                              </span>
+                            </button>
+
+                            {/* Delete button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDelete(customer);
+                              }}
+                              disabled={isDeleteLoading}
+                              className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
+                              title="Delete user"
+                            >
+                              {isDeleteLoading ? (
+                                <FiRefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <FiTrash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
                         );
                       })()}
                     </td>
@@ -310,6 +361,52 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ── */}
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 border border-slate-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                <FiAlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete User</h3>
+                <p className="text-xs text-slate-500 mt-0.5">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold text-slate-900">
+                {confirmDelete.name ||
+                  `${confirmDelete.firstName || ""} ${confirmDelete.lastName || ""}`.trim() ||
+                  "this user"}
+              </span>?
+              Their account will be permanently deactivated.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteUser(confirmDelete)}
+                className="flex-1 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all shadow-sm shadow-red-200"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
