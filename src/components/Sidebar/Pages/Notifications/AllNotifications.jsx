@@ -137,7 +137,6 @@ const AllNotifications = () => {
         return "bg-gray-100 text-gray-600";
     }
   };
-
   return (
     <div className="p-0 sm:p-4 max-w-6xl mx-auto space-y-4 animate-fade-in-up h-full pb-10">
       {/* Header Section */}

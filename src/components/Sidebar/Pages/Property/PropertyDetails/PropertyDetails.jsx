@@ -231,7 +231,7 @@ const PropertyDetails = () => {
       onSuccess: (res) => {
         if (res.success) {
           const salesRoles = [
-            "Sales Manager",
+            // "Sales Manager",
             "Sales Executive - Property Manager",
           ];
           const filtered = (res.data || []).filter((u) =>
