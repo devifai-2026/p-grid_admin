@@ -28,6 +28,7 @@ import Users from "./components/Sidebar/Pages/Users/Users";
 import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
+import AssignedEnquiries from "./components/Sidebar/Pages/Enquiry/AssignedEnquiries";
 import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
 import ExecutiveWorkBoard from "./components/Sidebar/Pages/WorkBoard/ExecutiveWorkBoard";
 import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
@@ -194,6 +195,7 @@ const AppRoutes = () => {
           {/* Others */}
           <Route path="/users" element={<Users />} />
           <Route path="/enquiry" element={<Enquiry />} />
+          <Route path="/enquiry/assigned" element={<AssignedEnquiries />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help-and-support" element={<HelpandSupport />} />
 

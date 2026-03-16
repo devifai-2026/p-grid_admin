@@ -34,7 +34,7 @@ const EnquiryCard = ({
   const isPending = item.status === "pending" || !item.status;
   const isAutoAssigning = autoAssignLoading === (item.propertyId + item.inquirerId);
   const isCurrentAssigning = assigningId === (item.id || item.propertyId);
-console.log(item)
+
   return (
     <motion.div
       layout

@@ -240,6 +240,11 @@ const buildMenuItems = (role) => {
             icon: <FiBriefcase className="w-4 h-4" />,
             link: "/users?roleName=Sales%20Manager",
           },
+          {
+            title: "Assigned Enquiries",
+            icon: <FiMessageSquare className="w-4 h-4" />,
+            link: "/enquiry/assigned",
+          },
         ],
       },
       {
