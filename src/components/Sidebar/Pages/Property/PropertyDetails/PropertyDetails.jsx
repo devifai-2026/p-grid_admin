@@ -613,7 +613,7 @@ const PropertyDetails = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PropertyDetailsCard title="Basic Information" icon={FiInfo}>
-          <InfoRow label="Property ID" value={property.propertyId} />
+          {/* <InfoRow label="Property ID" value={property.propertyId} /> */}
           <InfoRow label="Property Type" value={property.propertyType} />
           <InfoRow label="Price" value={`₹${property.sellingPrice} Cr`} />
           <InfoRow label="Building Grade" value={property.buildingGrade} />

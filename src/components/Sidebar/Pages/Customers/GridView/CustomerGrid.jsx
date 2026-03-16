@@ -338,7 +338,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                             </button>
 
                             {/* Delete button */}
-                            <button
+                            {/* <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setConfirmDelete(customer);
@@ -352,7 +352,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                               ) : (
                                 <FiTrash2 className="w-3.5 h-3.5" />
                               )}
-                            </button>
+                            </button> */}
                           </div>
                         );
                       })()}
