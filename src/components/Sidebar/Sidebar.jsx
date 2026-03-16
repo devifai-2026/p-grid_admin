@@ -157,7 +157,7 @@ const buildMenuItems = (role) => {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
         submenus: [
-          { title: "My Property", link: "/property/property-details" },
+          // { title: "My Property", link: "/property/property-details" },
           { title: "Property Pool", link: "/property/property-grid" },
           { title: "Add Property", link: "/property/add-property" },
         ],

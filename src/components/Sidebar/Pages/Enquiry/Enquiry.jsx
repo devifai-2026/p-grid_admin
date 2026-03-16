@@ -112,16 +112,24 @@ const Enquiry = () => {
   const filteredInquiries = useMemo(() => {
     return inquiries.filter((item) => {
       const propTitle =
-        `${item.property?.propertyType || ""} ${item.property?.city || ""}`.toLowerCase();
-      const inquirerName =
-        `${item.inquirer?.firstName || ""} ${item.inquirer?.lastName || ""}`.toLowerCase();
+        `${item.property?.propertyType || ""} ${item.property?.city || ""} ${item.property?.microMarket || ""}`.toLowerCase();
+      const inquirerInfo =
+        `${item.inquirer?.firstName || ""} ${item.inquirer?.lastName || ""} ${item.inquirer?.email || ""}`.toLowerCase();
       const idMatch = (item.propertyId || "").toLowerCase();
       const search = searchTerm.toLowerCase();
 
+      // Check inquiry content (Timeline)
+      const inquiryText = (item.inquiry || "").toLowerCase();
+      const inquiriesText = (item.inquiries || [])
+        .map((i) => `${i.question || ""} ${i.answer || ""}`.toLowerCase())
+        .join(" ");
+
       return (
         propTitle.includes(search) ||
-        inquirerName.includes(search) ||
-        idMatch.includes(search)
+        inquirerInfo.includes(search) ||
+        idMatch.includes(search) ||
+        inquiryText.includes(search) ||
+        inquiriesText.includes(search)
       );
     });
   }, [inquiries, searchTerm]);

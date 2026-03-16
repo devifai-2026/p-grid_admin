@@ -58,12 +58,15 @@ export const NotificationProvider = ({ children }) => {
       [
         {
           id: Date.now(),
+          ...newNotif,
+          propertyId: newNotif.propertyId,
           title: newNotif.title,
           message: newNotif.message,
           time: "just now",
           read: false,
           type: newNotif.type || "info",
           createdAt: new Date().toISOString(),
+          data: newNotif,
         },
         ...prev,
       ].slice(0, 50),

@@ -67,8 +67,18 @@ const SalesAgents = () => {
     fetchAgents();
   }, [fetchAgents, refreshKey]);
 
+  const isAuthorizedToChangeStatus = ["Admin", "Super Admin", "Sales Manager"].includes(
+    currentUser?.role,
+  );
+
   const toggleUserStatus = (e, agent) => {
     e.stopPropagation();
+
+    if (!isAuthorizedToChangeStatus) {
+      alert("You do not have permission to change user status.");
+      return;
+    }
+
     const userId = agent.userId || agent.id;
     if (!userId) return;
 
@@ -315,16 +325,22 @@ const SalesAgents = () => {
                           return (
                             <button
                               onClick={(e) => toggleUserStatus(e, agent)}
-                              disabled={isToggleLoading || agId === currentUser?.userId}
+                              disabled={
+                                isToggleLoading ||
+                                agId === currentUser?.userId ||
+                                !isAuthorizedToChangeStatus
+                              }
                               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
-                                isToggleLoading || agId === currentUser?.userId
+                                isToggleLoading ||
+                                agId === currentUser?.userId ||
+                                !isAuthorizedToChangeStatus
                                   ? "bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-70"
                                   : agent.isActive !== false
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
                                     : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
                               }`}
                               title={
-                                isToggleLoading
+                                isToggleLoading || !isAuthorizedToChangeStatus
                                   ? ""
                                   : `Click to mark as ${agent.isActive !== false ? "Inactive" : "Active"}`
                               }

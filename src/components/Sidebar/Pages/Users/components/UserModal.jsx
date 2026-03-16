@@ -302,6 +302,7 @@ const UserModal = ({
                       disabled={!!editingId}
                       className={`w-full px-4 py-2 bg-slate-900 text-white rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 border-0 transition-all text-[10px] font-black uppercase tracking-widest shadow-lg ${!!editingId ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
+                      {/* <option value="Super Admin">Super Admin</option> */}
                       <option value="Admin">Admin</option>
                       <option value="Sales Manager">Sales Manager</option>
                       <option value="Sales Executive - Client Dealer">

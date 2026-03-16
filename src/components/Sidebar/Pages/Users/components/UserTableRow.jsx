@@ -55,7 +55,8 @@ const UserTableRow = ({
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={() => onEdit(user)}
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              disabled={user.role === "Super Admin"}
+              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:text-gray-400 disabled:bg-gray-100"
               title="Edit"
             >
               <FiEdit2 className="w-4 h-4" />
