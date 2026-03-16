@@ -159,23 +159,45 @@ const ExecutiveWorkBoard = () => {
 
   // Compute Real counts for KPIs and Pills
   const counts = useMemo(() => {
+    const userAlreadyVerified = (p) =>
+      p.verificationLogs?.some((log) => log.userId === user?.userId);
+    // Under Review = the LAST (most recent) note is still pending admin approval
+    const lastNoteIsPending = (p) => {
+      if (!p.managerNotes?.length) return false;
+      const sorted = [...p.managerNotes].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
+      return sorted[0].status === "pending";
+    };
+
     return {
       total: properties.length,
       yetToVerify: properties.filter(
         (p) =>
-          !p.isVerified ||
-          p.isVerified === "false" ||
-          p.isVerified === "pending",
+          p.isVerified === "pending" ||
+          (p.isVerified === "partial" && !userAlreadyVerified(p)),
       ).length,
-      underReview: properties.filter((p) => p.isVerified === "partial").length,
-      hasNotes: properties.filter((p) => p.verificationLogs?.length > 0).length,
+      // Under Review = most recent note is awaiting admin approval
+      underReview: properties.filter((p) => lastNoteIsPending(p)).length,
+      hasNotes: properties.filter((p) => p.managerNotes?.length > 0).length,
       ownerUpdates: properties.filter((p) => p.updatedByRole === "Owner")
         .length,
       unread: properties.filter((p) => p.hasUnreadNotes).length,
     };
-  }, [properties]);
+  }, [properties, user]);
 
   const filteredProperties = useMemo(() => {
+    const userAlreadyVerified = (p) =>
+      p.verificationLogs?.some((log) => log.userId === user?.userId);
+    // Under Review = the LAST (most recent) note is still pending admin approval
+    const lastNoteIsPending = (p) => {
+      if (!p.managerNotes?.length) return false;
+      const sorted = [...p.managerNotes].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
+      return sorted[0].status === "pending";
+    };
+
     return properties.filter((p) => {
       const matchesSearch = (
         p.propertyId +
@@ -189,20 +211,20 @@ const ExecutiveWorkBoard = () => {
       let matchesTab = true;
       if (activeFilter === "yet-to-verify") {
         matchesTab =
-          !p.isVerified ||
-          p.isVerified === "false" ||
-          p.isVerified === "pending";
+          p.isVerified === "pending" ||
+          (p.isVerified === "partial" && !userAlreadyVerified(p));
       } else if (activeFilter === "under-review") {
-        matchesTab = p.isVerified === "partial";
+        // Under Review = most recent note is pending admin approval
+        matchesTab = lastNoteIsPending(p);
       } else if (activeFilter === "has-notes") {
-        matchesTab = p.verificationLogs?.length > 0;
+        matchesTab = p.managerNotes?.length > 0;
       } else if (activeFilter === "owner-updates") {
         matchesTab = p.updatedByRole === "Owner";
       }
 
       return matchesSearch && matchesTab;
     });
-  }, [properties, searchTerm, activeFilter]);
+  }, [properties, searchTerm, activeFilter, user]);
 
   const handleVerify = async (e, id) => {
     e.stopPropagation();
@@ -276,7 +298,7 @@ const ExecutiveWorkBoard = () => {
           {
             label: "UNDER REVIEW",
             value: counts.underReview,
-            sub: "Waiting for manager",
+            sub: "Waiting for Admin Approval",
             color: "border-blue-500",
             icon: <FiCheckCircle />,
           },
@@ -405,12 +427,18 @@ const ExecutiveWorkBoard = () => {
                   >
                     <div className="flex justify-between items-center mb-5">
                       <div className="flex gap-2">
-                        {p.isVerified === "partial" &&
-                          p.updatedByRole !== "Owner" && (
+                        {/* Under Review badge: LAST (most recent) note is pending admin approval */}
+                        {(() => {
+                          if (!p.managerNotes?.length) return null;
+                          const lastNote = [...p.managerNotes].sort(
+                            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                          )[0];
+                          return lastNote.status === "pending" ? (
                             <span className="bg-blue-500 text-white shadow-md shadow-blue-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
-                              Under Review
+                              ⏳ Under Review
                             </span>
-                          )}
+                          ) : null;
+                        })()}
                         {p.updatedByRole === "Owner" ? (
                           <span className="bg-[#e05252] text-white shadow-md shadow-red-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
                             <span role="img" aria-label="megaphone">
@@ -419,7 +447,13 @@ const ExecutiveWorkBoard = () => {
                             Owner Update
                           </span>
                         ) : (
-                          p.verificationLogs?.length > 0 && (
+                          p.managerNotes?.length > 0 &&
+                          (() => {
+                            const lastNote = [...p.managerNotes].sort(
+                              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                            )[0];
+                            return lastNote.status !== "pending";
+                          })() && (
                             <span className="bg-orange-500 text-white shadow-md shadow-orange-500/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
                               <span role="img" aria-label="memo">
                                 📝
@@ -559,8 +593,8 @@ const ExecutiveWorkBoard = () => {
                           }}
                         >
                           <FiMessageSquare />
-                          {p.verificationLogs?.length > 0
-                            ? `${p.verificationLogs.length} Notes`
+                          {p.managerNotes?.length > 0
+                            ? `${p.managerNotes.length} Notes`
                             : "No notes"}
                         </span>
                       </td>
@@ -577,9 +611,10 @@ const ExecutiveWorkBoard = () => {
                           >
                             <FiEye size={14} />
                           </button>
-                          {(!p.isVerified ||
-                            p.isVerified === "false" ||
-                            p.isVerified === "pending") && (
+                          {p.isVerified !== "completed" &&
+                            !p.verificationLogs?.some(
+                              (log) => log.userId === user?.userId,
+                            ) && (
                             <button
                               onClick={(e) => handleVerify(e, p.propertyId)}
                               className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-all flex items-center gap-1 font-bold"
@@ -614,6 +649,7 @@ const ExecutiveWorkBoard = () => {
           setSelectedPropertyForNotes(null);
         }}
         property={selectedPropertyForNotes}
+        onNoteAdded={fetchProperties}
       />
 
       <AssignPropertyModal

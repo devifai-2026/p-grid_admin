@@ -458,7 +458,7 @@ const EmptyNotes = ({ canWrite }) => (
 );
 
 // ─── Main Modal ────────────────────────────────────────────────────────────────
-const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
+const NotesAndActivityModal = ({ isOpen, onClose, property, onNoteAdded }) => {
   const { user } = useAuth();
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
@@ -533,6 +533,8 @@ const NotesAndActivityModal = ({ isOpen, onClose, property }) => {
           showSuccess("Note submitted for admin review! ✅");
           setNewNote("");
           loadNotes();
+          // Refetch parent list to update badges/counts (Under Review, etc.)
+          onNoteAdded?.();
         } else {
           showError(res.message || "Failed to submit note");
         }
