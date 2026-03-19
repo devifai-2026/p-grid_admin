@@ -1,5 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import { FiX, FiCheck, FiClock, FiTrash2 } from "react-icons/fi";
+import {
+  FiX,
+  FiCheck,
+  FiClock,
+  FiTrash2,
+  FiPlusCircle,
+  FiEdit,
+  FiUserPlus,
+  FiFileText,
+  FiCheckCircle,
+  FiXCircle,
+  FiMessageSquare,
+  FiBell,
+} from "react-icons/fi";
 
 const Notifications = ({
   notifications,
@@ -12,6 +25,35 @@ const Notifications = ({
   className = "",
 }) => {
   const navigate = useNavigate();
+
+  const getNotificationIcon = (title) => {
+    const t = title?.toLowerCase() || "";
+    if (t.includes("created") || t.includes("new property"))
+      return <FiPlusCircle size={18} />;
+    if (t.includes("updated")) return <FiEdit size={18} />;
+    if (t.includes("assigned")) return <FiUserPlus size={18} />;
+    if (t.includes("note pending")) return <FiFileText size={18} />;
+    if (t.includes("note added") || t.includes("client note"))
+      return <FiMessageSquare size={18} />;
+    if (t.includes("note accepted") || t.includes("verified"))
+      return <FiCheckCircle size={18} />;
+    if (t.includes("note declined") || t.includes("unassigned"))
+      return <FiXCircle size={18} />;
+    return <FiBell size={18} />;
+  };
+
+  const getIconColor = (title, type) => {
+    const t = title?.toLowerCase() || "";
+    if (t.includes("declined") || t.includes("unassigned"))
+      return "bg-red-100 text-red-600";
+    if (t.includes("accepted") || t.includes("verified") || t.includes("success"))
+      return "bg-green-100 text-green-600";
+    if (t.includes("pending")) return "bg-yellow-100 text-yellow-600";
+    if (t.includes("updated")) return "bg-blue-100 text-blue-600";
+    if (t.includes("created") || t.includes("assigned"))
+      return "bg-indigo-100 text-indigo-600";
+    return "bg-gray-100 text-gray-600";
+  };
   return (
     <div
       className={`absolute w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-fade-in-down ${className}`}
@@ -64,17 +106,14 @@ const Notifications = ({
                     propId ? "cursor-pointer" : ""
                   } ${!notification.read ? "bg-red-50/30" : ""}`}
                 >
-                  {/* Icon/Avatar Placeholder */}
+                  {/* Icon Container */}
                   <div
-                    className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      notification.type === "success"
-                        ? "bg-green-100 text-green-600"
-                        : notification.type === "alert"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-blue-100 text-blue-600"
-                    }`}
+                    className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(
+                      notification.title,
+                      notification.type
+                    )}`}
                   >
-                    {notification.icon || <FiClock size={18} />}
+                    {getNotificationIcon(notification.title)}
                   </div>
 
                   {/* Content */}
@@ -91,9 +130,45 @@ const Notifications = ({
                         {notification.time}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
-                      {notification.message}
-                    </p>
+                    <div className="mt-1 space-y-1.5">
+                      {notification.message.includes("\n") ? (
+                        <>
+                          <p className="text-[11px] font-bold text-gray-800 leading-snug">
+                            {notification.message.split("\n")[0]}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {notification.message
+                              .split("\n")
+                              .slice(1, 4)
+                              .map((line, idx) => {
+                                const parts = line.split(":");
+                                if (parts.length < 2) return null;
+                                const label = parts[0].replace("•", "").trim();
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-md flex items-center gap-1"
+                                  >
+                                    <span className="text-[9px] text-[#EE2529] font-bold">
+                                      {label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            {notification.message.split("\n").length > 4 && (
+                              <span className="text-[9px] text-gray-400 font-bold self-center">
+                                +{notification.message.split("\n").length - 4}{" "}
+                                more
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+                          {notification.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Actions */}

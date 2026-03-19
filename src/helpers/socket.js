@@ -85,6 +85,10 @@ export const subscribeToNotifications = (cb) => {
     cb({ ...data, type: "warning", title: "Property Unassigned" });
   });
 
+  socket.on("property:updated", (data) => {
+    cb({ ...data, type: "info", title: "Property Updated" });
+  });
+
   socket.on("property:verified", (data) => {
     cb({ ...data, type: "success", title: "Property Verified" });
   });

@@ -6,7 +6,14 @@ import {
   FiTrash2,
   FiFilter,
   FiSearch,
-  FiMoreVertical,
+  FiPlusCircle,
+  FiEdit,
+  FiUserPlus,
+  FiFileText,
+  FiCheckCircle,
+  FiXCircle,
+  FiMessageSquare,
+  FiShield,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
@@ -125,17 +132,33 @@ const AllNotifications = () => {
     }
   };
 
-  const getIconColor = (type) => {
-    switch (type) {
-      case "alert":
-        return "bg-red-100 text-red-600";
-      case "success":
-        return "bg-green-100 text-green-600";
-      case "info":
-        return "bg-blue-100 text-blue-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
+  const getNotificationIcon = (title) => {
+    const t = title?.toLowerCase() || "";
+    if (t.includes("created") || t.includes("new property"))
+      return <FiPlusCircle size={20} />;
+    if (t.includes("updated")) return <FiEdit size={20} />;
+    if (t.includes("assigned")) return <FiUserPlus size={20} />;
+    if (t.includes("note pending")) return <FiFileText size={20} />;
+    if (t.includes("note added") || t.includes("client note"))
+      return <FiMessageSquare size={20} />;
+    if (t.includes("note accepted") || t.includes("verified"))
+      return <FiCheckCircle size={20} />;
+    if (t.includes("note declined") || t.includes("unassigned"))
+      return <FiXCircle size={20} />;
+    return <FiBell size={20} />;
+  };
+
+  const getIconColor = (title, type) => {
+    const t = title?.toLowerCase() || "";
+    if (t.includes("declined") || t.includes("unassigned"))
+      return "bg-red-100 text-red-600";
+    if (t.includes("accepted") || t.includes("verified") || t.includes("success"))
+      return "bg-green-100 text-green-600";
+    if (t.includes("pending")) return "bg-yellow-100 text-yellow-600";
+    if (t.includes("updated")) return "bg-blue-100 text-blue-600";
+    if (t.includes("created") || t.includes("assigned"))
+      return "bg-indigo-100 text-indigo-600";
+    return "bg-gray-100 text-gray-600";
   };
   return (
     <div className="p-0 sm:p-4 max-w-6xl mx-auto space-y-4 animate-fade-in-up h-full pb-10">
@@ -243,16 +266,11 @@ const AllNotifications = () => {
                   {/* Icon Container */}
                   <div
                     className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${getIconColor(
-                      notification.type,
+                      notification.title,
+                      notification.type
                     )}`}
                   >
-                    {notification.type === "alert" ? (
-                      <FiBell size={20} />
-                    ) : notification.type === "success" ? (
-                      <FiCheck size={20} />
-                    ) : (
-                      <FiClock size={20} />
-                    )}
+                    {getNotificationIcon(notification.title)}
                   </div>
 
                   {/* Content Area */}
@@ -267,9 +285,69 @@ const AllNotifications = () => {
                       </h3>
                     </div>
 
-                    <p className="text-gray-500 text-xs sm:text-sm mt-1.5 line-clamp-2 leading-relaxed font-medium">
-                      {notification.message}
-                    </p>
+                    <div className="mt-1.5 space-y-2">
+                      {notification.message.includes("\n") ? (
+                        <>
+                          <p className="text-xs sm:text-sm font-bold text-gray-800 leading-tight">
+                            {notification.message.split("\n")[0]}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pt-1">
+                            {notification.message
+                              .split("\n")
+                              .slice(1)
+                              .map((line, idx) => {
+                                const parts = line.split(":");
+                                if (parts.length < 2) return null;
+                                const label = parts[0].replace("•", "").trim();
+                                const valParts = parts[1].split("→");
+                                if (valParts.length < 2)
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="bg-gray-50/50 p-2 rounded-xl border border-gray-100 flex flex-col"
+                                    >
+                                      <span className="text-[10px] uppercase text-gray-400 font-bold tracking-tight">
+                                        {label}
+                                      </span>
+                                      <span className="text-[11px] font-semibold text-gray-600">
+                                        {parts[1].trim()}
+                                      </span>
+                                    </div>
+                                  );
+
+                                const oldVal = valParts[0].trim();
+                                const newVal = valParts[1].trim();
+
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="bg-gray-50/50 p-2 rounded-xl border border-gray-100 flex flex-col hover:border-[#EE2529]/20 hover:bg-white transition-all group/item"
+                                  >
+                                    <span className="text-[10px] uppercase text-gray-400 font-bold tracking-tight mb-0.5">
+                                      {label}
+                                    </span>
+                                    <div className="flex items-center flex-wrap gap-1 text-[11px] font-bold">
+                                      <span className="text-gray-400 line-through decoration-red-200">
+                                        {oldVal}
+                                      </span>
+                                      <div className="w-4 h-4 rounded-full bg-blue-50 flex items-center justify-center">
+                                        <div className="w-1.5 h-1.5 border-t-2 border-r-2 border-blue-400 rotate-45 ml-[-1px]" />
+                                      </div>
+                                      <span className="text-green-600 bg-green-50 px-1.5 py-0.5 rounded-md">
+                                        {newVal}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 text-xs sm:text-sm leading-relaxed font-medium line-clamp-2">
+                          {notification.message}
+                        </p>
+                      )}
+                    </div>
 
                     {/* Status & Actions */}
                     <div className="flex items-center justify-between mt-4">

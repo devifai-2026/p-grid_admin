@@ -86,6 +86,7 @@ export const NotificationProvider = ({ children }) => {
         route: `/admin/notifications?page=${page}&limit=10`,
         onSuccess: (res) => {
           if (res.success && res.data) {
+            console.log(res.data)
             const formattedAlerts = res.data.map((n) => ({
               id: n.id,
               propertyId: n.propertyId,
