@@ -9,6 +9,9 @@ import {
   FiUsers,
   FiTrash2,
   FiAlertTriangle,
+  FiCheckCircle,
+  FiXCircle,
+  FiShield,
 } from "react-icons/fi";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
@@ -23,6 +26,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [statusLoadingId, setStatusLoadingId] = useState(null);
+  const [verifyLoadingId, setVerifyLoadingId] = useState(null);
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null); // holds the customer object to delete
   const fetchCustomers = useCallback(() => {
@@ -78,6 +82,37 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
       onError: (err) => {
         console.error("Error toggling user status:", err);
         setStatusLoadingId(null);
+      },
+    });
+  };
+  
+  const toggleVerificationStatus = (e, customer) => {
+    e.stopPropagation();
+    const userId = customer.userId || customer.id;
+    if (!userId) return;
+
+    setVerifyLoadingId(userId);
+    const newStatus = !customer.isVerified;
+
+    apiCall.put({
+      route: `/admin/users/${userId}`,
+      payload: { isVerified: newStatus },
+      onSuccess: (res) => {
+        if (res.success) {
+          setCustomers((prev) =>
+            prev.map((c) => {
+              const currentId = c.userId || c.id;
+              return currentId === userId ? { ...c, isVerified: newStatus } : c;
+            })
+          );
+        }
+        setVerifyLoadingId(null);
+      },
+      onError: (err) => {
+        console.error("Error toggling verification status:", err);
+        const msg =  err?.data?.message || "Failed to update verification status";
+        alert(msg);
+        setVerifyLoadingId(null);
       },
     });
   };
@@ -198,8 +233,8 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden lg:table-cell">
                     Business / Location
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-                    Role
+                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
+                    {roleName === "Broker" ? "Verify" : "Role"}
                   </th>
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
                     Actions
@@ -287,10 +322,48 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                       </div>
                     </td>
 
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-100">
-                        {customer.role || roleName}
-                      </span>
+                    <td className="px-6 py-4 text-right">
+                      {roleName === "Broker" ? (
+                        <button
+                          onClick={(e) => toggleVerificationStatus(e, customer)}
+                          disabled={
+                            verifyLoadingId === (customer.userId || customer.id) ||
+                            !["Admin", "Super Admin"].includes(currentUser?.role)
+                          }
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 border ${
+                            verifyLoadingId === (customer.userId || customer.id) ||
+                            !["Admin", "Super Admin"].includes(currentUser?.role)
+                              ? "bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-70"
+                              : customer.isVerified
+                                ? "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100"
+                                : "bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100"
+                          }`}
+                          title={
+                            verifyLoadingId === (customer.userId || customer.id)
+                              ? ""
+                              : `Click to ${customer.isVerified ? "unverify" : "verify"}`
+                          }
+                        >
+                          {verifyLoadingId === (customer.userId || customer.id) ? (
+                            <FiRefreshCw className="w-2.5 h-2.5 animate-spin" />
+                          ) : customer.isVerified ? (
+                            <FiCheckCircle className="w-3.5 h-3.5" />
+                          ) : (
+                            <FiXCircle className="w-3.5 h-3.5" />
+                          )}
+                          <span className="text-[10px] font-bold uppercase tracking-wider">
+                            {verifyLoadingId === (customer.userId || customer.id)
+                              ? "UPDATING"
+                              : customer.isVerified
+                                ? "VERIFIED"
+                                : "NOT VERIFIED"}
+                          </span>
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-100">
+                          {customer.role || roleName}
+                        </span>
+                      )}
                     </td>
 
                     <td className="px-6 py-4 text-right">
@@ -336,23 +409,6 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                                     : "INACTIVE"}
                               </span>
                             </button>
-
-                            {/* Delete button */}
-                            {/* <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setConfirmDelete(customer);
-                              }}
-                              disabled={isDeleteLoading}
-                              className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
-                              title="Delete user"
-                            >
-                              {isDeleteLoading ? (
-                                <FiRefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <FiTrash2 className="w-3.5 h-3.5" />
-                              )}
-                            </button> */}
                           </div>
                         );
                       })()}

@@ -28,8 +28,8 @@ const Notifications = ({
 
   const getNotificationIcon = (title) => {
     const t = title?.toLowerCase() || "";
-    if (t.includes("created") || t.includes("new property"))
-      return <FiPlusCircle size={18} />;
+    if (t.includes("created") || t.includes("new property") || t.includes("registered") || t.includes("registration"))
+      return <FiPlusCircle size={20} />;
     if (t.includes("updated")) return <FiEdit size={18} />;
     if (t.includes("assigned")) return <FiUserPlus size={18} />;
     if (t.includes("note pending")) return <FiFileText size={18} />;
@@ -39,6 +39,8 @@ const Notifications = ({
       return <FiCheckCircle size={18} />;
     if (t.includes("note declined") || t.includes("unassigned"))
       return <FiXCircle size={18} />;
+    if (t.includes("new broker"))
+      return <FiUserPlus size={18} />;
     return <FiBell size={18} />;
   };
 
@@ -50,7 +52,7 @@ const Notifications = ({
       return "bg-green-100 text-green-600";
     if (t.includes("pending")) return "bg-yellow-100 text-yellow-600";
     if (t.includes("updated")) return "bg-blue-100 text-blue-600";
-    if (t.includes("created") || t.includes("assigned"))
+    if (t.includes("created") || t.includes("assigned") || t.includes("new broker"))
       return "bg-indigo-100 text-indigo-600";
     return "bg-gray-100 text-gray-600";
   };

@@ -92,4 +92,8 @@ export const subscribeToNotifications = (cb) => {
   socket.on("property:verified", (data) => {
     cb({ ...data, type: "success", title: "Property Verified" });
   });
+
+  socket.on("broker:registered", (data) => {
+    cb({ ...data, type: "success", title: "New Broker" });
+  });
 };
