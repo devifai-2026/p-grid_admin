@@ -156,6 +156,7 @@ const ClientDetails = () => {
             <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden shadow-2xl border-4 border-white shrink-0 bg-slate-100 ring-1 ring-slate-100">
               <img
                 src={
+                  client.brokerProfile?.profilePhoto ||
                   client.profilePicture ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(client.firstName + " " + client.lastName)}&background=ef4444&color=fff&size=512`
                 }

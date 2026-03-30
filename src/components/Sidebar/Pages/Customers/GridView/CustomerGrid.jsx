@@ -230,9 +230,11 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden md:table-cell">
                     Contact Details
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden lg:table-cell">
-                    Business / Location
-                  </th>
+                  {roleName === "Broker" && (
+                    <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest hidden lg:table-cell">
+                      Business / Location
+                    </th>
+                  )}
                   <th className="px-6 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest text-right">
                     {roleName === "Broker" ? "Verify" : "Role"}
                   </th>
@@ -257,11 +259,13 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                         <div className="relative flex-shrink-0">
                           <img
                             src={
-                              customer.profilePicture ||
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                customer.name ||
-                                  `${customer.firstName || "U"} ${customer.lastName || ""}`,
-                              )}&background=random`
+                              (roleName === "Broker" && customer.brokerProfile?.profilePhoto)
+                                ? customer.brokerProfile.profilePhoto
+                                : customer.profilePicture ||
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    customer.name ||
+                                      `${customer.firstName || "U"} ${customer.lastName || ""}`,
+                                  )}&background=random`
                             }
                             alt={customer.name}
                             className="w-11 h-11 rounded-xl object-cover shadow-sm ring-2 ring-white group-hover:ring-red-50 transition-all border border-slate-100"
@@ -306,21 +310,50 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 hidden lg:table-cell">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                          <FiMapPin className="w-4 h-4 text-orange-500" />
+                    {roleName === "Broker" && (
+                      <td className="px-6 py-4 hidden lg:table-cell">
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <FiMapPin className="w-4 h-4 text-orange-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-700 truncate max-w-[180px]">
+                              {customer.brokerProfile?.companyName || customer.reraNumber || "—"}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {customer.brokerProfile?.locality || "No locality set"}
+                            </p>
+                            {customer.brokerProfile?.specializations?.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {customer.brokerProfile.specializations.slice(0, 2).map((s) => (
+                                  <span
+                                    key={s}
+                                    className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-100"
+                                  >
+                                    {s}
+                                  </span>
+                                ))}
+                                {customer.brokerProfile.specializations.length > 2 && (
+                                  <span className="text-[9px] text-slate-400 font-medium self-center">
+                                    +{customer.brokerProfile.specializations.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {customer.brokerProfile?.dealsClosed !== undefined && (
+                              <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">
+                                {customer.brokerProfile.dealsClosed} deals closed
+                              </p>
+                            )}
+                            {!customer.brokerProfile && (
+                              <span className="text-[10px] text-amber-600 font-semibold">
+                                Profile incomplete
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-700">
-                            {customer.reraNumber || "Micro Market"}
-                          </p>
-                          <p className="text-[10px] text-slate-400 font-medium">
-                            {customer.microMarket || "Noida/NCR"}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                      </td>
+                    )}
 
                     <td className="px-6 py-4 text-right">
                       {roleName === "Broker" ? (
