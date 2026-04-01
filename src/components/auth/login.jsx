@@ -101,15 +101,21 @@ const Login = ({ onLogin }) => {
       onSuccess: (res) => {
         setIsSubmitting(false);
         if (res.success) {
-          if (
-            res.data.role === "Owner" ||
-            res.data.role === "Broker" ||
-            res.data.role === "Investor"
-          ) {
+          const userRoles = res.data.roles || [];
+          const isRestrictedRole = userRoles.every((role) =>
+            ["Owner", "Broker", "Investor"].includes(role),
+          );
+
+          if (isRestrictedRole && userRoles.length > 0) {
             setError(
               "You are not authorized to login, only Admin, Sales Manager, Sales Executive and Super Admin can login",
             );
             return;
+          }
+
+          // Ensure a primary role is set for backward compatibility
+          if (!res.data.role && userRoles.length > 0) {
+            res.data.role = userRoles[0];
           }
           // Add pulse animation to button
           const loginBtn = e.target.querySelector('button[type="submit"]');

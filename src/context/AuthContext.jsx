@@ -38,9 +38,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
+    const userWithRole = {
+      ...userData,
+      role: userData.role || (Array.isArray(userData.roles) ? userData.roles[0] : null),
+    };
+    localStorage.setItem("user", JSON.stringify(userWithRole));
     localStorage.setItem("isLoggedIn", "true");
-    setUserState(userData);
+    setUserState(userWithRole);
     setIsLoggedIn(true);
   };
 
