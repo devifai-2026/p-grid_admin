@@ -158,7 +158,7 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
 
     return matchesSearch;
   });
-
+console.log(customers)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6">
       {/* Header */}
@@ -259,13 +259,13 @@ const CustomerGrid = ({ roleTitle, roleName }) => {
                         <div className="relative flex-shrink-0">
                           <img
                             src={
-                              (roleName === "Broker" && customer.brokerProfile?.profilePhoto)
-                                ? customer.brokerProfile.profilePhoto
-                                : customer.profilePicture ||
-                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    customer.name ||
-                                      `${customer.firstName || "U"} ${customer.lastName || ""}`,
-                                  )}&background=random`
+                              customer.brokerProfile?.profilePhoto ||
+                              customer.profilePhoto ||
+                              customer.profilePicture ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                customer.name ||
+                                  `${customer.firstName || "U"} ${customer.lastName || ""}`,
+                              )}&background=random`
                             }
                             alt={customer.name}
                             className="w-11 h-11 rounded-xl object-cover shadow-sm ring-2 ring-white group-hover:ring-red-50 transition-all border border-slate-100"
