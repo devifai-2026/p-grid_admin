@@ -30,7 +30,7 @@ const ENV_CONFIG = {
 };
 const env_ = 
   import.meta.env.PROD || 
-  (isBrowser && window.location.hostname.includes("netlify.app")) || 
+  (isBrowser && (window.location.hostname.includes("netlify.app") || window.location.hostname.includes("vercel.app"))) || 
   !isLocalhost 
     ? "prod" : "local";
 
