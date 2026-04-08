@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
-import { FaFacebook, FaTwitter } from 'react-icons/fa';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { FiPhone, FiLock, FiCheck } from "react-icons/fi";
+import { apiCall } from "../../helpers/apicall/apiCall";
+import { showToast } from "../../helpers/swalHelper";
+import AOS from "aos";
+
+import "aos/dist/aos.css";
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [showOtpField, setShowOtpField] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    email: 'preleaseadmin@gmail.com',
-    password: '123456'
+    mobileNumber: "",
+    otp: "",
+    verificationId: "",
   });
 
   // Initialize AOS
@@ -21,86 +24,144 @@ const Login = ({ onLogin }) => {
       duration: 1000,
       once: true,
       offset: 100,
-      easing: 'ease-out-cubic',
+      easing: "ease-out-cubic",
     });
-    
+
     // Refresh AOS after component mounts
     setTimeout(() => {
       AOS.refresh();
     }, 100);
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Dummy login - check for specific credentials
-    if (formData.email === 'preleaseadmin@gmail.com' && formData.password === '123456') {
-      console.log('Login successful with admin credentials');
-      
-      // Add animation before redirect
-      const loginBtn = e.target.querySelector('button[type="submit"]');
-      if (loginBtn) {
-        loginBtn.classList.add('animate-pulse');
-      }
-      
-      // Call the onLogin callback to update authentication state
-      if (onLogin) {
-        onLogin();
-      }
-      
-      // Redirect to dashboard after animation
-      setTimeout(() => {
-        navigate('/dashboard/analytics');
-      }, 800);
-    } else {
-      // Shake animation for invalid credentials
-      const form = e.target;
-      form.classList.add('shake-animation');
-      setTimeout(() => {
-        form.classList.remove('shake-animation');
-      }, 500);
-      
-      alert('Invalid credentials. Use: preleaseadmin@gmail.com / 123456');
+  const handleSendOtp = () => {
+    setError("");
+    if (formData.mobileNumber.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
     }
+
+    setIsSubmitting(true);
+    apiCall.post({
+      route: "/send-otp", // Corrected route
+      payload: {
+        mobileNumber: formData.mobileNumber,
+      },
+      onSuccess: (res) => {
+        setIsSubmitting(false);
+        if (res.success) {
+          setFormData((prev) => ({
+            ...prev,
+            verificationId: res.data.verificationId,
+          }));
+          setShowOtpField(true);
+          // Auto-fill OTP if it was pre-filled (e.g. demo credentials)
+          if (formData.otp === "1111") {
+            // keep it
+          } else {
+            showToast("success", "OTP sent to your mobile number");
+          }
+        } else {
+          setError(res.message || "Failed to send OTP");
+        }
+      },
+      onError: (err) => {
+        setIsSubmitting(false);
+        setError(err.message || "Failed to send OTP");
+      },
+    });
   };
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Social login with ${provider}`);
-    
-    // Add click animation
-    const buttons = document.querySelectorAll(`[title*="${provider}"]`);
-    if (buttons[0]) {
-      buttons[0].classList.add('scale-animation');
-      setTimeout(() => {
-        buttons[0].classList.remove('scale-animation');
-      }, 300);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!showOtpField) {
+      handleSendOtp();
+      return;
     }
-    
-    alert(`Social login with ${provider} would be implemented here`);
+
+    if (formData.otp.length !== 6) {
+      setError("Please enter a 6-digit OTP");
+      return;
+    }
+
+    if (!formData.verificationId) {
+      setError("Verification ID missing. Please resend OTP.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    apiCall.post({
+      route: "/login", // Corrected route
+      payload: {
+        mobileNumber: formData.mobileNumber,
+        otp: formData.otp,
+        verificationId: formData.verificationId,
+      },
+      onSuccess: (res) => {
+        setIsSubmitting(false);
+        if (res.success) {
+          const userRoles = res.data.roles || [];
+          const isRestrictedRole = userRoles.every((role) =>
+            ["Owner", "Broker", "Investor"].includes(role),
+          );
+
+          if (isRestrictedRole && userRoles.length > 0) {
+            setError(
+              "You are not authorized to login, only Admin, Sales Manager, Sales Executive and Super Admin can login",
+            );
+            return;
+          }
+
+          // Ensure a primary role is set for backward compatibility
+          if (!res.data.role && userRoles.length > 0) {
+            res.data.role = userRoles[0];
+          }
+          // Add pulse animation to button
+          const loginBtn = e.target.querySelector('button[type="submit"]');
+          if (loginBtn) {
+            loginBtn.classList.add("animate-pulse");
+          }
+
+          // Call the onLogin callback with user data
+          if (onLogin) {
+            onLogin(res.data);
+          }
+          // Redirect after short delay for animation
+          setTimeout(() => {
+            navigate("/dashboard/analytics");
+          }, 800);
+        } else {
+          setError(res.message || "Login failed");
+          const form = e.target;
+          form.classList.add("shake-animation");
+          setTimeout(() => form.classList.remove("shake-animation"), 500);
+        }
+      },
+      onError: (err) => {
+        setIsSubmitting(false);
+        setError(err.data?.message || err.message || "Something went wrong");
+        const form = e.target;
+        form.classList.add("shake-animation");
+        setTimeout(() => form.classList.remove("shake-animation"), 500);
+      },
+    });
   };
 
   const handleUseAdminCredentials = () => {
-    // Auto-fill admin credentials with animation
-    const adminBtn = document.querySelector('[type="button"]:contains("Use Admin Credentials")');
-    if (adminBtn) {
-      adminBtn.classList.add('success-animation');
-      setTimeout(() => {
-        adminBtn.classList.remove('success-animation');
-      }, 1000);
-    }
-    
     setFormData({
-      email: 'preleaseadmin@gmail.com',
-      password: '123456'
+      mobileNumber: "6666666666",
+      otp: "111111",
+      verificationId: "", // Reset verification ID to force new generation
     });
-    setRememberMe(true);
-    
+    setShowOtpField(false); // Force creating new OTP flow
+
     // Animate the form fields
-    document.querySelectorAll('input').forEach((input, index) => {
+    document.querySelectorAll("input").forEach((input, index) => {
       setTimeout(() => {
-        input.classList.add('highlight-animation');
+        input.classList.add("highlight-animation");
         setTimeout(() => {
-          input.classList.remove('highlight-animation');
+          input.classList.remove("highlight-animation");
         }, 500);
       }, index * 200);
     });
@@ -121,12 +182,6 @@ const Login = ({ onLogin }) => {
             50% { transform: scale(0.9); }
           }
           
-          @keyframes success {
-            0% { background-color: #f0f0f0; }
-            50% { background-color: #d4edda; }
-            100% { background-color: #f0f0f0; }
-          }
-          
           @keyframes highlight {
             0%, 100% { border-color: #d1d5db; box-shadow: none; }
             50% { border-color: #EE2529; box-shadow: 0 0 0 3px rgba(238, 37, 41, 0.1); }
@@ -141,14 +196,6 @@ const Login = ({ onLogin }) => {
             animation: shake 0.5s ease-in-out;
           }
           
-          .scale-animation {
-            animation: scale 0.3s ease-in-out;
-          }
-          
-          .success-animation {
-            animation: success 1s ease-in-out;
-          }
-          
           .highlight-animation {
             animation: highlight 0.5s ease-in-out;
           }
@@ -156,300 +203,198 @@ const Login = ({ onLogin }) => {
           .float-animation {
             animation: float 3s ease-in-out infinite;
           }
-          
-          .pulse-animation {
-            animation: pulse 2s infinite;
-          }
-          
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-          }
         `}
       </style>
-      
+
       <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 flex items-center justify-center p-4">
-        <div 
+        <div
           className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden"
           data-aos="zoom-in"
           data-aos-delay="100"
         >
-          
           {/* Left Column - Branding/Image */}
-          <div 
+          <div
             className="hidden md:flex relative bg-gradient-to-br from-[#EE2529] to-[#C73834] p-12"
             data-aos="fade-right"
             data-aos-delay="200"
           >
+            {/* Decorative elements - Background */}
+            <div
+              className="absolute top-0 right-0 w-32 h-32 bg-red-500 opacity-20 rounded-full -translate-y-16 translate-x-16 z-0"
+              data-aos="fade-down-left"
+              data-aos-delay="700"
+            ></div>
+            <div
+              className="absolute bottom-0 left-0 w-48 h-48 bg-red-500 opacity-20 rounded-full translate-y-24 -translate-x-24 z-0"
+              data-aos="fade-up-right"
+              data-aos-delay="800"
+            ></div>
+
             <div className="relative z-10 text-white">
-              <div 
-                className="mb-8"
-                data-aos="fade-up"
-                data-aos-delay="300"
-              >
+              <div className="mb-8" data-aos="fade-up" data-aos-delay="300">
                 <h1 className="text-4xl font-bold mb-2"># PreLease</h1>
-                <h2 className="text-2xl font-light tracking-widest">LIVING LIFE</h2>
+                <h2 className="text-2xl font-light tracking-widest text-white uppercase opacity-80">
+                  Living Life
+                </h2>
               </div>
-              
-              <div 
-                className="mt-8"
-                data-aos="fade-up"
-                data-aos-delay="400"
-              >
-                <div 
+
+              <div className="mt-8" data-aos="fade-up" data-aos-delay="400">
+                <div
                   className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4 float-animation"
                   data-aos="zoom-in"
                   data-aos-delay="500"
                 >
-                  <h3 className="text-lg font-semibold mb-2">Demo Credentials</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-white">
+                    OTP Verification
+                  </h3>
                   <div className="space-y-2">
-                    <p className="text-sm">
-                      <span className="font-medium">Email:</span> preleaseadmin@gmail.com
-                    </p>
-                    <p className="text-sm">
-                      <span className="font-medium">Password:</span> 123456
+                    <p className="text-sm text-white">
+                      Enter your mobile number to receive a secure OTP. Use 1111
+                      for demo purposes.
                     </p>
                   </div>
                 </div>
-                
-                <p 
-                  className="text-lg opacity-90"
+
+                <p
+                  className="text-lg opacity-90 text-white mt-12"
                   data-aos="fade-up"
                   data-aos-delay="600"
                 >
-                  Your gateway to premium property management
+                  Your gateway to premium property management.
                 </p>
               </div>
-              
-              {/* Decorative elements */}
-              <div 
-                className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16"
-                data-aos="fade-down-left"
-                data-aos-delay="700"
-              ></div>
-              <div 
-                className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full translate-y-24 -translate-x-24"
-                data-aos="fade-up-right"
-                data-aos-delay="800"
-              ></div>
             </div>
           </div>
 
           {/* Right Column - Login Form */}
-          <div 
+          <div
             className="p-8 md:p-12 flex items-center justify-center"
             data-aos="fade-left"
             data-aos-delay="300"
           >
             <div className="w-full max-w-md">
-              <div 
-                className="md:hidden mb-8 text-center"
-                data-aos="fade-down"
-                data-aos-delay="400"
-              >
-                <h1 className="text-3xl font-bold text-[#EE2529] mb-1"># LDHomes</h1>
-                <h2 className="text-xl text-gray-600">LIVING LIFE</h2>
-                
-                {/* Demo credentials for mobile */}
-                <div 
-                  className="mt-4 p-3 bg-red-50 rounded-lg float-animation"
-                  data-aos="zoom-in"
-                  data-aos-delay="500"
-                >
-                  <h3 className="text-sm font-semibold text-[#C73834] mb-1">Demo Credentials</h3>
-                  <p className="text-xs text-gray-600">
-                    Email: preleaseadmin@gmail.com<br />
-                    Password: 123456
-                  </p>
-                </div>
-              </div>
-
-              <h3 
-                className="text-2xl font-bold text-gray-800 mb-2"
+              <h3
+                className="text-2xl font-bold text-gray-800 mb-2 uppercase"
                 data-aos="fade-right"
                 data-aos-delay="500"
               >
-                SIGN IN
+                SIGN IN -
               </h3>
-              <p 
+              <p
                 className="text-gray-600 mb-8"
                 data-aos="fade-right"
                 data-aos-delay="600"
               >
-                Enter your email address and password to access admin panel.
+                Access the admin panel securely via OTP.
               </p>
 
+              {error && (
+                <div className="mb-6 p-3 bg-red-50 border-l-4 border-[#EE2529] rounded text-red-700 text-sm shake-animation">
+                  {error}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Input */}
+                {/* Mobile Number Input */}
                 <div data-aos="fade-up" data-aos-delay="700">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                    Mobile Number
                   </label>
                   <div className="relative">
-                    <FiMail className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
+                    <FiPhone className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
                     <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      type="tel"
+                      value={formData.mobileNumber}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          mobileNumber: e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10),
+                        })
+                      }
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all duration-300 hover:border-[#EE2529]"
-                      placeholder="preleaseadmin@gmail.com"
+                      placeholder="Enter 10 digit number"
+                      disabled={showOtpField || isSubmitting}
                       required
                     />
                   </div>
                 </div>
 
-                {/* Password Input */}
-                <div data-aos="fade-up" data-aos-delay="800">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <FiLock className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all duration-300 hover:border-[#EE2529]"
-                      placeholder="123456"
-                      required
-                    />
+                {/* OTP Input */}
+                {showOtpField && (
+                  <div data-aos="fade-up" data-aos-delay="300">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                      OTP
+                    </label>
+                    <div className="relative">
+                      <FiLock className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        value={formData.otp}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            otp: e.target.value.replace(/\D/g, "").slice(0, 6),
+                          })
+                        }
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all duration-300 hover:border-[#EE2529] font-bold tracking-widest"
+                        placeholder="6 digit OTP"
+                        required
+                        autoFocus
+                      />
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition-transform hover:scale-110"
+                      onClick={() => setShowOtpField(false)}
+                      className="mt-2 text-xs text-[#EE2529] font-semibold uppercase hover:underline"
                     >
-                      {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                      Change Number?
                     </button>
                   </div>
-                </div>
+                )}
 
-                {/* Remember Me & Forgot Password */}
-                <div 
-                  className="flex items-center justify-between"
-                  data-aos="fade-up"
-                  data-aos-delay="900"
-                >
-                  <label className="flex items-center cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={`w-5 h-5 border rounded flex items-center justify-center transition-all duration-300 ${rememberMe ? 'bg-[#EE2529] border-[#EE2529] scale-110' : 'border-gray-300 group-hover:border-[#EE2529]'}`}>
-                        {rememberMe && <FiCheck className="w-4 h-4 text-white" />}
-                      </div>
-                    </div>
-                    <span className="ml-2 text-gray-700 text-sm group-hover:text-[#EE2529] transition-colors duration-300">Remember me</span>
-                  </label>
-                  
-                  <Link 
-                    to="/reset-email" 
-                    className="text-sm text-[#EE2529] hover:text-[#C73834] font-medium transition-all duration-300 hover:scale-105"
-                    data-aos="fade-left"
-                    data-aos-delay="1000"
-                  >
-                    Reset password?
-                  </Link>
-                </div>
-
-                {/* Use Admin Credentials Button */}
-                <button
-                  type="button"
-                  onClick={handleUseAdminCredentials}
-                  className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                  data-aos="zoom-in"
-                  data-aos-delay="1100"
-                >
-                  <span>🔑</span>
-                  Use Admin Credentials
-                </button>
-
-                {/* Divider */}
-                <div className="relative" data-aos="fade-up" data-aos-delay="1200">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                </div>
-
-                {/* Sign In Button */}
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-[#EE2529] to-[#C73834] hover:from-[#C73834] hover:to-[#EE2529] text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg active:scale-95"
-                  data-aos="zoom-in"
-                  data-aos-delay="1300"
-                >
-                  Sign In
-                </button>
-
-                {/* Social Login Divider */}
-                <div 
-                  className="relative text-center"
-                  data-aos="fade-up"
-                  data-aos-delay="1400"
-                >
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative inline-flex items-center bg-white px-4">
-                    <span className="text-sm text-gray-500">OR sign with</span>
-                  </div>
-                </div>
-
-                {/* Social Login Buttons */}
-                <div 
-                  className="flex justify-center gap-4"
-                  data-aos="zoom-in"
-                  data-aos-delay="1500"
-                >
+                <div className="pt-2">
                   <button
-                    type="button"
-                    onClick={() => handleSocialLogin('google')}
-                    className="w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 hover:scale-110 hover:shadow-md"
-                    title="Sign in with Google"
-                    data-aos="flip-left"
-                    data-aos-delay="1600"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-[#EE2529] to-[#C73834] hover:from-[#C73834] hover:to-[#EE2529] text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg active:scale-95 disabled:opacity-70 flex items-center justify-center uppercase tracking-widest"
+                    data-aos="zoom-in"
+                    data-aos-delay="800"
                   >
-                    <FcGoogle size={24} />
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('facebook')}
-                    className="w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 hover:scale-110 hover:shadow-md text-blue-600"
-                    title="Sign in with Facebook"
-                    data-aos="flip-left"
-                    data-aos-delay="1700"
-                  >
-                    <FaFacebook size={24} />
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('twitter')}
-                    className="w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 hover:scale-110 hover:shadow-md text-blue-400"
-                    title="Sign in with Twitter"
-                    data-aos="flip-left"
-                    data-aos-delay="1800"
-                  >
-                    <FaTwitter size={24} />
+                    {isSubmitting
+                      ? "Verifying..."
+                      : showOtpField
+                        ? "Login"
+                        : "Get OTP"}
                   </button>
                 </div>
+
+                {!showOtpField && (
+                  <button
+                    type="button"
+                    onClick={handleUseAdminCredentials}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:scale-[1.02] shadow-sm flex items-center justify-center gap-2 uppercase text-xs tracking-wider"
+                    data-aos="zoom-in"
+                    data-aos-delay="900"
+                  >
+                    🔑 Use Demo Credentials
+                  </button>
+                )}
 
                 {/* Sign Up Link */}
-                <div 
-                  className="text-center pt-4"
+                <div
+                  className="text-center pt-4 border-t border-gray-100"
                   data-aos="fade-up"
-                  data-aos-delay="1900"
+                  data-aos-delay="1000"
                 >
                   <p className="text-gray-600">
-                    New here?{' '}
-                    <Link 
-                      to="/signup" 
-                      className="text-[#EE2529] hover:text-[#C73834] font-semibold transition-all duration-300 hover:scale-105 inline-block"
+                    New to the team?{" "}
+                    <Link
+                      to="/signup"
+                      className="text-[#EE2529] hover:text-[#C73834] font-bold transition-all duration-300 hover:scale-105 inline-block"
                     >
-                      Sign Up
+                      Create Account
                     </Link>
                   </p>
                 </div>

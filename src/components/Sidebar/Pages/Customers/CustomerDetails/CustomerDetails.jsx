@@ -94,7 +94,7 @@ const CustomerDetails = () => {
       date: '12/19/2025',
       type: 'Residences',
       address: '4604, Phill Lane Kiowa',
-      amount: '$45,842',
+      amount: '₹45,842',
       status: 'Paid',
       agent: 'Michael A. Miner'
     },
@@ -103,7 +103,7 @@ const CustomerDetails = () => {
       date: '09/10/2025',
       type: 'Villas',
       address: '127, Boulevard Cockeysville',
-      amount: '$76,483',
+      amount: '₹76,483',
       status: 'Paid',
       agent: 'Theresa T. Brose'
     },
@@ -112,7 +112,7 @@ const CustomerDetails = () => {
       date: '11/14/2024',
       type: 'Bungalow',
       address: '900, Creede Wl 54913',
-      amount: '$83,644',
+      amount: '₹83,644',
       status: 'Paid',
       agent: 'Walter L. Calab'
     },
@@ -121,7 +121,7 @@ const CustomerDetails = () => {
       date: '08/21/2025',
       type: 'Apartment',
       address: '223, Creede Santa Maria',
-      amount: '$94,305',
+      amount: '₹94,305',
       status: 'Paid',
       agent: 'Olive Mize'
     },
@@ -130,7 +130,7 @@ const CustomerDetails = () => {
       date: '07/15/2025',
       type: 'Townhouse',
       address: '789, Oak Street',
-      amount: '$58,900',
+      amount: '₹58,900',
       status: 'Paid',
       agent: 'John D. Smith'
     },
@@ -139,7 +139,7 @@ const CustomerDetails = () => {
       date: '06/22/2025',
       type: 'Condo',
       address: '456, Pine Avenue',
-      amount: '$67,200',
+      amount: '₹67,200',
       status: 'Pending',
       agent: 'Sarah Johnson'
     },
@@ -148,7 +148,7 @@ const CustomerDetails = () => {
       date: '05/18/2025',
       type: 'Mansion',
       address: '123, Maple Road',
-      amount: '$125,000',
+      amount: '₹125,000',
       status: 'Paid',
       agent: 'Robert Williams'
     },
@@ -157,7 +157,7 @@ const CustomerDetails = () => {
       date: '04/12/2025',
       type: 'Duplex',
       address: '321, Elm Street',
-      amount: '$89,500',
+      amount: '₹89,500',
       status: 'Paid',
       agent: 'Lisa Anderson'
     },
@@ -166,7 +166,7 @@ const CustomerDetails = () => {
       date: '03/10/2025',
       type: 'Penthouse',
       address: '654, Skyline Blvd',
-      amount: '$210,000',
+      amount: '₹210,000',
       status: 'Paid',
       agent: 'James Wilson'
     },
@@ -175,7 +175,7 @@ const CustomerDetails = () => {
       date: '02/05/2025',
       type: 'Studio',
       address: '987, Urban Ave',
-      amount: '$35,500',
+      amount: '₹35,500',
       status: 'Pending',
       agent: 'Emily Davis'
     },
@@ -184,7 +184,7 @@ const CustomerDetails = () => {
       date: '01/15/2025',
       type: 'Farmhouse',
       address: '741, Country Rd',
-      amount: '$180,000',
+      amount: '₹180,000',
       status: 'Paid',
       agent: 'Thomas Brown'
     },
@@ -193,17 +193,17 @@ const CustomerDetails = () => {
       date: '12/20/2024',
       type: 'Cottage',
       address: '852, Lakeside Dr',
-      amount: '$95,000',
+      amount: '₹95,000',
       status: 'Paid',
       agent: 'Jessica Miller'
     }
   ];
 
   const recentTransactions = [
-    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '$13,987', txn: 'TXN-341220' },
-    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '$2,710', txn: 'TXN-836451' },
-    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '$13,987', txn: 'TXN-341220' },
-    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '$2,710', txn: 'TXN-836451' }
+    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '₹13,987', txn: 'TXN-341220' },
+    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '₹2,710', txn: 'TXN-836451' },
+    { name: 'Michael A. Miner', email: 'michaelminer@dayrep.com', amount: '₹13,987', txn: 'TXN-341220' },
+    { name: 'Theresa T. Brose', email: 'theresabrosea@dayrep.com', amount: '₹2,710', txn: 'TXN-836451' }
   ];
 
   // Calculate total pages based on current itemsPerPage
@@ -259,7 +259,7 @@ const CustomerDetails = () => {
         {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {/* Property Image */}
-          <div className="h-64 bg-gradient-to-r from-blue-500 to-indigo-600 relative overflow-hidden">
+          <div className="h-64 bg-gradient-to-r from-red-500 to-[#EE2529] relative overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&h=400&fit=crop"
               alt="Property"
@@ -274,15 +274,15 @@ const CustomerDetails = () => {
                   <img
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop"
                     alt="David Nummi"
-                    className="w-24 h-24 rounded-full border-4 border-indigo-600"
+                    className="w-24 h-24 rounded-full border-4 border-[#EE2529]"
                   />
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900">David Nummi</h1>
-                    <p className="text-indigo-600 font-semibold">EastTribune.nl</p>
+                    <p className="text-[#EE2529] font-semibold">EastTribune.nl</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-3 w-full md:w-auto">
-                  <button className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                  <button className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-[#EE2529] text-white rounded-lg hover:bg-[#D32F2F] transition-colors">
                     <FaCommentAlt className="w-4 h-4" />
                     Chat Us
                   </button>
@@ -406,7 +406,7 @@ const CustomerDetails = () => {
                     <div className="p-4 bg-slate-50 rounded-lg flex-1 hover:shadow-md transition-shadow border border-slate-100">
                       <div className="flex justify-between items-start mb-2">
                         <p className="text-sm font-semibold text-slate-900">{property.title}</p>
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">For Sale</span>
+                        <span className="text-xs font-bold text-[#EE2529] bg-red-50 px-2 py-1 rounded">For Sale</span>
                       </div>
                       <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
                         <span>📍</span> {property.address}
@@ -426,7 +426,7 @@ const CustomerDetails = () => {
           {/* Right Column - Charts and Transactions */}
           <div className="space-y-6">
             {/* Credit Card */}
-            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#EE2529] to-red-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
               <div className="absolute top-4 right-4 flex gap-2">
                 <div className="w-10 h-8 bg-yellow-400 rounded"></div>
                 <div className="w-10 h-8 bg-orange-400 rounded"></div>
@@ -459,8 +459,8 @@ const CustomerDetails = () => {
                 {recentTransactions.map((txn, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <FaBuilding className="w-5 h-5 text-indigo-600" />
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                        <FaBuilding className="w-5 h-5 text-[#EE2529]" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{txn.name}</p>
@@ -474,7 +474,7 @@ const CustomerDetails = () => {
                   </div>
                 ))}
               </div>
-              <button className="w-full mt-4 py-2 text-center text-indigo-600 font-semibold hover:bg-indigo-50 rounded-lg transition-colors">
+              <button className="w-full mt-4 py-2 text-center text-[#EE2529] font-semibold hover:bg-red-50 rounded-lg transition-colors">
                 View More
               </button>
             </div>
@@ -502,7 +502,7 @@ const CustomerDetails = () => {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <p className="text-2xl font-bold text-indigo-600">27%</p>
+                    <p className="text-2xl font-bold text-[#EE2529]">27%</p>
                     <p className="text-xs text-slate-600">Own</p>
                   </div>
                 </div>
@@ -515,14 +515,14 @@ const CustomerDetails = () => {
                 <BsGraphUp className="w-8 h-8 text-rose-500" />
                 <div>
                   <p className="text-xs text-rose-600 font-medium">Total Invest On Property</p>
-                  <p className="text-lg font-bold text-rose-700">$928,128</p>
+                  <p className="text-lg font-bold text-rose-700">₹928,128</p>
                 </div>
               </div>
               <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-4 flex items-center gap-4">
                 <BsGraphDown className="w-8 h-8 text-emerald-500" />
                 <div>
                   <p className="text-xs text-emerald-600 font-medium">Income</p>
-                  <p className="text-lg font-bold text-emerald-700">$613,321.12</p>
+                  <p className="text-lg font-bold text-emerald-700">₹613,321.12</p>
                 </div>
               </div>
             </div>
@@ -603,7 +603,7 @@ const CustomerDetails = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-600">Rows:</span>
                 <select 
-                  className="text-sm border border-slate-300 rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="text-sm border border-slate-300 rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#EE2529]"
                   value={itemsPerPage}
                   onChange={handleItemsPerPageChange}
                 >
@@ -633,7 +633,7 @@ const CustomerDetails = () => {
                       key={pageNum}
                       className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors flex-shrink-0 flex items-center justify-center ${
                         currentPage === pageNum
-                          ? 'bg-indigo-600 text-white shadow-sm'
+                          ? 'bg-[#EE2529] text-white shadow-sm'
                           : 'hover:bg-slate-100 text-slate-700 bg-white border border-slate-200 hover:border-slate-300'
                       }`}
                       onClick={() => handlePageChange(pageNum)}

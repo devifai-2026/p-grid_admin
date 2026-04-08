@@ -80,7 +80,7 @@ const SocialSource = () => {
               <FiUser className="w-5 h-5 text-gray-700" />
               <div>
                 <span className="text-sm text-gray-600">Buyers : </span>
-                <span className="font-bold text-lg text-indigo-600">70</span>
+                <span className="font-bold text-lg text-[#EE2529]">70</span>
               </div>
             </div>
 
@@ -89,7 +89,7 @@ const SocialSource = () => {
               <button className="text-left text-gray-600 hover:text-gray-800 text-sm font-medium">
                 See More Statistic
               </button>
-              <button className=" bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1 px-3  transition text-sm">
+              <button className=" bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-1 px-3  transition text-sm">
                 See Details
               </button>
             </div>
@@ -214,7 +214,7 @@ const SocialSource = () => {
                 <p className="text-sm text-gray-600">Total Property Seals :</p>
                 <p className="text-base font-bold text-gray-800">5,746</p>
               </div>
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1 px-3  transition text-sm">
+              <button className="bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-1 px-3  transition text-sm">
                 View <br /> More
               </button>
             </div>

@@ -230,7 +230,7 @@ const GridView = () => {
           </div>
 
           {/* Right: Total Seal Properties */}
-          <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 shadow-lg text-white">
+          <div className="bg-gradient-to-br from-[#EE2529] to-purple-700 rounded-2xl p-8 shadow-lg text-white">
             <div className="flex flex-col items-center justify-center h-full">
               <div className="text-center mb-4">
                 <div className="text-7xl font-bold mb-2">450</div>
@@ -271,7 +271,7 @@ const GridView = () => {
         {/* Agents Section Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
-            <p className="text-slate-500 text-sm font-medium">Showing all <span className="text-indigo-600 font-semibold">311 Agent</span></p>
+            <p className="text-slate-500 text-sm font-medium">Showing all <span className="text-[#EE2529] font-semibold">311 Agent</span></p>
           </div>
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <button className="flex-1 md:flex-none justify-center px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm flex items-center gap-2 transition-colors">
@@ -305,7 +305,7 @@ const GridView = () => {
                     <div>
                       <h3 className="font-semibold text-slate-900">{agent.name}</h3>
                       <p className="text-xs text-slate-500">{agent.email}</p>
-                      <p className="text-xs font-semibold text-indigo-600 mt-1">{agent.number}</p>
+                      <p className="text-xs font-semibold text-[#EE2529] mt-1">{agent.number}</p>
                     </div>
                   </div>
                   <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
@@ -317,13 +317,13 @@ const GridView = () => {
               {/* Agent Info */}
               <div className="px-6 py-4 space-y-3">
                 <div className="flex items-center gap-2 text-slate-700">
-                  <div className="w-5 h-5 rounded text-indigo-600 flex items-center justify-center bg-indigo-50">
+                  <div className="w-5 h-5 rounded text-[#EE2529] flex items-center justify-center bg-red-50">
                     <MdHome size={14} />
                   </div>
                   <span className="text-sm font-medium">{agent.properties} Properties</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
-                  <div className="w-5 h-5 rounded text-indigo-600 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded text-[#EE2529] flex items-center justify-center">
                     <HiOutlineLocationMarker size={14} />
                   </div>
                   <span className="text-sm">{agent.location}</span>
@@ -334,7 +334,7 @@ const GridView = () => {
               <div className="px-6 py-4 border-t border-slate-100">
                 <p className="text-xs text-slate-500 font-medium mb-3">Social Media :</p>
                 <div className="flex gap-3">
-                  <a href="#" className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-colors">
+                  <a href="#" className="text-[#EE2529] hover:bg-red-50 p-2 rounded-lg transition-colors">
                     <FaFacebookF size={18} />
                   </a>
                   <a href="#" className="text-pink-600 hover:bg-pink-50 p-2 rounded-lg transition-colors">
@@ -354,7 +354,7 @@ const GridView = () => {
 
               {/* Action Buttons */}
               <div className="px-6 py-4 border-t border-slate-100 grid grid-cols-2 gap-3">
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
+                <button className="bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
                   <FaPhone size={16} />
                   Call Us
                 </button>
@@ -382,7 +382,7 @@ const GridView = () => {
               onClick={() => setCurrentPage(page)}
               className={`px-3 py-2 rounded font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-[#EE2529] text-white'
                   : 'text-slate-600 hover:bg-slate-200'
               }`}
             >

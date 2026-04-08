@@ -1,175 +1,239 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar/Sidebar';
-import Header from './components/Header';
-import BreadCrumbs from './components/BreadCrumbs';
-import AnalyticsCards from './components/Sidebar/Pages/Dashboard/Analytics/AnalyticsCard';
-import SalesAnalytic from './components/Sidebar/Pages/Dashboard/Analytics/SalesAnalytics';
-import SocialSource from './components/Sidebar/Pages/Dashboard/Analytics/SocialSource';
-import LastTransaction from './components/Sidebar/Pages/Dashboard/Analytics/LastTransaction';
-import Agent from './components/Sidebar/Pages/Dashboard/Agent/Agent';
-import PropertyGrid from './components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid';
-import PropertyDetails from './components/Sidebar/Pages/Property/PropertyDetails/PropertyDetails';
-import AddProperty from './components/Sidebar/Pages/Property/AddProperty/AddProperty';
-import Login from './components/auth/login';
-import SignUp from './components/auth/SignUp';
-import ResetEmail from './components/auth/ResetEmail';
-import ResetOtp from './components/auth/ResetOtp';
-import ConfirmPassword from './components/auth/ConfirmPassword';
-import GridView from './components/Sidebar/Pages/Customers/GridView/GridView';
-import CustomerDetails from './components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails';
-import AddCustomer from './components/Sidebar/Pages/Customers/AddCustomer/AddCustomer';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import MainLayout from "./components/Layout/MainLayout";
+import PrivateRoute from "./helpers/PrivateRoute";
 
-const App = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); 
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+// Page Imports
+import AnalyticsPage from "./components/Sidebar/Pages/Dashboard/Analytics/AnalyticsPage";
+import Analytics from "./components/Sidebar/Pages/Dashboard/NewAnalytics/Analytics";
+import PropertyNotes from "./components/Sidebar/Pages/PropertyNotes/PropertyNotes";
+import Agent from "./components/Sidebar/Pages/Dashboard/Agent/Agent";
+import PropertyGrid from "./components/Sidebar/Pages/Property/PropertyGrid/PropertyGrid";
+import PropertyDetails from "./components/Sidebar/Pages/Property/PropertyDetails/PropertyDetails";
+import AddProperty from "./components/Sidebar/Pages/Property/AddProperty/AddProperty";
+import GridView from "./components/Sidebar/Pages/Customers/GridView/GridView";
+import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails";
+import ClientDetails from "./components/Sidebar/Pages/Customers/ClientDetails/ClientDetails";
+import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
+import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
+import Profile from "./components/Sidebar/Pages/Profile/Profile";
+import Users from "./components/Sidebar/Pages/Users/Users";
+import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
+import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
+import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
+import AssignedEnquiries from "./components/Sidebar/Pages/Enquiry/AssignedEnquiries";
+import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
+import ExecutiveWorkBoard from "./components/Sidebar/Pages/WorkBoard/ExecutiveWorkBoard";
+import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
+
+import HelpandSupport from "./components/Sidebar/Pages/HelpandSupport/HelpandSupport";
+
+import ExecutiveAnalytics from "./components/Sidebar/Pages/Dashboard/NewAnalytics/ExecutiveAnalytics";
+
+// Auth Imports
+import Login from "./components/auth/login";
+import SignUp from "./components/auth/SignUp";
+import ResetEmail from "./components/auth/ResetEmail";
+import ResetOtp from "./components/auth/ResetOtp";
+import ConfirmPassword from "./components/auth/ConfirmPassword";
+import SalesBoard from "./components/Sidebar/Pages/SalesBoard/SalesBoard";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
-      setIsMobile(mobile);
-      if (mobile) {
-        setSidebarCollapsed(false); // Reset collapsed state on mobile
-        setShowMobileSidebar(false); // Hide sidebar by default on mobile
-      }
-    };
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [pathname]);
 
-    handleResize(); // Initial check
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  return null;
+};
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
+const AppRoutes = () => {
+  const { login, isLoggedIn, user } = useAuth();
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-  };
-
-  const toggleSidebar = () => {
-    if (isMobile) {
-        setShowMobileSidebar(!showMobileSidebar);
-    } else {
-        setSidebarCollapsed(!sidebarCollapsed);
-    }
+  const getRedirectPath = (role) => {
+    const r = role?.toLowerCase() || "";
+    if (r === "sales manager") return "/dashboard/analytics";
+    if (r.includes("client dealer")) return "/enquiry";
+    if (
+      r.includes("property manager") ||
+      r.includes("property dealer") ||
+      role === "Sales Executive - Property Manager"
+    )
+      return "/dashboard/workboard";
+    if (r === "admin" || r === "super admin") return "/dashboard/work-board";
+    return "/property/property-details";
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50 font-sans">
-        {isAuthenticated ? (
-          // Show dashboard when authenticated
-          <div className="flex h-screen overflow-hidden">
-            {/* Sidebar Desktop */}
-            {!isMobile && (
-                <div 
-                  className={`${sidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300 ease-in-out h-full overflow-y-auto border-r border-gray-200`}
-                >
-                  <Sidebar collapsed={sidebarCollapsed} />
-                </div>
-            )}
+    <Routes>
+      {/* Public Authentication Routes */}
+      <Route
+        path="/login"
+        element={
+          isLoggedIn ? (
+            <Navigate to={getRedirectPath(user?.role)} replace />
+          ) : (
+            <Login onLogin={login} />
+          )
+        }
+      />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/reset-email" element={<ResetEmail />} />
+      <Route path="/reset-otp" element={<ResetOtp />} />
+      <Route path="/confirm-password" element={<ConfirmPassword />} />
 
-            {/* Sidebar Mobile Overlay */}
-            {isMobile && (
-                <>
-                    {/* Backdrop */}
-                    {showMobileSidebar && (
-                        <div 
-                            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-                            onClick={() => setShowMobileSidebar(false)}
-                        />
-                    )}
-                    {/* Sidebar Drawer */}
-                    <div 
-                        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform transition-transform duration-300 ease-in-out ${
-                            showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
-                        } lg:hidden`}
-                    >
-                        <Sidebar collapsed={false} />
-                    </div>
-                </>
-            )}
-            
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full overflow-hidden">
-              {/* Main Header */}
-              <div className="flex-shrink-0 z-30 bg-white">
-                <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
-              </div>
-              
-              {/* Scrollable Content Area */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
-                <BreadCrumbs />
-                
-                <Routes>
-                  {/* Dashboard Routes */}
-                  <Route path="/dashboard/analytics" element={
-                    <>
-                      <AnalyticsCards />
-                      <div className="space-y-6 mt-6">
-                        <SalesAnalytic />
-                        <SocialSource />
-                        <LastTransaction />
-                      </div>
-                    </>
-                  } />
-                  
-                  <Route path="/dashboard/agent" element={<Agent />} />
-                  
-                  {/* Property Routes */}
-                  <Route path="/property/property-grid" element={<PropertyGrid />} />
-                  <Route path="/property/property-details" element={<PropertyDetails />} />
-                  <Route path="/property/add-property" element={<AddProperty />} />
-                  
-                  {/* Agent Routes */}
-                  {/* <Route path="/agents/grid-view" element={<GridView />} />
-                  <Route path="/agents/agent-details" element={<AgentDetails />} />
-                  <Route path="/agents/add-agent" element={<AddAgent />} />
-                  <Route path="/agents" element={<Navigate to="/agents/grid-view" />} /> */}
-                  
-                  {/* Customer Routes */}
-                  <Route path="/customers/grid-view" element={<GridView />} />
-                  <Route path="/customers/customer-details" element={<CustomerDetails />} />
-                  <Route path="/customers/add-customer" element={<AddCustomer />} />
-                  <Route path="/customers" element={<Navigate to="/customers/grid-view" />} />
-                  
-                  {/* Other Routes */}
-                  <Route path="/orders" element={<div>Orders Page</div>} />
-                  <Route path="/transactions" element={<div>Transactions Page</div>} />
-                  <Route path="/reviews" element={<div>Reviews Page</div>} />
-                  <Route path="/messages" element={<div>Messages Page</div>} />
-                  <Route path="/inbox" element={<div>Inbox Page</div>} />
-                  
-                  {/* Redirects */}
-                  <Route path="/" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/dashboard" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/property" element={<Navigate to="/property/property-grid" />} />
-                  <Route path="/login" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/signup" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/reset-email" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/reset-otp" element={<Navigate to="/dashboard/analytics" />} />
-                  <Route path="/confirm-password" element={<Navigate to="/dashboard/analytics" />} />
-                </Routes>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // Show auth pages when not authenticated
-          <Routes>
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/reset-email" element={<ResetEmail />} />
-            <Route path="/reset-otp" element={<ResetOtp />} />
-            <Route path="/confirm-password" element={<ConfirmPassword />} />
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        )}
-      </div>
+      {/* Protected Routes */}
+      <Route element={<PrivateRoute />}>
+        <Route element={<MainLayout />}>
+          {/* Dashboard */}
+          {/* <Route path="/dashboard/analytics" element={<AnalyticsPage />} /> */}
+          <Route
+            path="/dashboard/analytics"
+            element={
+              user?.role === "Sales Manager" ? (
+                <Analytics />
+              ) : user?.role === "Sales Executive - Property Manager" ? (
+                <ExecutiveAnalytics />
+              ) : (
+                <Navigate to={getRedirectPath(user?.role)} replace />
+              )
+            }
+          />
+          {/* <Route path="/dashboard/agent" element={<Agent />} /> */}
+          <Route path="/dashboard/work-board" element={<WorkBoard />} />
+          <Route path="/dashboard/agent" element={<SalesAgents />} />
+          <Route
+            path="/dashboard/agent/property-dealer"
+            element={<SalesAgents />}
+          />
+          <Route
+            path="/dashboard/agent/client-dealer"
+            element={<SalesAgents />}
+          />
+          <Route path="/dashboard/workboard" element={<ExecutiveWorkBoard />} />
+          <Route path="/dashboard/sales-board" element={<SalesBoard />} />
+
+          <Route path="/dashboard/property-notes" element={<PropertyNotes />} />
+
+          {/* Properties */}
+          <Route path="/property/property-grid" element={<PropertyGrid />} />
+          <Route path="/property/hot-property" element={<HotProperty />} />
+          <Route
+            path="/property/property-details/:id"
+            element={<PropertyDetails />}
+          />
+          <Route
+            path="/property/property-details"
+            element={<PropertyDetails />}
+          />
+          <Route path="/property/add-property" element={<AddProperty />} />
+
+          {/* Customers */}
+          <Route
+            path="/customers/owners"
+            element={<CustomerGrid roleTitle="Owners" roleName="Owner" />}
+          />
+          <Route
+            path="/customers/brokers"
+            element={<CustomerGrid roleTitle="Brokers" roleName="Broker" />}
+          />
+          <Route
+            path="/customers/investors"
+            element={<CustomerGrid roleTitle="Investors" roleName="Investor" />}
+          />
+          <Route
+            path="/customers/sales-manager"
+            element={
+              <CustomerGrid
+                roleTitle="Sales Manager"
+                roleName="Sales Manager"
+              />
+            }
+          />
+          <Route
+            path="/customers/sales-executive-client-dealer"
+            element={
+              <CustomerGrid
+                roleTitle="Sales Executive - Client Dealer"
+                roleName="Sales Executive - Client Dealer"
+              />
+            }
+          />
+          <Route
+            path="/customers/sales-executive-property-manager"
+            element={
+              <CustomerGrid
+                roleTitle="Sales Executive - Property Manager"
+                roleName="Sales Executive - Property Manager"
+              />
+            }
+          />
+          <Route path="/customers/grid-view" element={<GridView />} />
+          <Route
+            path="/customers/customer-details"
+            element={<CustomerDetails />}
+          />
+          <Route path="/customers/add-customer" element={<AddCustomer />} />
+          <Route path="/client-details/:id" element={<ClientDetails />} />
+          <Route
+            path="/customers"
+            element={<Navigate to="/customers/owners" replace />}
+          />
+
+          {/* Others */}
+          <Route path="/users" element={<Users />} />
+          <Route path="/enquiry" element={<Enquiry />} />
+          <Route path="/enquiry/assigned" element={<AssignedEnquiries />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/help-and-support" element={<HelpandSupport />} />
+
+          {/* Placeholder Routes */}
+          <Route path="/notifications" element={<AllNotifications />} />
+
+          {/* Redirects */}
+          <Route
+            path="/"
+            element={<Navigate to={getRedirectPath(user?.role)} replace />}
+          />
+          <Route
+            path="/dashboard"
+            element={<Navigate to={getRedirectPath(user?.role)} replace />}
+          />
+          <Route
+            path="/property"
+            element={<Navigate to="/property/property-grid" replace />}
+          />
+        </Route>
+      </Route>
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <ScrollToTop />
+      <AppRoutes />
     </Router>
   );
-}
+};
 
 export default App;
+
+// Admin - > 6666666666
+// Client Dealer -> 7777777771

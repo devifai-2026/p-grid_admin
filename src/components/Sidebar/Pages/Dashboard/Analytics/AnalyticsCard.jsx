@@ -47,7 +47,7 @@ const AnalyticsCards = () => {
     },
     { 
       title: 'Revenue', 
-      value: '$78.3M',
+      value: '₹78.3M',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       icon: null,

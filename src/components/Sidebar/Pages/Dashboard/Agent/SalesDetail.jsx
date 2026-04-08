@@ -156,7 +156,7 @@ const SalesDetail = () => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-lg font-bold text-gray-800">Recent Agent Status</h2>
-                <p className="text-sm text-gray-500">More than $50K</p>
+                <p className="text-sm text-gray-500">More than ₹50K</p>
               </div>
               <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-100">
                 <span className="text-sm text-gray-700">This Month</span>
@@ -168,19 +168,19 @@ const SalesDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 p-6">
               <div>
                 <p className="text-gray-500 text-sm mb-1">Today</p>
-                <p className="text-2xl font-bold text-gray-800">$8,839</p>
+                <p className="text-2xl font-bold text-gray-800">₹8,839</p>
               </div>
               <div>
                 <p className="text-gray-500 text-sm mb-1">This Month</p>
                 <div className="flex items-baseline gap-1">
-                  <p className="text-2xl font-bold text-gray-800">$52,356</p>
+                  <p className="text-2xl font-bold text-gray-800">₹52,356</p>
                   <span className="text-green-500 text-sm font-medium">0.2 % ↑</span>
                 </div>
               </div>
               <div>
                 <p className="text-gray-500 text-sm mb-1">This Year</p>
                 <div className="flex items-baseline gap-1">
-                  <p className="text-2xl font-bold text-gray-800">$78M</p>
+                  <p className="text-2xl font-bold text-gray-800">₹78M</p>
                   <span className="text-green-500 text-sm font-medium">0.1 % ↑</span>
                 </div>
               </div>
@@ -229,18 +229,18 @@ const SalesDetail = () => {
 
               <div className="mb-6">
                 <div className="text-sm text-gray-500 mb-1">Total</div>
-                <p className="text-3xl font-bold text-gray-800">$500.50K</p>
+                <p className="text-3xl font-bold text-gray-800">₹500.50K</p>
               </div>
 
               <div className="flex gap-4 mb-6">
                 <div className="flex-1">
                   <p className="text-green-600 font-medium text-sm mb-2">Collected</p>
-                  <p className="text-xl font-bold text-gray-800">$250.50K</p>
+                  <p className="text-xl font-bold text-gray-800">₹250.50K</p>
                   <div className="w-full h-3 bg-green-500 rounded-full mt-2"></div>
                 </div>
                 <div className="flex-1">
                   <p className="text-gray-500 text-sm mb-2">Pending</p>
-                  <p className="text-xl font-bold text-gray-800">$250.00K</p>
+                  <p className="text-xl font-bold text-gray-800">₹250.00K</p>
                   <div className="w-full h-3 bg-gray-300 rounded-full mt-2"></div>
                 </div>
               </div>
@@ -261,7 +261,7 @@ const SalesDetail = () => {
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+              <button className="w-full mt-4 bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-2 px-4 rounded-lg transition">
                 Send Reminder
               </button>
             </div>
@@ -307,7 +307,7 @@ const SalesDetail = () => {
                 ))}
               </div>
 
-              <button className="w-full mt-6 text-center text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+              <button className="w-full mt-6 text-center text-[#EE2529] hover:text-[#D32F2F] font-medium text-sm">
                 Add Other +
               </button>
             </div>
@@ -328,14 +328,14 @@ const SalesDetail = () => {
 
             <div className="mb-6">
               <div className="flex items-baseline gap-2 mb-1">
-                <p className="text-3xl font-bold text-gray-800">$15,563.786</p>
+                <p className="text-3xl font-bold text-gray-800">₹15,563.786</p>
                 <span className="text-green-500 font-medium text-sm">+ 4.53%</span>
               </div>
-              <p className="text-gray-500 text-sm">Gained <span className="text-green-500 font-medium">$978.56</span> This Month !</p>
+              <p className="text-gray-500 text-sm">Gained <span className="text-green-500 font-medium">₹978.56</span> This Month !</p>
             </div>
 
             <div className="flex justify-end mb-6">
-              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
                 <span className="text-lg">🛍️</span>
               </div>
             </div>
@@ -348,37 +348,37 @@ const SalesDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                    <div className="w-3 h-3 bg-[#EE2529] rounded-full"></div>
                     <span className="text-gray-700 text-sm font-medium">Rent</span>
                   </div>
-                  <p className="font-bold text-gray-800">$12,223.78</p>
+                  <p className="font-bold text-gray-800">₹12,223.78</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                     <span className="text-gray-700 text-sm font-medium">Sales</span>
                   </div>
-                  <p className="font-bold text-gray-800">$56,131</p>
+                  <p className="font-bold text-gray-800">₹56,131</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <span className="text-gray-700 text-sm font-medium">Broker Deal</span>
                   </div>
-                  <p className="font-bold text-gray-800">$1,340.15</p>
+                  <p className="font-bold text-gray-800">₹1,340.15</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
                     <span className="text-gray-700 text-sm font-medium">Market</span>
                   </div>
-                  <p className="font-bold text-gray-800">$600.46</p>
+                  <p className="font-bold text-gray-800">₹600.46</p>
                 </div>
               </div>
 
               {/* Stacked Bar */}
               <div className="flex h-3 gap-0.5 rounded-full overflow-hidden bg-gray-100">
-                <div className="bg-indigo-600" style={{ width: '45%' }}></div>
+                <div className="bg-[#EE2529]" style={{ width: '45%' }}></div>
                 <div className="bg-orange-500" style={{ width: '25%' }}></div>
                 <div className="bg-green-500" style={{ width: '20%' }}></div>
                 <div className="bg-cyan-500" style={{ width: '10%' }}></div>
@@ -391,11 +391,11 @@ const SalesDetail = () => {
             <h2 className="text-lg font-bold text-gray-800 mb-4">Top Agents</h2>
 
             {/* Agent Card */}
-            <div className="bg-gradient-to-br from-indigo-400 via-indigo-500 to-indigo-600 rounded-2xl p-6 text-white mb-6">
+            <div className="bg-gradient-to-br from-red-400 via-[#EE2529] to-[#EE2529] rounded-2xl p-6 text-white mb-6">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="text-lg font-bold">Lahomes Group , Pvt Ltd</h3>
-                  <p className="text-indigo-100 text-sm">Markovi , USA</p>
+                  <p className="text-red-100 text-sm">Markovi , USA</p>
                 </div>
                 <HiArrowRight className="w-6 h-6" />
               </div>
@@ -474,7 +474,7 @@ const SalesDetail = () => {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">From June</p>
-                    <p className="text-lg font-bold text-gray-800">$12,167</p>
+                    <p className="text-lg font-bold text-gray-800">₹12,167</p>
                   </div>
                 </div>
               </div>
@@ -486,7 +486,7 @@ const SalesDetail = () => {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">From July</p>
-                    <p className="text-lg font-bold text-gray-800">$14,900</p>
+                    <p className="text-lg font-bold text-gray-800">₹14,900</p>
                   </div>
                 </div>
               </div>
@@ -520,7 +520,7 @@ const SalesDetail = () => {
               ))}
             </div>
 
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition">
+            <button className="w-full bg-[#EE2529] hover:bg-[#D32F2F] text-white font-semibold py-3 px-4 rounded-lg transition">
               View All
             </button>
           </div>
