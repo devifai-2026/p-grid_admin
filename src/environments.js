@@ -25,7 +25,8 @@ const ENV_CONFIG = {
     BASE_URL: "https://pre-release-production.up.railway.app/api/v1",
   },
   prod: {
-    BASE_URL: "https://pre-release-production.up.railway.app/api/v1",
+    // BASE_URL: "https://pre-release-production.up.railway.app/api/v1",
+    BASE_URL: "https://pre-lease-server-yp9n.onrender.com/api/v1",
   },
 };
 const env_ = 
