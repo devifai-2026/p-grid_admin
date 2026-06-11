@@ -9,6 +9,7 @@ import {
 import { useAuth } from "./context/AuthContext";
 import MainLayout from "./components/Layout/MainLayout";
 import PrivateRoute from "./helpers/PrivateRoute";
+import ErrorBoundary from "./helpers/ErrorBoundary";
 
 // Page Imports
 import AnalyticsPage from "./components/Sidebar/Pages/Dashboard/Analytics/AnalyticsPage";
@@ -20,6 +21,7 @@ import PropertyDetails from "./components/Sidebar/Pages/Property/PropertyDetails
 import AddProperty from "./components/Sidebar/Pages/Property/AddProperty/AddProperty";
 import GridView from "./components/Sidebar/Pages/Customers/GridView/GridView";
 import CustomerDetails from "./components/Sidebar/Pages/Customers/CustomerDetails/CustomerDetails";
+import AgentDetails from "./components/Sidebar/Pages/Agents/AgentDetails/AgentDetails";
 import ClientDetails from "./components/Sidebar/Pages/Customers/ClientDetails/ClientDetails";
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
 import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
@@ -182,9 +184,14 @@ const AppRoutes = () => {
           />
           <Route path="/customers/grid-view" element={<GridView />} />
           <Route
+            path="/customers/customer-details/:id"
+            element={<CustomerDetails />}
+          />
+          <Route
             path="/customers/customer-details"
             element={<CustomerDetails />}
           />
+          <Route path="/agent-details/:id" element={<AgentDetails />} />
           <Route path="/customers/add-customer" element={<AddCustomer />} />
           <Route path="/client-details/:id" element={<ClientDetails />} />
           <Route
@@ -228,7 +235,9 @@ const App = () => {
   return (
     <Router>
       <ScrollToTop />
-      <AppRoutes />
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
     </Router>
   );
 };

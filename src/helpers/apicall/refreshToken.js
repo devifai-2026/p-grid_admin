@@ -40,9 +40,20 @@ export const refreshAccessToken = async () => {
         }
     } catch (error) {
         console.error("Token refresh failed:", error);
+        // Session truly dead (refresh token invalid/expired): clear auth and kick
+        // the user out to the login screen.
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("token");
         window.dispatchEvent(new Event('userLoginStatusChanged'));
+        if (
+            typeof window !== "undefined" &&
+            window.location &&
+            !window.location.pathname.startsWith("/login")
+        ) {
+            window.location.href = "/login";
+        }
         throw error;
     }
 };

@@ -13,7 +13,6 @@ import {
   FiInfo,
   FiSettings,
   FiCamera,
-  FiChevronRight,
   FiX,
   FiEdit2,
 } from "react-icons/fi";
@@ -41,7 +40,7 @@ const Profile = () => {
 
   const handleSendOtp = () => {
     setMobileApiError("");
-    if (newMobile.length !== 10) {
+    if (!/^[6-9]\d{9}$/.test(newMobile)) {
       setMobileApiError("Please enter a valid 10-digit mobile number");
       return;
     }
@@ -74,8 +73,8 @@ const Profile = () => {
 
   const handleChangeMobile = () => {
     setMobileApiError("");
-    if (otp.length < 6) {
-      setMobileApiError("Please enter a valid OTP");
+    if (!/^\d{6}$/.test(otp)) {
+      setMobileApiError("Please enter a valid 6-digit OTP");
       return;
     }
     setMobileApiLoading(true);
@@ -285,10 +284,10 @@ const Profile = () => {
                 </div>
                 <div>
                   <h4 className="text-[12px] font-bold uppercase tracking-tight">
-                    2FA Is Active
+                    Account Security
                   </h4>
                   <p className="text-[10px] text-slate-400 font-medium italic">
-                    High protection level
+                    Not available
                   </p>
                 </div>
               </div>
@@ -344,8 +343,7 @@ const Profile = () => {
                         Location Context
                       </h4>
                       <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                        Authorized service region: Mumbai HQ. Cross-region
-                        administrative privileges active.
+                        Authorized service region: Not available.
                       </p>
                     </div>
 
@@ -357,8 +355,7 @@ const Profile = () => {
                         Member Timeline
                       </h4>
                       <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                        Account established: Feb 15, 2026. Consistent track
-                        record with superior task completion.
+                        Account established: Not available.
                       </p>
                     </div>
 
@@ -380,47 +377,16 @@ const Profile = () => {
                 )}
 
                 {activeTab === "activity" && (
-                  <div className="space-y-3">
-                    {[
-                      {
-                        action: "Login detected from Mumbai IP",
-                        time: "11 Mins ago",
-                        color: "bg-red-500",
-                      },
-                      {
-                        action: "Updated Property Listing #9921",
-                        time: "2 Hours ago",
-                        color: "bg-blue-500",
-                      },
-                      {
-                        action: "Password changed successfully",
-                        time: "1 Day ago",
-                        color: "bg-green-500",
-                      },
-                    ].map((activity, i) => (
-                      <motion.div
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        key={i}
-                        className="p-4 bg-white rounded-xl shadow-sm border border-slate-200/60 flex items-center justify-between group hover:border-slate-300 transition-all"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`w-2 h-2 rounded-full ${activity.color} animate-pulse shadow-sm`}
-                          ></div>
-                          <div>
-                            <p className="text-[11px] font-bold text-slate-800 uppercase tracking-tight">
-                              {activity.action}
-                            </p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                              {activity.time}
-                            </p>
-                          </div>
-                        </div>
-                        <FiChevronRight className="text-slate-300 group-hover:text-slate-500 transition-all" />
-                      </motion.div>
-                    ))}
+                  <div className="bg-white rounded-2xl shadow-sm p-10 border border-slate-200/60 flex flex-col items-center justify-center text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-6 border border-slate-100">
+                      <FiActivity size={26} />
+                    </div>
+                    <h4 className="font-bold text-slate-700 uppercase text-sm mb-2 tracking-tight">
+                      No recent activity
+                    </h4>
+                    <p className="text-[10px] text-slate-400 max-w-xs leading-relaxed italic">
+                      Your recent activity will appear here once available.
+                    </p>
                   </div>
                 )}
 
@@ -497,9 +463,14 @@ const Profile = () => {
                       New Mobile Number
                     </label>
                     <input
-                      type="text"
+                      type="tel"
+                      inputMode="numeric"
                       value={newMobile}
-                      onChange={(e) => setNewMobile(e.target.value)}
+                      onChange={(e) =>
+                        setNewMobile(
+                          e.target.value.replace(/\D/g, "").slice(0, 10),
+                        )
+                      }
                       maxLength={10}
                       placeholder="Enter 10-digit number"
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold"
@@ -529,8 +500,11 @@ const Profile = () => {
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
                       maxLength={6}
                       placeholder="Enter 6-digit OTP"
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold tracking-[0.2em] text-center"

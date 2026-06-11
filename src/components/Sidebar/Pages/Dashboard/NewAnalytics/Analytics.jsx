@@ -120,32 +120,24 @@ const Analytics = () => {
             value={data.summary.partial.toLocaleString()}
             icon={<FiClock className="text-yellow-600" />}
             iconBg="bg-yellow-50"
-            trend="+12%"
-            trendColor="text-yellow-600"
           />
           <StatCard
             title="Total"
             value={data.summary.total.toLocaleString()}
             icon={<FiHome className="text-blue-600" />}
             iconBg="bg-blue-50"
-            trend="+5.4k"
-            trendColor="text-blue-600"
           />
           <StatCard
             title="Pending"
             value={data.summary.pending.toLocaleString()}
             icon={<FiAlertCircle className="text-red-600" />}
             iconBg="bg-red-50"
-            trend="-2%"
-            trendColor="text-red-600"
           />
           <StatCard
             title="Verified"
             value={data.summary.completed.toLocaleString()}
             icon={<FiCheckCircle className="text-green-600" />}
             iconBg="bg-green-50"
-            trend="+18%"
-            trendColor="text-green-600"
           />
         </div>
 
@@ -299,7 +291,7 @@ const Analytics = () => {
   );
 };
 
-const StatCard = ({ title, value, icon, iconBg, trend, trendColor }) => (
+const StatCard = ({ title, value, icon, iconBg }) => (
   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all duration-300 group">
     <div className="flex items-center gap-3">
       <div
@@ -316,11 +308,6 @@ const StatCard = ({ title, value, icon, iconBg, trend, trendColor }) => (
         </h3>
       </div>
     </div>
-    <span
-      className={`text-[10px] font-black ${trendColor} bg-white px-2 py-0.5 rounded-full border border-gray-50 shadow-sm`}
-    >
-      {trend}
-    </span>
   </div>
 );
 

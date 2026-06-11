@@ -1,8 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { formatPrice } from "../../../../../helpers/formatPrice";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiHome, FiMapPin, FiUser, FiArrowRight, FiMessageSquare } from "react-icons/fi";
 
 const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal, openNotesModal }) => {
+  const navigate = useNavigate();
   return (
     <motion.tr
       key={prop.propertyId}
@@ -45,7 +48,7 @@ const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal, openNotesMo
           </div>
           <div className="flex items-center gap-1.5 font-bold text-slate-600">
             <span className="text-slate-400">Price:</span>
-            <span>₹{prop.sellingPrice || 0}Cr</span>
+            <span>{formatPrice(prop.sellingPrice)}</span>
           </div>
         </div>
       </td>
@@ -128,7 +131,7 @@ const PropertyRow = ({ prop, idx, isAdminOrManager, openAssignModal, openNotesMo
             className="p-2 border border-slate-100 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all group-hover:scale-110 active:scale-90"
             title="View Details"
             onClick={() =>
-              (window.location.href = `/property/property-details/${prop.propertyId}`)
+              navigate(`/property/property-details/${prop.propertyId}`)
             }
           >
             <FiArrowRight size={16} />

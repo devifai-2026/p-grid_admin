@@ -87,10 +87,19 @@ const FinancialDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) 
   };
 
   const handleInputChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Financial fields are positive decimals only — strip leading '-' and any
+    // non-numeric chars (keep digits and a single decimal point).
+    let clean = String(value).replace(/[^0-9.]/g, "");
+    const firstDot = clean.indexOf(".");
+    if (firstDot !== -1) {
+      clean =
+        clean.slice(0, firstDot + 1) +
+        clean.slice(firstDot + 1).replace(/\./g, "");
+    }
+    setFormData((prev) => ({ ...prev, [name]: clean }));
 
     if (touched[name]) {
-      const error = validateField(name, String(value));
+      const error = validateField(name, String(clean));
       setErrors((prev) => ({ ...prev, [name]: error }));
     }
   };

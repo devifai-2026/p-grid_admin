@@ -22,9 +22,11 @@ const HotProperty = () => {
     hasPrevPage: false,
   });
 
+  const PAGE_SIZE = 10;
+
   const fetchHotProperties = (page = 1) => {
     setLoading(true);
-    let route = `/get-hot-properties?page=${page}&limit=10`;
+    let route = `/get-hot-properties?page=${page}&limit=${PAGE_SIZE}`;
     if (verificationFilter !== "all") {
       const mappedFilter =
         verificationFilter === "verified" ? "completed" : verificationFilter;
@@ -34,13 +36,45 @@ const HotProperty = () => {
     apiCall.get({
       route,
       onSuccess: (res) => {
-        setLoading(false);
         if (res.success) {
-          setPropertyList(res.data || []);
+          const items = res.data || [];
+
+          // Guard against empty pages: if a non-first page comes back empty
+          // (e.g. the underlying set shrank or page count was stale), fall
+          // back to the last page that actually has items so we never show
+          // an empty list under a populated paginator.
+          if (items.length === 0 && page > 1) {
+            const totalItems = res.pagination?.totalItems || 0;
+            const recoverPage =
+              totalItems > 0
+                ? Math.max(1, Math.ceil(totalItems / PAGE_SIZE))
+                : 1;
+            if (recoverPage < page) {
+              fetchHotProperties(recoverPage);
+              return;
+            }
+          }
+
+          setPropertyList(items);
           if (res.pagination) {
-            setPagination(res.pagination);
+            // Derive totalPages from the (filtered) total item count so the
+            // paginator never advertises pages that have no items.
+            const totalItems = res.pagination.totalItems || items.length;
+            const totalPages = Math.max(
+              1,
+              Math.ceil(totalItems / PAGE_SIZE),
+            );
+            const currentPage = res.pagination.currentPage || page;
+            setPagination({
+              currentPage,
+              totalPages,
+              totalItems,
+              hasNextPage: currentPage < totalPages,
+              hasPrevPage: currentPage > 1,
+            });
           }
         }
+        setLoading(false);
       },
       onError: (err) => {
         setLoading(false);

@@ -370,7 +370,7 @@ const ExecutiveWorkBoard = () => {
             onClick={() => setActiveFilter(pill.id)}
             className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-sm ${
               activeFilter === pill.id
-                ? `${pill.color} text-white ring-4 ring-${pill.id === "all" ? "slate" : "red"}-100`
+                ? `${pill.color} text-white ring-4 ${pill.id === "all" ? "ring-slate-100" : "ring-red-100"}`
                 : "bg-white text-slate-500 border border-slate-100 hover:bg-slate-50"
             }`}
           >

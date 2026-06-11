@@ -28,7 +28,7 @@ const AgentCard = () => {
       change: 'positive'
     },
     {
-      title: 'Conversation Rate',
+      title: 'Conversion Rate',
       value: '78.8%',
       icon: <FiPercent className="w-5 h-5" />,
       color: 'bg-purple-100 text-purple-600',

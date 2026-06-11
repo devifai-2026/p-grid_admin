@@ -1,6 +1,7 @@
 import React from "react";
 import { FiImage, FiMapPin, FiLayers, FiTrendingUp } from "react-icons/fi";
 import { MdVerified, MdArrowForward } from "react-icons/md";
+import { formatPrice } from "../../../../../helpers/formatPrice";
 
 const PropertyCard = ({
   item,
@@ -10,10 +11,6 @@ const PropertyCard = ({
   onView,
   isSalesRelated = false,
 }) => {
-  const formatPrice = (price) => {
-    if (!price) return "N/A";
-    return `₹${price} Cr`;
-  };
 
   return (
     <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full">

@@ -437,7 +437,7 @@ const NoteCard = ({ note, userRole, onAction, currentUserId }) => {
 };
 
 // ─── Empty State ───────────────────────────────────────────────────────────────
-const EmptyNotes = ({ canWrite }) => (
+const EmptyNotes = ({ canWrite, onRefresh }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
       <FiMessageSquare className="text-slate-300" size={28} />
@@ -449,10 +449,10 @@ const EmptyNotes = ({ canWrite }) => (
         : "No notes have been submitted for this property yet."}
     </p>
     <button
-      onClick={() => window.location.reload()}
+      onClick={onRefresh}
       className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-500 text-[11px] font-black uppercase transition-all"
     >
-      Refresh Dashboard
+      Refresh Notes
     </button>
   </div>
 );
@@ -706,7 +706,7 @@ console.log(notes)
               </p>
             </div>
           ) : filteredNotes.length === 0 ? (
-            <EmptyNotes canWrite={canWrite} />
+            <EmptyNotes canWrite={canWrite} onRefresh={loadNotes} />
           ) : (
             filteredNotes.map((note) => (
               <NoteCard

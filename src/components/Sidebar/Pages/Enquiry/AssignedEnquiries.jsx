@@ -45,7 +45,7 @@ const AssignedEnquiries = () => {
     setLoading(true);
 
     apiCall.get({
-      route: `/sales/assigned-inquiries?page=${currentPage}&limit=${limit}&search=${debouncedSearch}`,
+      route: `/sales/assigned-inquiries?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(debouncedSearch)}`,
       onSuccess: (res) => {
         setLoading(false);
         if (res.success && res.data) {

@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  FaFacebook, 
-  FaInstagram, 
-  FaTwitter, 
-  FaCommentAlt, 
-  FaEnvelope, 
+import { useNavigate } from 'react-router-dom';
+import {
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaCommentAlt,
+  FaEnvelope,
   FaCheck,
   FaCloudUploadAlt
 } from 'react-icons/fa';
+import { apiCall } from '../../../../../helpers/apicall/apiCall';
+import { showSuccess, showError, showWarning } from '../../../../../helpers/swalHelper';
 
 const AddCustomer = () => {
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -77,9 +82,109 @@ const AddCustomer = () => {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      customerName: '',
+      customerEmail: '',
+      customerNumber: '',
+      viewProperties: '',
+      ownProperties: '',
+      investProperty: '000',
+      customerAddress: '',
+      zipCode: '',
+      city: '',
+      country: '',
+      facebookUrl: '',
+      instagramUrl: '',
+      twitterUrl: '',
+      status: ''
+    });
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    navigate('/customers/owners');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', { formData, image: selectedImage });
+
+    const name = formData.customerName.trim();
+    const email = formData.customerEmail.trim();
+    const mobileNumber = formData.customerNumber.trim();
+
+    // --- Validation ---
+    if (!name) {
+      showWarning('Customer name is required.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showWarning('Please enter a valid email address.');
+      return;
+    }
+
+    // Phone must be digits-only and a valid 10-digit Indian mobile number
+    if (!/^\d+$/.test(mobileNumber)) {
+      showWarning('Mobile number must contain digits only.');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
+      showWarning('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    // Numeric-only fields (when provided)
+    const numericFields = [
+      ['viewProperties', formData.viewProperties],
+      ['ownProperties', formData.ownProperties],
+      ['investProperty', formData.investProperty],
+    ];
+    for (const [, value] of numericFields) {
+      if (value && !/^\d+$/.test(String(value).trim())) {
+        showWarning('View / Own / Invest property fields must be numeric.');
+        return;
+      }
+    }
+
+    // Map the customer form onto the admin user-creation payload
+    // (same endpoint Users.jsx uses to create users).
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || nameParts[0];
+
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      mobileNumber,
+      roleName: 'Sales Executive - Client Dealer',
+    };
+
+    setSubmitting(true);
+    apiCall.post({
+      route: '/admin/users',
+      payload,
+      onSuccess: (res) => {
+        setSubmitting(false);
+        if (res.success) {
+          showSuccess('Customer created successfully!');
+          resetForm();
+          navigate('/customers/owners');
+        } else {
+          showError(res.message || 'Failed to create customer.');
+        }
+      },
+      onError: (err) => {
+        setSubmitting(false);
+        showError(
+          err?.data?.message || err?.message || 'Failed to create customer.'
+        );
+      },
+    });
   };
 
   return (
@@ -455,14 +560,17 @@ const AddCustomer = () => {
               {/* Action Buttons */}
               <div className="flex gap-4 justify-end">
                 <button
-                  type="button"
-                  className="px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] rounded-lg font-semibold hover:bg-red-50 transition-colors"
+                  type="submit"
+                  disabled={submitting}
+                  className="px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] rounded-lg font-semibold hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Create Customer
+                  {submitting ? 'Creating...' : 'Create Customer'}
                 </button>
                 <button
                   type="button"
-                  className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
+                  onClick={handleCancel}
+                  disabled={submitting}
+                  className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>

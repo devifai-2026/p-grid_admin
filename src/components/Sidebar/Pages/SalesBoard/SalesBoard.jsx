@@ -29,10 +29,10 @@ const SalesBoard = () => {
   const [loading, setLoading] = useState(true);
   const [performanceData, setPerformanceData] = useState({
     stats: {
-      totalAssigned: 0,
-      verifiedCount: 0,
-      pendingCount: 0,
-      partialCount: 0,
+      total: 0,
+      completed: 0,
+      pending: 0,
+      partial: 0,
     },
     recentTasks: [],
     chartData: [],
@@ -51,15 +51,31 @@ const SalesBoard = () => {
         if (res.success) {
           // In a real scenario, this would be specific sales-person data
           setPerformanceData({
-            stats: res.data.summary,
-            recentTasks: res.data.updates.slice(0, 5),
-            chartData: res.data.trends,
+            stats: res.data.summary || {
+              total: 0,
+              completed: 0,
+              pending: 0,
+              partial: 0,
+            },
+            recentTasks: (res.data.updates || []).slice(0, 5),
+            chartData: res.data.trends || [],
           });
         }
       },
       onError: (err) => {
         setLoading(false);
         console.error("Sales data fetch error:", err);
+        // Keep safe zeroed data so the UI never renders undefined values
+        setPerformanceData({
+          stats: {
+            total: 0,
+            completed: 0,
+            pending: 0,
+            partial: 0,
+          },
+          recentTasks: [],
+          chartData: [],
+        });
       },
     });
   };
@@ -99,7 +115,8 @@ const SalesBoard = () => {
             </div>
             <div>
               <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter leading-none mb-1">
-                {greetings()}, {user?.firstName || "Partner"}
+                {greetings()},{" "}
+                {user?.name?.split(" ")[0] || user?.firstName || "Partner"}
               </h1>
               <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -300,7 +317,7 @@ const SalesStatCard = ({ title, value, icon, bg, footer }) => (
     </div>
     <div>
       <h3 className="text-2xl font-black text-gray-900 tracking-tighter leading-none mb-1">
-        {value.toLocaleString()}
+        {(value ?? 0).toLocaleString()}
       </h3>
       <p className="text-[11px] font-bold text-gray-500 uppercase tracking-tight mb-4">
         {title}

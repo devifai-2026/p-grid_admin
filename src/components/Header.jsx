@@ -1,25 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   FiMenu,
-  FiSearch,
-  FiMoon,
-  FiMaximize2,
   FiBell,
-  FiSettings,
   FiUser,
-  FiCalendar,
-  FiHelpCircle,
-  FiLock,
   FiLogOut,
 } from "react-icons/fi";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuthApi } from "../helpers/API/Auth/authAPIs";
 import { apiCall } from "../helpers/apicall/apiCall";
 import { useNotifications } from "../context/NotificationContext";
 import Notifications from "./Notifications/Notifications";
 
 const Header = ({ toggleSidebar, onLogout }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const {
     notifications,
@@ -32,8 +24,6 @@ const Header = ({ toggleSidebar, onLogout }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userName, setUserName] = useState("Admin");
   const [userRole, setUserRole] = useState("Staff");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const { logout } = useAuthApi();
@@ -146,7 +136,7 @@ const Header = ({ toggleSidebar, onLogout }) => {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between">
-        {/* Left Section - Menu & Search */}
+        {/* Left Section - Menu */}
         <div className="flex items-center gap-6 flex-1">
           {/* Menu Button */}
           <button
@@ -155,40 +145,10 @@ const Header = ({ toggleSidebar, onLogout }) => {
           >
             <FiMenu size={24} />
           </button>
-
-          {/* Search Bar */}
-          {/* <div className="relative hidden md:block max-w-xs flex-1">
-            <FiSearch
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:bg-white transition"
-            />
-          </div> */}
         </div>
 
         {/* Right Section - Icons & Profile */}
         <div className="flex items-center gap-2 md:gap-6">
-          {/* Dark Mode Button */}
-          {/* <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
-            title="Toggle Dark Mode"
-          >
-            <FiMoon size={20} />
-          </button> */}
-
-          {/* Fullscreen Button */}
-          {/* <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
-            title="Fullscreen"
-          >
-            <FiMaximize2 size={20} />
-          </button> */}
-
           {/* Notifications Button */}
           <div className="relative" ref={notificationRef}>
             <button
@@ -218,14 +178,6 @@ const Header = ({ toggleSidebar, onLogout }) => {
               />
             )}
           </div>
-
-          {/* Settings Button */}
-          {/* <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 hidden md:block"
-            title="Settings"
-          >
-            <FiSettings size={20} />
-          </button> */}
 
           {/* Profile Avatar with Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -266,30 +218,6 @@ const Header = ({ toggleSidebar, onLogout }) => {
                     <FiUser className="w-5 h-5" />
                     <span>My Profile</span>
                   </Link>
-                  {/* 
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50"
-                  >
-                    <FiCalendar className="w-5 h-5" />
-                    <span>Pricing</span>
-                  </a>
-
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50"
-                  >
-                    <FiHelpCircle className="w-5 h-5" />
-                    <span>Help</span>
-                  </a>
-
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50"
-                  >
-                    <FiLock className="w-5 h-5" />
-                    <span>Lock screen</span>
-                  </a> */}
 
                   <div className="border-t border-gray-100 my-2"></div>
 

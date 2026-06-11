@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { formatPrice } from "../../../../../helpers/formatPrice";
 import {
   FiShare2,
-  FiHeart,
   FiMapPin,
   FiMoreVertical,
   FiArrowLeft,
@@ -59,6 +59,32 @@ import {
   confirmAction,
 } from "../../../../../helpers/swalHelper";
 
+// --- Helpers ---
+
+// Safely format a date, returning "N/A" for missing / invalid / epoch (1970) values.
+const safeDate = (value) => {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "N/A";
+  // Treat the Unix epoch (or anything before 1971) as "no real date".
+  if (d.getFullYear() <= 1970) return "N/A";
+  return d.toLocaleDateString();
+};
+
+// Render a numeric value with a unit, falling back to "N/A" when missing.
+// e.g. safeUnit(property.leaseDurationYears, "Yrs") => "5 Yrs" | "N/A"
+const safeUnit = (value, unit = "") =>
+  value === null || value === undefined || value === ""
+    ? "N/A"
+    : `${value}${unit ? ` ${unit}` : ""}`;
+
+// Analytics figures are stored in Lakhs (suffixed with " L"). Guard nulls so we
+// render "N/A" instead of "₹null L".
+const lakhs = (value) =>
+  value === null || value === undefined || value === ""
+    ? "N/A"
+    : `₹${value} L`;
+
 // --- Helper Components ---
 
 const InfoRow = ({ label, value }) => (
@@ -114,8 +140,6 @@ const PropertyDetails = () => {
   const [activeTab, setActiveTab] = useState("property");
   const [activeFaq, setActiveFaq] = useState(null);
   const [verificationFilter, setVerificationFilter] = useState("all");
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLikeLoading, setIsLikeLoading] = useState(false);
 
   // Assignment States
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -351,7 +375,6 @@ const PropertyDetails = () => {
           setLoading(false);
           const data = res.data || res;
           setProperty(data);
-          checkLikedStatus(id);
         },
         onError: (err) => {
           console.error("PropertyDetails API Error:", err);
@@ -392,33 +415,6 @@ const PropertyDetails = () => {
     }
   }, [activeTab, id]);
 
-  const checkLikedStatus = (propertyId) => {
-    apiCall.get({
-      route: `/properties/${propertyId}/like`,
-      onSuccess: (res) => {
-        if (res.success && res.data) {
-          setIsLiked(res.data.isLiked);
-        }
-      }
-    });
-  };
-
-  const toggleWishlist = () => {
-    setIsLikeLoading(true);
-    apiCall.post({
-      route: `/properties/${id}/like`,
-      onSuccess: (res) => {
-        setIsLikeLoading(false);
-        if (res.success) {
-          setIsLiked(!isLiked);
-        }
-      },
-      onError: (err) => {
-        setIsLikeLoading(false);
-        showWarning("Failed to toggle wishlist");
-      }
-    });
-  };
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -615,11 +611,15 @@ const PropertyDetails = () => {
         <PropertyDetailsCard title="Basic Information" icon={FiInfo}>
           {/* <InfoRow label="Property ID" value={property.propertyId} /> */}
           <InfoRow label="Property Type" value={property.propertyType} />
-          <InfoRow label="Price" value={`₹${property.sellingPrice} Cr`} />
+          <InfoRow label="Price" value={formatPrice(property.sellingPrice)} />
           <InfoRow label="Building Grade" value={property.buildingGrade} />
           <InfoRow
             label="Carpet Area"
-            value={`${property.carpetArea} ${property.carpetAreaUnit}`}
+            value={
+              property.carpetArea
+                ? `${property.carpetArea} ${property.carpetAreaUnit || "sqft"}`
+                : "N/A"
+            }
           />
           <InfoRow label="Built Year" value={property.completionYear} />
           <InfoRow label="Ownership" value={property.ownershipType} />
@@ -700,7 +700,7 @@ const PropertyDetails = () => {
                   </div>
                   <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                     <span>{log.email}</span>
-                    <span>{new Date(log.verifiedAt).toLocaleDateString()}</span>
+                    <span>{safeDate(log.verifiedAt)}</span>
                   </div>
                 </div>
               ))}
@@ -739,15 +739,19 @@ const PropertyDetails = () => {
         <PropertyDetailsCard title="Financials" icon={FaChartLine}>
           <InfoRow
             label="Monthly Rent"
-            value={`₹${property.totalMonthlyRent}`}
+            value={formatPrice(property.totalMonthlyRent)}
           />
           <InfoRow
             label="Security Deposit"
-            value={`₹${property.securityDepositAmount} (${property.securityDepositMonths} Mos)`}
+            value={
+              property.securityDepositMonths
+                ? `${formatPrice(property.securityDepositAmount)} (${property.securityDepositMonths} Mos)`
+                : formatPrice(property.securityDepositAmount)
+            }
           />
           <InfoRow
             label="Rent / Sq.ft"
-            value={`₹${property.rentPerSqftMonthly}`}
+            value={formatPrice(property.rentPerSqftMonthly)}
           />
           <InfoRow
             label="Maintenance"
@@ -756,34 +760,42 @@ const PropertyDetails = () => {
         </PropertyDetailsCard>
 
         <PropertyDetailsCard title="Lease Terms" icon={FaRegFileAlt}>
-          <InfoRow
-            label="Start Date"
-            value={new Date(property.leaseStartDate).toLocaleDateString()}
-          />
-          <InfoRow
-            label="End Date"
-            value={new Date(property.leaseEndDate).toLocaleDateString()}
-          />
+          <InfoRow label="Start Date" value={safeDate(property.leaseStartDate)} />
+          <InfoRow label="End Date" value={safeDate(property.leaseEndDate)} />
           <InfoRow
             label="Lock-in Period"
-            value={`${property.lockInPeriodYears} Yrs ${property.lockInPeriodMonths} Months`}
+            value={
+              property.lockInPeriodYears == null &&
+              property.lockInPeriodMonths == null
+                ? "N/A"
+                : `${property.lockInPeriodYears ?? 0} Yrs ${
+                    property.lockInPeriodMonths ?? 0
+                  } Months`
+            }
           />
           <InfoRow
             label="Total Duration"
-            value={`${property.leaseDurationYears} Yrs`}
+            value={safeUnit(property.leaseDurationYears, "Yrs")}
           />
         </PropertyDetailsCard>
 
         <PropertyDetailsCard title="Escalation" icon={FaChartLine}>
           <InfoRow
             label="Escalation Rate"
-            value={`${property.annualEscalationPercent}%`}
+            value={
+              property.annualEscalationPercent == null
+                ? "N/A"
+                : `${property.annualEscalationPercent}%`
+            }
           />
           <InfoRow
             label="Frequency"
-            value={`Every ${property.escalationFrequencyYears} Years`}
+            value={
+              property.escalationFrequencyYears == null
+                ? "N/A"
+                : `Every ${property.escalationFrequencyYears} Years`
+            }
           />
-          <InfoRow label="Next Escalation" value="12 Aug 2026" />
         </PropertyDetailsCard>
       </div>
     </div>
@@ -842,15 +854,15 @@ const PropertyDetails = () => {
         <PropertyDetailsCard title="Investment Summary" icon={FaChartLine}>
           <InfoRow
             label="Total Investment"
-            value={`₹${property.sellingPrice} Cr`}
+            value={formatPrice(property.sellingPrice)}
           />
           <InfoRow
             label="Gross Annual Rent"
-            value={`₹${property.annualGrossRent} L`}
+            value={lakhs(property.annualGrossRent)}
           />
           <InfoRow
             label="Annual Expenses"
-            value={`₹${property.totalOperatingAnnualCosts} L`}
+            value={lakhs(property.totalOperatingAnnualCosts)}
           />
           <div className="my-2 border-t border-dashed border-gray-200"></div>
           <div className="flex justify-between py-2 px-2 rounded-lg bg-green-50">
@@ -858,7 +870,7 @@ const PropertyDetails = () => {
               Net Annual Income
             </span>
             <span className="text-sm font-black text-green-700">
-              ₹{property.netAnnualIncome} L
+              {lakhs(property.netAnnualIncome)}
             </span>
           </div>
         </PropertyDetailsCard>
@@ -866,12 +878,12 @@ const PropertyDetails = () => {
         <PropertyDetailsCard title="Annual Expenses" icon={FiInfo}>
           <InfoRow
             label="Property Tax"
-            value={`₹${property.propertyTaxAnnual} L`}
+            value={lakhs(property.propertyTaxAnnual)}
           />
-          <InfoRow label="Insurance" value={`₹${property.insuranceAnnual} L`} />
+          <InfoRow label="Insurance" value={lakhs(property.insuranceAnnual)} />
           <InfoRow
             label="Maintenance"
-            value={`₹${property.maintenanceAmount} L`}
+            value={lakhs(property.maintenanceAmount)}
           />
           <InfoRow label="Mgmt Fees" value="₹0.5 L" />
         </PropertyDetailsCard>
@@ -1174,17 +1186,6 @@ const PropertyDetails = () => {
                     </span>
                   </div>
                 )}
-                <button 
-                  onClick={toggleWishlist}
-                  disabled={isLikeLoading}
-                  className={`absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 hover:bg-white transition-all shadow-md z-20 ${isLikeLoading ? 'opacity-70 cursor-not-allowed' : ''} ${isLiked ? 'text-[#EE2529]' : 'text-gray-400 hover:text-[#EE2529]'}`}
-                >
-                  {isLikeLoading ? (
-                    <div className="w-5 h-5 border-2 border-gray-300 border-t-[#EE2529] rounded-full animate-spin"></div>
-                  ) : (
-                    <FiHeart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-                  )}
-                </button>
               </div>
             </div>
 

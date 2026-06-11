@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { formatPrice } from "../../../../helpers/formatPrice";
 import {
   FiMessageSquare,
   FiUser,
@@ -198,7 +199,7 @@ const PropertyNotes = () => {
                       <span>{group.property.propertyType}</span>
                     )}
                     {group.property?.sellingPrice && (
-                      <span>₹{group.property.sellingPrice} Cr</span>
+                      <span>{formatPrice(group.property.sellingPrice)}</span>
                     )}
                   </div>
                   <span className="text-[10px] font-black text-[#EE2529] uppercase flex items-center gap-1">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaLeaf, FaSearch } from "react-icons/fa";
 import {
   FiRefreshCw,
@@ -15,6 +15,7 @@ import { useAuth } from "../../../../context/AuthContext";
 const SalesAgents = () => {
   const { user: currentUser } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [agents, setAgents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -370,8 +371,8 @@ const SalesAgents = () => {
                         <button
                           onClick={() => {
                             const id = agent.userId || agent.id;
-                            // Add a special flag or handle in ClientDetails if needed
-                            window.location.href = `/client-details/${id}`;
+                            // Navigate within the SPA so state/context is preserved
+                            navigate(`/client-details/${id}`);
                           }}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                           title="View Profile"

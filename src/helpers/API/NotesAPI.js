@@ -2,6 +2,15 @@ import { apiCall } from "../apicall/apiCall";
 import pako from "pako";
 import { Buffer } from "buffer";
 
+// Normalize backend note statuses to the keys the notes modal expects
+// (pending / approved / denied / edited_approved). The backend uses
+// "pending_review" for unreviewed notes, which previously never matched
+// the modal's Pending tab/counts.
+const normalizeNoteStatus = (status) => {
+  if (status === "pending_review" || !status) return "pending";
+  return status;
+};
+
 /**
  * Enhanced decryption with deep logging.
  */
@@ -53,7 +62,7 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
               senderId: sId,
               senderName: senderName,
               senderRole: record.isOwnerNote ? "Client" : senderRole,
-              status: record.status || "pending_review",
+              status: normalizeNoteStatus(record.status),
               isEdited: record.isEdited,
               isOwnerNote: record.isOwnerNote || false,
               editedMessage: record.adminNote || null,
@@ -76,7 +85,7 @@ export const fetchNotes = ({ propertyId, onSuccess, onError }) => {
                 message: item.originalNote,
                 createdAt: item.createdAt || new Date().toISOString(),
                 updatedAt: item.updatedAt || item.createdAt || new Date().toISOString(),
-                status: item.status || "pending_review",
+                status: normalizeNoteStatus(item.status),
                 isEdited: item.isEdited,
                 editedMessage: item.adminNote || null,
                 senderRole: "Sales",

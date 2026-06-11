@@ -57,7 +57,7 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
       mobileNumber.length === 10 &&
       /^[6-9]\d{9}$/.test(mobileNumber) &&
       formData.listUnder !== '' &&
-      (!otpSent || (formData.otp && /^\d{4}$/.test(formData.otp))) &&
+      (!otpSent || (formData.otp && /^\d{6}$/.test(formData.otp))) &&
       formData.agreeTerms &&
       formData.agreePrivacy
     );
@@ -98,7 +98,7 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
       case 'otp':
         if (otpSent) {
           if (!value) return 'OTP is required';
-          if (!/^\d{4}$/.test(value)) return 'OTP must be 4 digits';
+          if (!/^\d{6}$/.test(value)) return 'OTP must be 6 digits';
         }
         return '';
 
@@ -170,14 +170,14 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
     // Only allow digits
     const digit = text.replace(/[^0-9]/g, '');
 
-    const currentOtpArray = formData.otp.split('').concat(Array(4).fill('')).slice(0, 4);
+    const currentOtpArray = formData.otp.split('').concat(Array(6).fill('')).slice(0, 6);
     currentOtpArray[index] = digit;
     const newOtp = currentOtpArray.join('');
-    
+
     handleChange('otp', newOtp);
 
     // Auto-focus next input if digit entered
-    if (digit && index < 3) {
+    if (digit && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
   };
@@ -337,11 +337,12 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
         <div className="mb-5">
           <label className="block text-sm font-bold text-gray-700 mb-2">OTP *</label>
           <div className="flex gap-3 justify-center md:justify-start">
-            {[0, 1, 2, 3].map((index) => (
+            {[0, 1, 2, 3, 4, 5].map((index) => (
               <input
                 key={index}
                 ref={(el) => (otpInputRefs.current[index] = el)}
                 type="text"
+                inputMode="numeric"
                 maxLength={1}
                 className={`w-12 h-12 text-center text-lg font-bold border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#EE2529] ${
                    touched.otp && errors.otp ? 'border-red-500' : 'border-gray-300'

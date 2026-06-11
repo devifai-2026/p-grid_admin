@@ -10,6 +10,7 @@ import {
   initiateSocketConnection,
   disconnectSocket,
   subscribeToNotifications,
+  unsubscribeFromNotifications,
 } from "../helpers/socket";
 import { apiCall } from "../helpers/apicall/apiCall";
 import { useAuth } from "./AuthContext";
@@ -135,15 +136,15 @@ export const NotificationProvider = ({ children }) => {
       }, 1000);
       initiateSocketConnection(user.userId);
       subscribeToNotifications(addNotification);
+
+      return () => {
+        // Remove the listeners so re-running this effect never stacks duplicates.
+        unsubscribeFromNotifications();
+      };
     } else {
       // If user logs out or userId becomes null, disconnect the socket
       disconnectSocket();
     }
-
-    return () => {
-      // Disconnect if the provider unmounts or user logs out
-      disconnectSocket();
-    };
   }, [user?.userId, addNotification]);
 
   const deleteNotification = useCallback((id) => {

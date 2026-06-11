@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { formatPrice } from "../../../../../helpers/formatPrice";
 import {
   FiArrowLeft,
   FiMail,
@@ -211,7 +212,7 @@ const ClientDetails = () => {
                         {item.label}
                       </p>
                       <p className="text-sm font-bold text-slate-700 truncate capitalize">
-                        {item.value.toLowerCase()}
+                        {(item.value || "").toLowerCase()}
                       </p>
                     </div>
                   </div>
@@ -376,7 +377,7 @@ const ClientDetails = () => {
                                 Value
                               </span>
                               <span className="text-slate-800">
-                                ₹{prop.sellingPrice || "0"}Cr
+                                {formatPrice(prop.sellingPrice)}
                               </span>
                             </div>
                           </div>

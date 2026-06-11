@@ -8,6 +8,7 @@ import {
   Image,
   Font,
 } from "@react-pdf/renderer";
+import { formatPrice } from "../../../../../helpers/formatPrice";
 
 // Register fonts if needed, otherwise use standard fonts
 // Font.register({
@@ -225,7 +226,7 @@ const PropertyBrochure = ({ property }) => {
             </View>
             <View style={styles.infoBox}>
               <Text style={styles.infoLabel}>Price</Text>
-              <Text style={styles.infoValue}>₹{property.sellingPrice} Cr</Text>
+              <Text style={styles.infoValue}>{formatPrice(property.sellingPrice)}</Text>
             </View>
             <View style={styles.infoBox}>
               <Text style={styles.infoLabel}>Carpet Area</Text>

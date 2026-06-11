@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { 
-  FaUpload, 
-  FaFacebookF, 
-  FaInstagram, 
-  FaTwitter, 
+import { useNavigate } from 'react-router-dom';
+import {
+  FaUpload,
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
   FaWhatsapp,
   FaEnvelope,
   FaTimes,
@@ -20,8 +21,12 @@ import {
 } from 'react-icons/md';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { BsFillHouseFill } from 'react-icons/bs';
+import { apiCall } from '../../../../../helpers/apicall/apiCall';
+import { showSuccess, showError, showWarning } from '../../../../../helpers/swalHelper';
 
 const AddAgent = () => {
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -86,12 +91,7 @@ const AddAgent = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission
-  };
-
-  const handleCancel = () => {
+  const resetForm = () => {
     setFormData({
       fullName: '',
       email: '',
@@ -106,6 +106,84 @@ const AddAgent = () => {
       twitterUrl: ''
     });
     setPreviewImage(null);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const name = formData.fullName.trim();
+    const email = formData.email.trim();
+    const mobileNumber = formData.agentNumber.trim();
+
+    // --- Validation ---
+    if (!name) {
+      showWarning('Agent name is required.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showWarning('Please enter a valid email address.');
+      return;
+    }
+
+    // Phone must be digits-only and a valid 10-digit Indian mobile number
+    if (!/^\d+$/.test(mobileNumber)) {
+      showWarning('Agent number must contain digits only.');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
+      showWarning('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    // Numeric-only field (when provided)
+    if (
+      formData.propertiesNumber &&
+      !/^\d+$/.test(String(formData.propertiesNumber).trim())
+    ) {
+      showWarning('Properties number must be numeric.');
+      return;
+    }
+
+    // Map the agent form onto the admin user-creation payload
+    // (same endpoint Users.jsx uses to create users). A sales agent maps
+    // to the property-manager sales-executive role.
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || nameParts[0];
+
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      mobileNumber,
+      roleName: 'Sales Executive - Property Manager',
+    };
+
+    setSubmitting(true);
+    apiCall.post({
+      route: '/admin/users',
+      payload,
+      onSuccess: (res) => {
+        setSubmitting(false);
+        if (res.success) {
+          showSuccess('Agent created successfully!');
+          resetForm();
+          navigate('/dashboard/agent');
+        } else {
+          showError(res.message || 'Failed to create agent.');
+        }
+      },
+      onError: (err) => {
+        setSubmitting(false);
+        showError(err?.data?.message || err?.message || 'Failed to create agent.');
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    resetForm();
   };
 
   return (
@@ -173,10 +251,20 @@ const AddAgent = () => {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <button className="px-3 py-2 border-2 border-[#EE2529] text-[#EE2529] hover:bg-red-50 rounded-lg font-semibold transition-colors text-sm text-nowrap">
-                  Add Agent
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="px-3 py-2 border-2 border-[#EE2529] text-[#EE2529] hover:bg-red-50 rounded-lg font-semibold transition-colors text-sm text-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Adding...' : 'Add Agent'}
                 </button>
-                <button onClick={handleCancel} className="px-2 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold text-sm transition-colors text-nowrap">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={submitting}
+                  className="px-2 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold text-sm transition-colors text-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+                >
                   Cancel
                 </button>
               </div>
@@ -453,17 +541,19 @@ const AddAgent = () => {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="w-full sm:w-auto justify-center px-8 py-3 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                  disabled={submitting}
+                  className="w-full sm:w-auto justify-center px-8 py-3 bg-red-400 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <MdCancel size={16} />
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto justify-center px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] hover:bg-red-50 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                  disabled={submitting}
+                  className="w-full sm:w-auto justify-center px-8 py-3 border-2 border-[#EE2529] text-[#EE2529] hover:bg-red-50 rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <FaUser size={16} />
-                  Create Agent
+                  {submitting ? 'Creating...' : 'Create Agent'}
                 </button>
               </div>
             </form>

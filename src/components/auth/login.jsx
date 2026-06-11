@@ -55,7 +55,7 @@ const Login = ({ onLogin }) => {
           }));
           setShowOtpField(true);
           // Auto-fill OTP if it was pre-filled (e.g. demo credentials)
-          if (formData.otp === "1111") {
+          if (formData.otp === "111111") {
             // keep it
           } else {
             showToast("success", "OTP sent to your mobile number");
@@ -150,7 +150,7 @@ const Login = ({ onLogin }) => {
 
   const handleUseAdminCredentials = () => {
     setFormData({
-      mobileNumber: "6666666666",
+      mobileNumber: "9000000001", // Super Admin (fresh dev account)
       otp: "111111",
       verificationId: "", // Reset verification ID to force new generation
     });
@@ -249,10 +249,24 @@ const Login = ({ onLogin }) => {
                   </h3>
                   <div className="space-y-2">
                     <p className="text-sm text-white">
-                      Enter your mobile number to receive a secure OTP. Use 1111
-                      for demo purposes.
+                      Enter your mobile number to receive a secure OTP.
+                      {import.meta.env.DEV && " OTP for all demo accounts: 111111."}
                     </p>
                   </div>
+                  {import.meta.env.DEV && (
+                    <div className="mt-3 rounded-lg bg-white/10 border border-white/20 p-3 text-[11px] leading-relaxed text-white/90">
+                      <p className="font-semibold uppercase tracking-wider text-[10px] text-white/70 mb-1">
+                        Demo accounts (OTP 111111)
+                      </p>
+                      <ul className="space-y-0.5">
+                        <li>Super Admin — <span className="font-mono">9000000001</span></li>
+                        <li>Admin — <span className="font-mono">9000000002</span></li>
+                        <li>Sales Manager — <span className="font-mono">9000000003</span></li>
+                        <li>Property Manager — <span className="font-mono">9000000004</span></li>
+                        <li>Client Dealer — <span className="font-mono">9000000005</span></li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 <p

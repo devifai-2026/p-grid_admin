@@ -35,7 +35,7 @@ const UserModal = ({
 
   const handleSendOtp = () => {
     setMobileApiError("");
-    if (newMobile.length !== 10) {
+    if (!/^[6-9]\d{9}$/.test(newMobile)) {
       setMobileApiError("Please enter a valid 10-digit mobile number");
       return;
     }
@@ -69,8 +69,8 @@ const UserModal = ({
 
   const handleChangeMobile = () => {
     setMobileApiError("");
-    if (otp.length < 6) {
-      setMobileApiError("Please enter a valid OTP");
+    if (!/^\d{6}$/.test(otp)) {
+      setMobileApiError("Please enter a valid 6-digit OTP");
       return;
     }
     setMobileApiLoading(true);
@@ -270,10 +270,23 @@ const UserModal = ({
                       )}
                     </label>
                     <input
-                      type="text"
+                      type="tel"
+                      inputMode="numeric"
                       name="mobileNumber"
                       value={formData.mobileNumber}
-                      onChange={editingId ? undefined : handleInputChange}
+                      onChange={
+                        editingId
+                          ? undefined
+                          : (e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "mobileNumber",
+                                  value: e.target.value
+                                    .replace(/\D/g, "")
+                                    .slice(0, 10),
+                                },
+                              })
+                      }
                       readOnly={!!editingId}
                       required
                       maxLength={10}
@@ -440,9 +453,14 @@ const UserModal = ({
                           New Mobile Number
                         </label>
                         <input
-                          type="text"
+                          type="tel"
+                          inputMode="numeric"
                           value={newMobile}
-                          onChange={(e) => setNewMobile(e.target.value)}
+                          onChange={(e) =>
+                            setNewMobile(
+                              e.target.value.replace(/\D/g, "").slice(0, 10),
+                            )
+                          }
                           maxLength={10}
                           placeholder="Enter 10-digit number"
                           className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold"
@@ -472,8 +490,13 @@ const UserModal = ({
                         </label>
                         <input
                           type="text"
+                          inputMode="numeric"
                           value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
+                          onChange={(e) =>
+                            setOtp(
+                              e.target.value.replace(/\D/g, "").slice(0, 6),
+                            )
+                          }
                           maxLength={6}
                           placeholder="Enter 6-digit OTP"
                           className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold tracking-[0.2em] text-center"
