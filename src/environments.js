@@ -21,12 +21,10 @@ const EMAILJS = {
 /* Environment configs */
 const ENV_CONFIG = {
   local: {
-    // BASE_URL: "http://localhost:3000/api/v1",
     BASE_URL: "http://localhost:3000/api/v1",
   },
   prod: {
-    // BASE_URL: "https://pre-release-production.up.railway.app/api/v1",
-    BASE_URL: "http://localhost:3000/api/v1",
+    BASE_URL: "https://pre-lease-server-1.onrender.com/api/v1",
   },
 };
 const env_ = 
