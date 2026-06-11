@@ -1,0 +1,16 @@
+# Render Blueprint — admin dashboard (Vite static site).
+services:
+  - type: web
+    name: p-grid-admin
+    runtime: static
+    branch: production
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
+    routes:
+      # SPA: serve index.html for client-side routes (react-router).
+      - type: rewrite
+        source: /*
+        destination: /index.html
