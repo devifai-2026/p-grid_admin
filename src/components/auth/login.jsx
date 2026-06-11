@@ -249,24 +249,39 @@ const Login = ({ onLogin }) => {
                   </h3>
                   <div className="space-y-2">
                     <p className="text-sm text-white">
-                      Enter your mobile number to receive a secure OTP.
-                      {import.meta.env.DEV && " OTP for all demo accounts: 111111."}
+                      Enter your mobile number to receive a secure OTP. OTP for all
+                      demo accounts: 111111.
                     </p>
                   </div>
-                  {import.meta.env.DEV && (
-                    <div className="mt-3 rounded-lg bg-white/10 border border-white/20 p-3 text-[11px] leading-relaxed text-white/90">
-                      <p className="font-semibold uppercase tracking-wider text-[10px] text-white/70 mb-1">
-                        Demo accounts (OTP 111111)
-                      </p>
-                      <ul className="space-y-0.5">
-                        <li>Super Admin — <span className="font-mono">9000000001</span></li>
-                        <li>Admin — <span className="font-mono">9000000002</span></li>
-                        <li>Sales Manager — <span className="font-mono">9000000003</span></li>
-                        <li>Property Manager — <span className="font-mono">9000000004</span></li>
-                        <li>Client Dealer — <span className="font-mono">9000000005</span></li>
-                      </ul>
-                    </div>
-                  )}
+                  <div className="mt-3 rounded-lg bg-white/10 border border-white/20 p-3 text-[11px] leading-relaxed text-white/90">
+                    <p className="font-semibold uppercase tracking-wider text-[10px] text-white/70 mb-1">
+                      Demo accounts (tap to fill · OTP 111111)
+                    </p>
+                    <ul className="space-y-0.5">
+                      {[
+                        ["Super Admin", "9000000001"],
+                        ["Admin", "9000000002"],
+                        ["Sales Manager", "9000000003"],
+                        ["Property Manager", "9000000004"],
+                        ["Client Dealer", "9000000005"],
+                      ].map(([label, num]) => (
+                        <li
+                          key={num}
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              mobileNumber: num,
+                              otp: "",
+                              verificationId: "",
+                            }))
+                          }
+                          className="cursor-pointer hover:text-white"
+                        >
+                          {label} — <span className="font-mono">{num}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 <p
