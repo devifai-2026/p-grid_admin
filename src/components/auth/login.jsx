@@ -55,7 +55,7 @@ const Login = ({ onLogin }) => {
           }));
           setShowOtpField(true);
           // Auto-fill OTP if it was pre-filled (e.g. demo credentials)
-          if (formData.otp === "111111") {
+          if (formData.otp === "1111") {
             // keep it
           } else {
             showToast("success", "OTP sent to your mobile number");
@@ -80,8 +80,8 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    if (formData.otp.length !== 6) {
-      setError("Please enter a 6-digit OTP");
+    if (formData.otp.length !== 4) {
+      setError("Please enter a 4-digit OTP");
       return;
     }
 
@@ -151,7 +151,7 @@ const Login = ({ onLogin }) => {
   const handleUseAdminCredentials = () => {
     setFormData({
       mobileNumber: "9000000001", // Super Admin (fresh dev account)
-      otp: "111111",
+      otp: "1111",
       verificationId: "", // Reset verification ID to force new generation
     });
     setShowOtpField(false); // Force creating new OTP flow
@@ -250,12 +250,12 @@ const Login = ({ onLogin }) => {
                   <div className="space-y-2">
                     <p className="text-sm text-white">
                       Enter your mobile number to receive a secure OTP. OTP for all
-                      demo accounts: 111111.
+                      demo accounts: 1111.
                     </p>
                   </div>
                   <div className="mt-3 rounded-lg bg-white/10 border border-white/20 p-3 text-[11px] leading-relaxed text-white/90">
                     <p className="font-semibold uppercase tracking-wider text-[10px] text-white/70 mb-1">
-                      Demo accounts (tap to fill · OTP 111111)
+                      Demo accounts (tap to fill · OTP 1111)
                     </p>
                     <ul className="space-y-0.5">
                       {[
@@ -364,11 +364,11 @@ const Login = ({ onLogin }) => {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            otp: e.target.value.replace(/\D/g, "").slice(0, 6),
+                            otp: e.target.value.replace(/\D/g, "").slice(0, 4),
                           })
                         }
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE2529] focus:border-transparent transition-all duration-300 hover:border-[#EE2529] font-bold tracking-widest"
-                        placeholder="6 digit OTP"
+                        placeholder="4 digit OTP"
                         required
                         autoFocus
                       />

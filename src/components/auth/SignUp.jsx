@@ -91,8 +91,8 @@ const SignUp = () => {
       return;
     }
 
-    if (formData.otp.length !== 6) {
-      setError("Please enter the 6-digit OTP");
+    if (formData.otp.length !== 4) {
+      setError("Please enter the 4-digit OTP");
       return;
     }
 
@@ -417,11 +417,11 @@ const SignUp = () => {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            otp: e.target.value.replace(/\D/g, "").slice(0, 6),
+                            otp: e.target.value.replace(/\D/g, "").slice(0, 4),
                           })
                         }
                         className="w-full pl-10 pr-4 py-3 border-2 border-[#EE2529] rounded-lg focus:outline-none font-bold tracking-[0.5em]"
-                        placeholder="6 DIGITS"
+                        placeholder="4 DIGITS"
                         required
                         autoFocus
                       />

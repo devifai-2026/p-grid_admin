@@ -165,7 +165,7 @@ const UserFormDialog = ({
 
   const verifyMobile = () => {
     setMobileErr("");
-    if (!/^\d{6}$/.test(otp)) return setMobileErr("Enter a valid 6-digit OTP");
+    if (!/^\d{4}$/.test(otp)) return setMobileErr("Enter a valid 4-digit OTP");
     setMobileLoading(true);
     apiCall.patch({
       route: "/change-mobile",
@@ -319,10 +319,10 @@ const UserFormDialog = ({
                   <TextField
                     label="Enter OTP"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
                     size="small"
                     fullWidth
-                    inputProps={{ inputMode: "numeric", maxLength: 6 }}
+                    inputProps={{ inputMode: "numeric", maxLength: 4 }}
                   />
                   <Button onClick={() => setMobileStep("phone")} disabled={mobileLoading}>
                     Back

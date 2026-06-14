@@ -69,8 +69,8 @@ const UserModal = ({
 
   const handleChangeMobile = () => {
     setMobileApiError("");
-    if (!/^\d{6}$/.test(otp)) {
-      setMobileApiError("Please enter a valid 6-digit OTP");
+    if (!/^\d{4}$/.test(otp)) {
+      setMobileApiError("Please enter a valid 4-digit OTP");
       return;
     }
     setMobileApiLoading(true);
@@ -494,11 +494,11 @@ const UserModal = ({
                           value={otp}
                           onChange={(e) =>
                             setOtp(
-                              e.target.value.replace(/\D/g, "").slice(0, 6),
+                              e.target.value.replace(/\D/g, "").slice(0, 4),
                             )
                           }
-                          maxLength={6}
-                          placeholder="Enter 6-digit OTP"
+                          maxLength={4}
+                          placeholder="Enter 4-digit OTP"
                           className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all text-sm font-bold tracking-[0.2em] text-center"
                         />
                         {mobileApiError ? (
