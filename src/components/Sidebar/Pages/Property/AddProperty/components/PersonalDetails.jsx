@@ -370,7 +370,15 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
           />
           <span className="text-sm text-gray-700">
             I agree to the{' '}
-            <span className="text-blue-500 underline">terms & conditions</span>
+            <a
+              href="/terms-and-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-blue-500 underline"
+            >
+              terms & conditions
+            </a>
           </span>
         </label>
         {isSubmitted && !formData.agreeTerms && (
@@ -385,7 +393,16 @@ const PersonalDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
             onChange={() => handleChange('agreePrivacy', !formData.agreePrivacy)}
           />
           <span className="text-sm text-gray-700">
-            I agree to the <span className="text-blue-500 underline">Privacy Policy</span>
+            I agree to the{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-blue-500 underline"
+            >
+              Privacy Policy
+            </a>
           </span>
         </label>
         {isSubmitted && !formData.agreePrivacy && (

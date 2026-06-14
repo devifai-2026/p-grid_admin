@@ -115,6 +115,18 @@ const LocationDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
+  // City supports an "Others" option that reveals a free-text input, so users
+  // can enter a city that isn't in the predefined CITY_BY_STATE list. When
+  // editing an existing property whose city isn't in the list, default to the
+  // free-text mode so the saved value shows and remains editable.
+  const cityListForState = (state) =>
+    state && CITY_BY_STATE[state] ? CITY_BY_STATE[state] : [];
+  const [cityIsOther, setCityIsOther] = useState(() => {
+    const c = initialData?.city;
+    if (!c) return false;
+    return !cityListForState(initialData?.state).includes(c);
+  });
+
   useEffect(() => {
     const isValid = validateFormSilently();
     onFormValid(isValid);
@@ -242,6 +254,7 @@ const LocationDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
                  onChange={(v) => {
                    handleInputChange('state', v);
                    handleInputChange('city', ''); // Reset city
+                   setCityIsOther(false); // Reset Others mode on state change
                    handleBlur('state', v);
                  }}
                  onBlur={() => handleBlur('state')}
@@ -256,19 +269,35 @@ const LocationDetails = forwardRef(({ onNext, onFormValid, initialData }, ref) =
                <label className="block text-sm font-bold text-gray-700 mb-2">City *</label>
                <CustomDropdown
                  placeholder="Select City"
-                 value={formData.city}
-                 options={
-                   formData.state && CITY_BY_STATE[formData.state]
-                     ? CITY_BY_STATE[formData.state].map(c => ({ label: c, value: c }))
-                     : []
-                 }
+                 value={cityIsOther ? '__OTHER__' : formData.city}
+                 options={[
+                   ...cityListForState(formData.state).map(c => ({ label: c, value: c })),
+                   { label: 'Others (type manually)', value: '__OTHER__' },
+                 ]}
                  onChange={(v) => {
-                   handleInputChange('city', v);
-                   handleBlur('city', v);
+                   if (v === '__OTHER__') {
+                     setCityIsOther(true);
+                     handleInputChange('city', ''); // clear so user types a fresh value
+                   } else {
+                     setCityIsOther(false);
+                     handleInputChange('city', v);
+                     handleBlur('city', v);
+                   }
                  }}
-                 onBlur={() => handleBlur('city')}
-                 error={touched.city && !!errors.city}
+                 onBlur={() => !cityIsOther && handleBlur('city')}
+                 error={touched.city && !cityIsOther && !!errors.city}
                />
+               {cityIsOther && (
+                 <input
+                   type="text"
+                   placeholder="Enter city name"
+                   className="w-full bg-white border rounded px-3 py-2 text-sm mt-2 focus:outline-none focus:ring-1 focus:ring-[#EE2529]"
+                   value={formData.city}
+                   onChange={(e) => handleInputChange('city', e.target.value)}
+                   onBlur={(e) => handleBlur('city', e.target.value)}
+                   autoFocus
+                 />
+               )}
                {touched.city && errors.city && (
                  <p className="text-red-500 text-xs mt-1">{errors.city}</p>
                )}

@@ -15,6 +15,9 @@ import {
   FiCalendar,
   FiChevronDown,
   FiAlertCircle,
+  FiTag,
+  FiMessageSquare,
+  FiRepeat,
 } from "react-icons/fi";
 
 const EnquiryCard = ({
@@ -30,8 +33,17 @@ const EnquiryCard = ({
   executives,
   handleAssign,
   assignLoading,
+  stages = [],
+  onUpdateStage,
+  onMessages,
+  onReassign,
 }) => {
-  const isPending = item.status === "pending" || !item.status;
+  // Enquiries no longer have a legacy "status" field — the lifecycle is stage
+  // based. "Pending" here means unassigned (no dealer yet); "assigned" means a
+  // dealer owns it. The action bar (stage / messages / reassign) is for
+  // assigned enquiries.
+  const isAssigned = !!item.assignedTo;
+  const isPending = !isAssigned;
   const isAutoAssigning = autoAssignLoading === (item.propertyId + item.inquirerId);
   const isCurrentAssigning = assigningId === (item.id || item.propertyId);
 
@@ -65,13 +77,37 @@ const EnquiryCard = ({
                 <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">
                   {item.property?.propertyType || "Premium Asset"}
                 </h3>
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border ${
-                  isPending 
-                    ? "bg-amber-50 text-amber-600 border-amber-100" 
-                    : "bg-blue-50 text-blue-600 border-blue-100"
-                }`}>
-                  {item.status}
-                </span>
+                {item.stage && (
+                  <span
+                    className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest text-white"
+                    style={{ backgroundColor: item.stage.color || "#0f172a" }}
+                  >
+                    {item.stage.name}
+                  </span>
+                )}
+                {typeof item.score === "number" && (
+                  <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-amber-100 text-amber-700">
+                    {item.score} pts
+                  </span>
+                )}
+                {item.unreadClientMessages > 0 && (
+                  <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-red-600 text-white flex items-center gap-1 animate-pulse">
+                    <FiMessageSquare size={9} />
+                    {item.unreadClientMessages} New
+                  </span>
+                )}
+                {isAssigned ? (
+                  <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-blue-100 text-blue-700 flex items-center gap-1">
+                    <FiUser size={9} />
+                    {item.clientDealer
+                      ? `${item.clientDealer.firstName} ${item.clientDealer.lastName}`
+                      : "Assigned"}
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-amber-100 text-amber-700">
+                    Unassigned
+                  </span>
+                )}
               </div>
               <p className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                 <FiMapPin className="text-red-500" />
@@ -188,6 +224,30 @@ const EnquiryCard = ({
             </div>
           </div>
         </div>
+
+        {/* Action bar — stage move, messages, reassign (for assigned enquiries) */}
+        {!isPending && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            <button
+              onClick={() => onUpdateStage?.(item)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95"
+            >
+              <FiTag size={14} /> Update Stage
+            </button>
+            <button
+              onClick={() => onMessages?.(item)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-red-300 hover:text-red-600 transition-all active:scale-95"
+            >
+              <FiMessageSquare size={14} /> Messages
+            </button>
+            <button
+              onClick={() => onReassign?.(item)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-red-300 hover:text-red-600 transition-all active:scale-95"
+            >
+              <FiRepeat size={14} /> Reassign
+            </button>
+          </div>
+        )}
 
         {/* Message Content */}
         <div className="space-y-4">

@@ -497,6 +497,15 @@ const ExecutiveWorkBoard = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            navigate(`/property/property-details/${p.propertyId}`);
+                          }}
+                          className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-full text-sm font-semibold hover:bg-slate-200 transition-all"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
                             openAssignModal(p);
                           }}
                           className="px-5 py-2.5 bg-[#FFF4E5] text-[#E67E22] rounded-full text-sm font-semibold hover:bg-[#FFE8CC] transition-all"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMessageSquare,
@@ -12,14 +13,37 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiUserPlus,
+  FiArrowRight,
 } from "react-icons/fi";
 import { apiCall } from "../../../../helpers/apicall/apiCall";
 import { useAuth } from "../../../../context/AuthContext";
+import InquiryStageModal from "./InquiryStageModal";
+import InquiryMessagesModal from "./InquiryMessagesModal";
+
+// Small coloured chip showing an enquiry's current stage.
+const StageChip = ({ stage }) => {
+  if (!stage) {
+    return (
+      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-400">
+        No Stage
+      </span>
+    );
+  }
+  return (
+    <span
+      className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide text-white"
+      style={{ backgroundColor: stage.color || "#0f172a" }}
+    >
+      {stage.name}
+    </span>
+  );
+};
 
 const COLORS = ["#EE2529", "#e5e7eb"];
 
 const AssignedEnquiries = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [inquiries, setInquiries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,6 +54,21 @@ const AssignedEnquiries = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(5);
+
+  // Pipeline stages (admin-configured) + the enquiry whose status is being edited.
+  const [stages, setStages] = useState([]);
+  const [stageInquiry, setStageInquiry] = useState(null);
+  const [messageInquiry, setMessageInquiry] = useState(null);
+
+  useEffect(() => {
+    apiCall.get({
+      route: "/inquiry-stages",
+      onSuccess: (res) => res.success && setStages(res.data || []),
+      onError: () => {},
+    });
+  }, []);
+
+  const stageById = (id) => stages.find((s) => s.id === id);
 
   // Debounce search
   useEffect(() => {
@@ -170,6 +209,40 @@ const AssignedEnquiries = () => {
                       </p>
                     </div>
                   </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <StageChip stage={item.stage || stageById(item.stageId)} />
+                      <span className="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-700">
+                        {item.score ?? 0} pts
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setMessageInquiry(item)}
+                        className="text-[11px] font-black uppercase tracking-wider text-slate-500 hover:text-[#EE2529] hover:underline"
+                      >
+                        Messages
+                      </button>
+                      <button
+                        onClick={() => setStageInquiry(item)}
+                        className="text-[11px] font-black uppercase tracking-wider text-[#EE2529] hover:underline"
+                      >
+                        Update Status
+                      </button>
+                    </div>
+                  </div>
+
+                  {item.property?.propertyId && (
+                    <button
+                      onClick={() =>
+                        navigate(`/property/property-details/${item.property.propertyId}`)
+                      }
+                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95"
+                    >
+                      View Property <FiArrowRight size={14} />
+                    </button>
+                  )}
                 </motion.div>
               );
             })}
@@ -196,6 +269,9 @@ const AssignedEnquiries = () => {
                   </th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                     Timeline
+                  </th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -280,6 +356,42 @@ const AssignedEnquiries = () => {
                             </p>
                           </div>
                         </td>
+                        <td className="px-8 py-6 text-right">
+                          <div className="flex flex-col items-end gap-2">
+                            <div className="flex items-center gap-2">
+                              <StageChip stage={item.stage || stageById(item.stageId)} />
+                              <span className="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-700">
+                                {item.score ?? 0} pts
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setMessageInquiry(item)}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-black uppercase tracking-widest hover:border-red-300 hover:text-red-600 transition-all whitespace-nowrap"
+                              >
+                                <FiMessageSquare size={13} /> Messages
+                              </button>
+                              <button
+                                onClick={() => setStageInquiry(item)}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-black uppercase tracking-widest hover:border-red-300 hover:text-red-600 transition-all whitespace-nowrap"
+                              >
+                                Status
+                              </button>
+                              {item.property?.propertyId && (
+                                <button
+                                  onClick={() =>
+                                    navigate(
+                                      `/property/property-details/${item.property.propertyId}`,
+                                    )
+                                  }
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 whitespace-nowrap"
+                                >
+                                  View <FiArrowRight size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </td>
                       </motion.tr>
                     );
                   })}
@@ -343,6 +455,20 @@ const AssignedEnquiries = () => {
           </div>
         )}
       </div>
+
+      <InquiryStageModal
+        isOpen={!!stageInquiry}
+        inquiry={stageInquiry}
+        stages={stages}
+        onClose={() => setStageInquiry(null)}
+        onUpdated={() => setRefreshKey((k) => k + 1)}
+      />
+
+      <InquiryMessagesModal
+        isOpen={!!messageInquiry}
+        inquiry={messageInquiry}
+        onClose={() => setMessageInquiry(null)}
+      />
     </div>
   );
 };

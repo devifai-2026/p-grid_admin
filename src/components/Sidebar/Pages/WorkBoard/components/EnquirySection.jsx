@@ -86,7 +86,7 @@ const EnquirySection = ({
               Quiet on the front
             </h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              No pending leads requiring attention
+              No active enquiries right now
             </p>
           </div>
         )}

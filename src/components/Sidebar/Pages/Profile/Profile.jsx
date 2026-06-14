@@ -12,7 +12,6 @@ import {
   FiActivity,
   FiInfo,
   FiSettings,
-  FiCamera,
   FiX,
   FiEdit2,
 } from "react-icons/fi";
@@ -166,12 +165,6 @@ const Profile = () => {
           <div className="h-32 md:h-40 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-red-900/90 animate-gradient-xy"></div>
             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-
-            <div className="absolute bottom-3 right-4">
-              <button className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-all border border-white/20">
-                <FiCamera size={14} />
-              </button>
-            </div>
           </div>
 
           {/* Profile Basic Info - Refined */}
@@ -280,20 +273,23 @@ const Profile = () => {
 
               <div className="flex items-center gap-4 mb-5">
                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <FiShield className="text-red-400 text-lg" />
+                  <FiPhone className="text-red-400 text-lg" />
                 </div>
                 <div>
                   <h4 className="text-[12px] font-bold uppercase tracking-tight">
-                    Account Security
+                    Mobile Number
                   </h4>
-                  <p className="text-[10px] text-slate-400 font-medium italic">
-                    Not available
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    +91 {user.mobileNumber}
                   </p>
                 </div>
               </div>
 
-              <button className="w-full py-2.5 bg-red-600 hover:bg-red-700 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-red-900/20">
-                Update Settings
+              <button
+                onClick={() => setIsMobileModalOpen(true)}
+                className="w-full py-2.5 bg-red-600 hover:bg-red-700 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-red-900/20"
+              >
+                Change Mobile Number
               </button>
             </motion.div>
           </div>
@@ -343,7 +339,11 @@ const Profile = () => {
                         Location Context
                       </h4>
                       <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                        Authorized service region: Not available.
+                        {user.city || user.locality || user.region
+                          ? `Authorized service region: ${
+                              user.city || user.locality || user.region
+                            }.`
+                          : "No service region set on your profile."}
                       </p>
                     </div>
 
@@ -355,7 +355,15 @@ const Profile = () => {
                         Member Timeline
                       </h4>
                       <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                        Account established: Not available.
+                        {user.createdAt
+                          ? `Account established: ${new Date(
+                              user.createdAt,
+                            ).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}.`
+                          : "Account established date not on record."}
                       </p>
                     </div>
 
@@ -364,13 +372,12 @@ const Profile = () => {
                         <FiTarget size={100} />
                       </div>
                       <h4 className="text-[9px] font-bold text-red-500 uppercase tracking-[3px] mb-3">
-                        Professional Note
+                        Role
                       </h4>
                       <p className="text-slate-600 text-[12px] leading-relaxed max-w-2xl relative z-10">
-                        "Committed to excellence in pre-lease property
-                        management and client relationship building. Expert in
-                        administrative workflows and digital transformation of
-                        property assets."
+                        {user.bio?.trim()
+                          ? user.bio
+                          : `${user.name} · ${user.role} on the P-Lease-Grid platform.`}
                       </p>
                     </div>
                   </div>
@@ -396,15 +403,18 @@ const Profile = () => {
                       <FiShield size={28} />
                     </div>
                     <h4 className="font-bold text-slate-800 uppercase text-sm mb-3 tracking-tight">
-                      Vault Security Setup
+                      Account Security
                     </h4>
                     <p className="text-[10px] text-slate-500 max-w-xs mb-8 leading-relaxed italic">
-                      Biometric and PIN methods are active. We recommend
-                      refreshing your access keys every 90 days.
+                      Your mobile number is used to sign in and receive OTPs.
+                      Keep it up to date to secure your account.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                      <button className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95">
-                        Devices
+                      <button
+                        onClick={() => setIsMobileModalOpen(true)}
+                        className="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                      >
+                        Change Mobile Number
                       </button>
                     </div>
                   </div>

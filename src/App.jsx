@@ -26,11 +26,17 @@ import ClientDetails from "./components/Sidebar/Pages/Customers/ClientDetails/Cl
 import AddCustomer from "./components/Sidebar/Pages/Customers/AddCustomer/AddCustomer";
 import CustomerGrid from "./components/Sidebar/Pages/Customers/GridView/CustomerGrid";
 import Profile from "./components/Sidebar/Pages/Profile/Profile";
-import Users from "./components/Sidebar/Pages/Users/Users";
+import Users from "./components/Sidebar/Pages/Users/UsersAndRoles";
 import SalesAgents from "./components/Sidebar/Pages/Users/SalesAgents";
+import TermsAndConditions from "./components/Sidebar/Pages/Legal/TermsAndConditions";
+import PrivacyPolicy from "./components/Sidebar/Pages/Legal/PrivacyPolicy";
+import EnquiryStages from "./components/Sidebar/Pages/AdvancedSettings/EnquiryStages";
+import EnquiryReport from "./components/Sidebar/Pages/Reports/EnquiryReport";
+import ContactLeads from "./components/Sidebar/Pages/Leads/ContactLeads";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 import AssignedEnquiries from "./components/Sidebar/Pages/Enquiry/AssignedEnquiries";
+import PendingMessages from "./components/Sidebar/Pages/Enquiry/PendingMessages";
 import WorkBoard from "./components/Sidebar/Pages/WorkBoard/WorkBoard";
 import ExecutiveWorkBoard from "./components/Sidebar/Pages/WorkBoard/ExecutiveWorkBoard";
 import HotProperty from "./components/Sidebar/Pages/Property/HotProperty/HotProperty";
@@ -95,6 +101,10 @@ const AppRoutes = () => {
       <Route path="/reset-email" element={<ResetEmail />} />
       <Route path="/reset-otp" element={<ResetOtp />} />
       <Route path="/confirm-password" element={<ConfirmPassword />} />
+
+      {/* Public Legal Pages */}
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
       {/* Protected Routes */}
       <Route element={<PrivateRoute />}>
@@ -203,6 +213,10 @@ const AppRoutes = () => {
           <Route path="/users" element={<Users />} />
           <Route path="/enquiry" element={<Enquiry />} />
           <Route path="/enquiry/assigned" element={<AssignedEnquiries />} />
+          <Route path="/enquiry/pending-messages" element={<PendingMessages />} />
+          <Route path="/settings/enquiry-stages" element={<EnquiryStages />} />
+          <Route path="/reports/enquiries" element={<EnquiryReport />} />
+          <Route path="/leads/contact" element={<ContactLeads />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help-and-support" element={<HelpandSupport />} />
 

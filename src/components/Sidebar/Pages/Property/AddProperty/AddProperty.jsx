@@ -191,6 +191,16 @@ const AddProperty = () => {
         finalData.futureInfrastructure || '',
       );
 
+      // -- FAQs (optional) -- only send entries that have a question; strip the
+      // client-only `id` so the backend stores clean { question, answer } objects.
+      const cleanedFaqs = (finalData.faqs || [])
+        .filter((faq) => faq && faq.question && faq.question.trim() !== '')
+        .map((faq) => ({
+          question: faq.question.trim(),
+          answer: (faq.answer || '').trim(),
+        }));
+      apiFormData.append('faqs', JSON.stringify(cleanedFaqs));
+
       const mappedConnectivity = (finalData.connectivity || [])
         .filter((conn) => conn.type && conn.type.trim() !== '')
         .map((conn) => ({

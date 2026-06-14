@@ -9,6 +9,8 @@ import { showError } from "../../../../helpers/swalHelper";
 // Sub-components
 import EnquiryHeader from "./components/EnquiryHeader";
 import EnquiryCard from "./components/EnquiryCard";
+import InquiryStageModal from "./InquiryStageModal";
+import InquiryMessagesModal from "./InquiryMessagesModal";
 
 const Enquiry = () => {
   const { user } = useAuth();
@@ -21,6 +23,28 @@ const Enquiry = () => {
   const [selectedExec, setSelectedExec] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
   const [autoAssignLoading, setAutoAssignLoading] = useState(null);
+
+  // Stages (for the stage picker) + which enquiry has a modal open.
+  const [stages, setStages] = useState([]);
+  const [stageInquiry, setStageInquiry] = useState(null);
+  const [messageInquiry, setMessageInquiry] = useState(null);
+
+  useEffect(() => {
+    apiCall.get({
+      route: "/inquiry-stages",
+      onSuccess: (res) => res.success && setStages(res.data || []),
+      onError: () => {},
+    });
+  }, []);
+
+  // Client Dealers list for reassignment (any sales role may reassign to a dealer).
+  useEffect(() => {
+    apiCall.get({
+      route: "/admin/sales-related-active-users/Sales Executive - Client Dealer",
+      onSuccess: (res) => res.success && res.data && setExecutives(res.data),
+      onError: () => {},
+    });
+  }, []);
 
   const isManager = useMemo(
     () => ["Admin", "Super Admin", "Sales Manager"].includes(user?.role),
@@ -174,6 +198,14 @@ const Enquiry = () => {
                 executives={executives}
                 handleAssign={handleAssign}
                 assignLoading={assignLoading}
+                stages={stages}
+                onUpdateStage={(it) => setStageInquiry(it)}
+                onMessages={(it) => setMessageInquiry(it)}
+                onReassign={(it) =>
+                  setAssigningId(
+                    assigningId === (it.id || it.propertyId) ? null : (it.id || it.propertyId)
+                  )
+                }
               />
             ))
           ) : (
@@ -203,6 +235,25 @@ const Enquiry = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <InquiryStageModal
+        isOpen={!!stageInquiry}
+        inquiry={stageInquiry}
+        stages={stages}
+        onClose={() => setStageInquiry(null)}
+        onUpdated={() => setRefreshKey((k) => k + 1)}
+      />
+
+      <InquiryMessagesModal
+        isOpen={!!messageInquiry}
+        inquiry={messageInquiry}
+        onClose={() => {
+          setMessageInquiry(null);
+          // Opening the thread marked client messages as seen on the server;
+          // refetch so the "new message" badge clears.
+          setRefreshKey((k) => k + 1);
+        }}
+      />
     </div>
   );
 };

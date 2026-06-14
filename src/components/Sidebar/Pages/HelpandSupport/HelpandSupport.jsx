@@ -159,7 +159,7 @@ const HelpandSupport = () => {
     },
   ];
 
-  const togggleFaq = (index) => {
+  const toggleFaq = (index) => {
     setActiveFaq(activeFaq === index ? null : index);
   };
 
@@ -326,6 +326,46 @@ const HelpandSupport = () => {
               </table>
             </div>
           )}
+        </div>
+
+        {/* FAQs */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+          <h2 className="text-lg font-black text-gray-800 uppercase tracking-tight mb-4">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-2">
+            {filteredFaqs.length === 0 ? (
+              <p className="text-sm text-gray-400 py-4 text-center">
+                No FAQs match your search.
+              </p>
+            ) : (
+              filteredFaqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-100 rounded-xl overflow-hidden"
+                >
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-gray-50 transition"
+                  >
+                    <span className="text-sm font-bold text-gray-700">
+                      {faq.question}
+                    </span>
+                    <FiChevronDown
+                      className={`shrink-0 text-gray-400 transition-transform ${
+                        activeFaq === index ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {activeFaq === index && (
+                    <p className="px-4 pb-4 text-sm text-gray-500 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

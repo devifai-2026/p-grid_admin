@@ -66,7 +66,7 @@ const WorkBoard = () => {
       // Fetch Enquiries if role allows
       if (showEnquiries) {
         const enquiryEndpoint = isAdminOrManager
-          ? "/admin/pending-inquiries"
+          ? "/admin/pending-inquiries?limit=100"
           : "/sales/assigned-inquiries";
 
         promises.push(

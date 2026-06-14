@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiUsers,
   FiPackage,
@@ -14,6 +14,7 @@ import {
   FiBarChart2,
   FiBriefcase,
   FiEdit3,
+  FiCheckSquare,
 } from "react-icons/fi";
 import {
   MdDashboard,
@@ -25,6 +26,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/Navbar/Preleasegrid logo 1.png";
 import { useUserStorage } from "../../helpers/useUserStorage";
 import { useAuth } from "../../context/AuthContext";
+import { apiCall } from "../../helpers/apicall/apiCall";
 
 // ─── Role-based menu definitions ────────────────────────────────────────────
 
@@ -63,6 +65,54 @@ const buildMenuItems = (role) => {
       { title: "All Owner", link: "/customers/owners" },
       { title: "All Broker / Agent", link: "/customers/brokers" },
       { title: "All Investor", link: "/customers/investors" },
+    ],
+  };
+
+  // Top-level entry to the Users & Roles management page. Shown for roles that
+  // can manage users (Admin / Super Admin / Sales Manager).
+  const usersAndRolesItem = {
+    title: "Users & Roles",
+    icon: <FiUsers className="w-5 h-5" />,
+    link: "/users",
+  };
+
+  // Admin advanced settings — enquiry pipeline stage configuration, etc.
+  const advancedSettingsItem = {
+    title: "Advanced Settings",
+    icon: <FiBriefcase className="w-5 h-5" />,
+    submenus: [
+      { title: "Enquiry Stages", link: "/settings/enquiry-stages" },
+    ],
+  };
+
+  // Reports — role-scoped enquiry report (admins see all, managers their team,
+  // dealers their own).
+  const reportsItem = {
+    title: "Reports",
+    icon: <FiBarChart2 className="w-5 h-5" />,
+    submenus: [
+      { title: "Enquiry Report", link: "/reports/enquiries" },
+    ],
+  };
+
+  // Leads — "Contact Us" form submissions from the consumer site (admin-only).
+  const leadsItem = {
+    title: "Leads",
+    icon: <FiMail className="w-5 h-5" />,
+    submenus: [{ title: "Contact Leads", link: "/leads/contact" }],
+  };
+
+  // Approvals — dealer enquiry messages awaiting admin approval. `badgeKey`
+  // tells the Sidebar to render a live count badge here.
+  const approvalsItem = {
+    title: "Approvals",
+    icon: <FiCheckSquare className="w-5 h-5" />,
+    submenus: [
+      {
+        title: "Pending Messages",
+        link: "/enquiry/pending-messages",
+        badgeKey: "pendingMessages",
+      },
     ],
   };
 
@@ -200,6 +250,9 @@ const buildMenuItems = (role) => {
           },
         ],
       },
+      usersAndRolesItem,
+      reportsItem,
+      approvalsItem,
       {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
@@ -247,6 +300,11 @@ const buildMenuItems = (role) => {
           },
         ],
       },
+      usersAndRolesItem,
+      advancedSettingsItem,
+      reportsItem,
+      leadsItem,
+      approvalsItem,
       {
         title: "Property",
         icon: <FiHome className="w-5 h-5" />,
@@ -304,6 +362,32 @@ const Sidebar = ({ collapsed }) => {
   const location = useLocation();
 
   const menuItems = buildMenuItems(user?.role);
+
+  // Live counts for nav badges (keyed by submenu.badgeKey).
+  const [badges, setBadges] = useState({ pendingMessages: 0 });
+  const canApprove = ["Admin", "Super Admin", "Sales Manager"].includes(user?.role);
+
+  useEffect(() => {
+    if (!canApprove) return;
+    let cancelled = false;
+    const load = () =>
+      apiCall.get({
+        route: "/inquiry-messages/pending/count",
+        onSuccess: (res) => {
+          if (!cancelled && res.success) {
+            setBadges((b) => ({ ...b, pendingMessages: res.data?.count || 0 }));
+          }
+        },
+        onError: () => {},
+      });
+    load();
+    // Refresh every 60s so the badge stays roughly current.
+    const id = setInterval(load, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [canApprove]);
 
   const [expandedMenus, setExpandedMenus] = useState(() =>
     menuItems.filter((item) => item.submenus).map((item) => item.title),
@@ -475,7 +559,12 @@ const Sidebar = ({ collapsed }) => {
                                       {sub.icon}
                                     </span>
                                   )}
-                                  {sub.title}
+                                  <span className="flex-1">{sub.title}</span>
+                                  {sub.badgeKey && badges[sub.badgeKey] > 0 && (
+                                    <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-[#EE2529] text-white text-[10px] font-bold flex items-center justify-center">
+                                      {badges[sub.badgeKey]}
+                                    </span>
+                                  )}
                                 </Link>
                               </li>
                             );

@@ -45,13 +45,15 @@ import {
   FaRegBuilding,
   FaRegFileAlt,
   FaChartLine,
-  FaMapMarkedAlt,
   FaQuestionCircle,
 } from "react-icons/fa";
 import { apiCall } from "../../../../../helpers/apicall/apiCall";
+import { CLIENT_URL } from "../../../../../environments";
 import { useUserStorage } from "../../../../../helpers/useUserStorage";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PropertyBrochure from "./PropertyBrochure";
+import NotesAndActivityModal from "../../WorkBoard/NotesAndActivityModal";
+import InquiryMessagesModal from "../../Enquiry/InquiryMessagesModal";
 import {
   showSuccess,
   showError,
@@ -80,10 +82,14 @@ const safeUnit = (value, unit = "") =>
 
 // Analytics figures are stored in Lakhs (suffixed with " L"). Guard nulls so we
 // render "N/A" instead of "₹null L".
-const lakhs = (value) =>
-  value === null || value === undefined || value === ""
-    ? "N/A"
-    : `₹${value} L`;
+// Values are stored in rupees. Render as lakhs (₹ … L) by dividing by 1e5,
+// e.g. 60000 -> "₹0.60 L", 5000000 -> "₹50.00 L".
+const lakhs = (value) => {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "N/A";
+  return `₹${(num / 100000).toFixed(2)} L`;
+};
 
 // --- Helper Components ---
 
@@ -139,6 +145,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("property");
   const [activeFaq, setActiveFaq] = useState(null);
+  const [activeMedia, setActiveMedia] = useState(0); // index into property.media
   const [verificationFilter, setVerificationFilter] = useState("all");
 
   // Assignment States
@@ -157,7 +164,13 @@ const PropertyDetails = () => {
   });
 
   // Notes States
+  const [isNotesActivityOpen, setIsNotesActivityOpen] = useState(false);
   const [notesData, setNotesData] = useState([]);
+
+  // Enquiry messages tab: this property's enquiries + the open conversation.
+  const [propertyEnquiries, setPropertyEnquiries] = useState([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(false);
+  const [messageInquiry, setMessageInquiry] = useState(null);
   const [newNote, setNewNote] = useState("");
   const [notesLoading, setNotesLoading] = useState(false);
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
@@ -165,6 +178,42 @@ const PropertyDetails = () => {
   const isAdminOrSuperAdmin = ["Admin", "Super Admin"].includes(user?.role);
   const isSalesManager = user?.role === "Sales Manager";
   const canAssignProperty = isAdminOrSuperAdmin || isSalesManager;
+
+  // Share points to the consumer (client-facing) site, NOT the admin app.
+  const handleShare = async () => {
+    const propertyId = property?.propertyId || id;
+    if (!propertyId) {
+      showError("No property to share yet.");
+      return;
+    }
+    const shareUrl = `${CLIENT_URL}/propertyDetails/${propertyId}`;
+    const title = property?.microMarket
+      ? `${property.microMarket}, ${property.city || ""}`
+      : `${property?.propertyType || "Property"} in ${property?.city || ""}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title,
+          text: `Check out this property: ${title}`,
+          url: shareUrl,
+        });
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        showSuccess("Property link copied to clipboard!");
+        return;
+      }
+      // Last-resort fallback for browsers without the Clipboard API.
+      window.prompt("Copy this property link:", shareUrl);
+    } catch (err) {
+      // User dismissing the native share sheet is not an error.
+      if (err?.name === "AbortError") return;
+      showError("Unable to share this property.");
+    }
+  };
+
   const handleVerify = async (e, propertyId) => {
     e.stopPropagation();
     const isConfirmed = await confirmAction(
@@ -415,6 +464,32 @@ const PropertyDetails = () => {
     }
   }, [activeTab, id]);
 
+  // Load this property's enquiries (the dealer's assigned ones) for the
+  // Messages tab — filtered from the assigned-inquiries list by propertyId.
+  const fetchPropertyEnquiries = () => {
+    setEnquiriesLoading(true);
+    apiCall.get({
+      route: "/sales/assigned-inquiries?limit=200",
+      onSuccess: (res) => {
+        setEnquiriesLoading(false);
+        const list = Array.isArray(res?.data) ? res.data : res?.data?.rows || [];
+        // Match on the inquiry's propertyId (top-level or nested property).
+        setPropertyEnquiries(
+          list.filter(
+            (i) => i.propertyId === id || i.property?.propertyId === id
+          )
+        );
+      },
+      onError: () => setEnquiriesLoading(false),
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab === "messages") {
+      fetchPropertyEnquiries();
+    }
+  }, [activeTab, id]);
+
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -589,7 +664,10 @@ const PropertyDetails = () => {
                 )
               }
             </PDFDownloadLink>
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600 transition">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600 transition"
+            >
               <FiShare2 size={14} /> Share
             </button>
           </div>
@@ -603,7 +681,7 @@ const PropertyDetails = () => {
           {property.state}. Offering a great investment opportunity with an
           expected ROI of {property.grossRentalYield || "N/A"}%. This property
           features {property.carpetArea} {property.carpetAreaUnit} of premium
-          space in a {property.buildingGrade || "Grade A"} building.
+          space{property.buildingGrade ? ` in a ${property.buildingGrade} building` : ""}.
         </p>
       </div>
 
@@ -645,20 +723,28 @@ const PropertyDetails = () => {
 
         <PropertyDetailsCard title="Amenities" icon={MdFitnessCenter}>
           <div className="grid grid-cols-2 gap-4 py-2">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MdLocalParking className="text-[#EE2529]" />
-              <span className="font-semibold">
-                {property.parkingFourWheeler} Car Parking
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MdPower className="text-[#EE2529]" />
-              <span className="font-semibold">{property.powerBackup}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MdSecurity className="text-[#EE2529]" />
-              <span className="font-semibold">24/7 Security</span>
-            </div>
+            {property.parkingFourWheeler > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MdLocalParking className="text-[#EE2529]" />
+                <span className="font-semibold">
+                  {property.parkingFourWheeler} Car Parking
+                </span>
+              </div>
+            )}
+            {property.parkingTwoWheeler > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MdLocalParking className="text-[#EE2529]" />
+                <span className="font-semibold">
+                  {property.parkingTwoWheeler} Bike Parking
+                </span>
+              </div>
+            )}
+            {property.powerBackup && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MdPower className="text-[#EE2529]" />
+                <span className="font-semibold">{property.powerBackup} Power Backup</span>
+              </div>
+            )}
             {property.amenities?.map((amenity, idx) => (
               <div
                 key={idx}
@@ -668,17 +754,22 @@ const PropertyDetails = () => {
                 <span className="font-semibold">{amenity.amenityName}</span>
               </div>
             ))}
+            {!property.parkingFourWheeler &&
+              !property.parkingTwoWheeler &&
+              !property.powerBackup &&
+              (!property.amenities || property.amenities.length === 0) && (
+                <p className="text-sm text-gray-400 col-span-2">No amenities added.</p>
+              )}
           </div>
         </PropertyDetailsCard>
 
         <PropertyDetailsCard title="Infrastructure" icon={MdBusiness}>
-          <InfoRow label="Total Floors" value={property.totalFloors} />
-          <InfoRow label="Wing/Block" value={property.wing} />
-          <InfoRow label="Lifts" value={property.numberOfLifts} />
-          <InfoRow label="HVAC System" value={property.hvacType || "Central"} />
+          <InfoRow label="Lifts" value={property.numberOfLifts ?? "N/A"} />
+          <InfoRow label="Furnishing" value={property.furnishingStatus || "N/A"} />
+          <InfoRow label="HVAC System" value={property.hvacType || "N/A"} />
           <InfoRow
-            label="Maintenance"
-            value={property.caretaker?.caretakerName || "Professional"}
+            label="Maintained By"
+            value={property.caretaker?.caretakerName || "N/A"}
           />
         </PropertyDetailsCard>
 
@@ -829,7 +920,7 @@ const PropertyDetails = () => {
           },
           {
             label: "Annual Rent",
-            value: `₹${property.annualGrossRent || 0} L`,
+            value: lakhs(property.annualGrossRent),
             icon: MdVerified,
             color: "text-orange-500",
             bg: "bg-orange-50",
@@ -885,7 +976,7 @@ const PropertyDetails = () => {
             label="Maintenance"
             value={lakhs(property.maintenanceAmount)}
           />
-          <InfoRow label="Mgmt Fees" value="₹0.5 L" />
+          <InfoRow label="Other Costs" value={lakhs(property.otherCostsAnnual)} />
         </PropertyDetailsCard>
       </div>
     </div>
@@ -893,60 +984,88 @@ const PropertyDetails = () => {
 
   const renderLocationContent = () => (
     <div className="space-y-6 animate-fadeIn">
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-80 relative group">
-        {/* Placeholder Map - In real app insert Google Maps Iframe or Component */}
-        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-          <div className="text-center">
-            <FaMapMarkedAlt className="text-gray-400 text-5xl mx-auto mb-4" />
-            <p className="text-gray-500 font-bold uppercase tracking-widest">
-              Interactive Map View
-            </p>
-            <p className="text-xs text-gray-400 mt-2">
-              {property.city}, {property.state}
-            </p>
-          </div>
-        </div>
-
-        <div className="absolute bottom-4 left-4 bg-white p-4 rounded-xl shadow-lg max-w-xs">
-          <h4 className="font-bold text-gray-800 flex items-center gap-2 text-sm mb-1">
-            <FiMapPin className="text-[#EE2529]" /> {property.microMarket}
-          </h4>
-          <p className="text-xs text-gray-500 pl-6">
-            {property.city}, {property.state}
-          </p>
-        </div>
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <h4 className="font-bold text-gray-800 flex items-center gap-2 text-sm mb-1">
+          <FiMapPin className="text-[#EE2529]" /> {property.microMarket}
+        </h4>
+        <p className="text-xs text-gray-500 pl-6">
+          {property.city}, {property.state}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PropertyDetailsCard title="Connectivity" icon={MdTrain}>
-          <InfoRow label="Airport" value="12 km" />
-          <InfoRow label="Metro Station" value="1.5 km" />
-          <InfoRow label="Highway Access" value="200 m" />
-          <InfoRow label="Bus Terminal" value="500 m" />
+          {Array.isArray(property.connectivity) && property.connectivity.length > 0 ? (
+            property.connectivity.map((c, i) => (
+              <InfoRow
+                key={c.connectivityId || i}
+                label={[c.connectivityType, c.name].filter(Boolean).join(" — ") || "Connectivity"}
+                value={
+                  c.distanceKm !== null && c.distanceKm !== undefined && c.distanceKm !== ""
+                    ? `${c.distanceKm} km`
+                    : "—"
+                }
+              />
+            ))
+          ) : (
+            <p className="text-sm text-gray-400 px-2 py-3">
+              No connectivity details added.
+            </p>
+          )}
         </PropertyDetailsCard>
 
-        <PropertyDetailsCard title="Demand Drivers" icon={MdBusiness}>
-          <ul className="space-y-3 px-2">
-            {[
-              "Proximity to IT Parks",
-              "High demand for Grade A Office",
-              "Planned Metro Phase 2",
-            ].map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-sm text-gray-600"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#EE2529] mt-1.5"></span>
-                {item}
-              </li>
-            ))}
-          </ul>
+        <PropertyDetailsCard title="Market Intelligence" icon={MdBusiness}>
+          <div className="px-2 space-y-4">
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">
+                Demand Drivers
+              </p>
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                {property.demandDrivers || "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">
+                Upcoming Developments
+              </p>
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                {property.upcomingDevelopments || "—"}
+              </p>
+            </div>
+          </div>
         </PropertyDetailsCard>
       </div>
     </div>
   );
   console.log(property);
+  // The Notes tab now opens the full "Notes & Activity" approval experience
+  // (All / Pending / Approved / Declined + Approve / Edit & Approve / Decline),
+  // which also parses the API response correctly (the old inline list mis-read
+  // the response shape and always showed empty).
   const renderNotesContent = () => (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-[#EE2529] mx-auto mb-4">
+          <FiMessageSquare size={22} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Notes &amp; Activity</h2>
+        <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
+          Review notes submitted by the team, approve or decline them before they
+          reach the client, and add your own.
+        </p>
+        <button
+          onClick={() => setIsNotesActivityOpen(true)}
+          className="px-6 py-3 bg-[#EE2529] hover:bg-[#D32F2F] text-white rounded-xl text-sm font-bold inline-flex items-center gap-2 transition-all active:scale-95"
+        >
+          <FiMessageSquare size={16} /> Open Notes &amp; Activity
+        </button>
+      </div>
+    </div>
+  );
+
+  // Legacy inline notes view (kept out of the render tree; superseded by the
+  // NotesAndActivityModal above).
+  const renderNotesContentLegacy = () => (
     <div className="space-y-6 animate-fadeIn">
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold text-gray-800 uppercase tracking-tight mb-2">
@@ -1044,41 +1163,100 @@ const PropertyDetails = () => {
     </div>
   );
 
-  const renderFaqContent = () => (
+  // Messages tab — this property's enquiries; open a conversation per enquiry.
+  const renderMessagesContent = () => (
     <div className="space-y-4 animate-fadeIn max-w-3xl mx-auto">
-      {[
-        "Can we schedule a virtual tour?",
-        "What are the property tax rates?",
-        "Are there association fees?",
-        "Lease renewal terms?",
-      ].map((q, i) => (
-        <div
-          key={i}
-          className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
-        >
-          <button
-            onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-            className="w-full flex justify-between items-center p-5 text-left bg-white hover:bg-gray-50 transition"
-          >
-            <span className="font-bold text-gray-800 text-sm uppercase tracking-wide">
-              {q}
-            </span>
-            <FiHelpCircle
-              className={`text-gray-400 transition-transform ${activeFaq === i ? "rotate-180 text-[#EE2529]" : ""}`}
-            />
-          </button>
-          {activeFaq === i && (
-            <div className="p-5 pt-0 bg-gray-50 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
-            </div>
-          )}
-        </div>
-      ))}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-800 mb-1">Enquiry Messages</h2>
+        <p className="text-gray-500 text-sm mb-5">
+          Conversations with clients who enquired about this property. Your
+          messages are reviewed by an admin before the client sees them.
+        </p>
+
+        {enquiriesLoading ? (
+          <div className="py-10 text-center text-gray-400 text-sm">Loading enquiries…</div>
+        ) : propertyEnquiries.length === 0 ? (
+          <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <FiMessageSquare size={36} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-sm text-gray-400 font-medium">
+              No enquiries assigned to you for this property.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {propertyEnquiries.map((enq) => (
+              <div
+                key={enq.id}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"
+              >
+                <div>
+                  <p className="text-sm font-bold text-gray-800">
+                    {enq.inquirer?.firstName} {enq.inquirer?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 italic line-clamp-1">
+                    "{enq.inquiry || "No message"}"
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMessageInquiry(enq)}
+                  className="shrink-0 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wide hover:bg-[#EE2529] transition-all flex items-center gap-2"
+                >
+                  <FiMessageSquare size={14} /> Open Conversation
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
+
+  const renderFaqContent = () => {
+    // FAQs are stored on the property as an array of { question, answer }.
+    // They are optional, so guard against a missing/empty list.
+    const faqs = Array.isArray(property?.faqs) ? property.faqs : [];
+
+    if (faqs.length === 0) {
+      return (
+        <div className="animate-fadeIn max-w-3xl mx-auto">
+          <div className="bg-white border border-gray-100 rounded-xl p-10 text-center shadow-sm">
+            <FiHelpCircle className="mx-auto text-gray-300 w-10 h-10 mb-3" />
+            <p className="text-gray-500 text-sm font-medium">
+              No FAQs were added for this property.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4 animate-fadeIn max-w-3xl mx-auto">
+        {faqs.map((faq, i) => (
+          <div
+            key={i}
+            className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+          >
+            <button
+              onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+              className="w-full flex justify-between items-center p-5 text-left bg-white hover:bg-gray-50 transition"
+            >
+              <span className="font-bold text-gray-800 text-sm uppercase tracking-wide">
+                {faq.question}
+              </span>
+              <FiHelpCircle
+                className={`text-gray-400 transition-transform shrink-0 ml-3 ${activeFaq === i ? "rotate-180 text-[#EE2529]" : ""}`}
+              />
+            </button>
+            {activeFaq === i && (
+              <div className="p-5 pt-0 bg-gray-50 text-sm text-gray-600 leading-relaxed border-t border-gray-100 whitespace-pre-wrap">
+                {faq.answer || "—"}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -1125,6 +1303,8 @@ const PropertyDetails = () => {
                   {property.verificationLogs?.some(
                     (log) => log.userId === user?.userId,
                   ) ? (
+                    // Current user is one of the verifiers — they can remove
+                    // their own verification regardless of overall status.
                     <button
                       onClick={(e) => handleUnverify(e, property.propertyId)}
                       className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-red-100 text-red-700 hover:bg-red-200 transition"
@@ -1132,14 +1312,19 @@ const PropertyDetails = () => {
                       Unverify
                     </button>
                   ) : (
-                    <button
-                      onClick={(e) => handleVerify(e, property.propertyId)}
-                      className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
-                    >
-                      {property.isVerified === "partial"
-                        ? "2nd Verify"
-                        : "Verify Now"}
-                    </button>
+                    // Only offer to verify while the property still needs it.
+                    // Once it's "completed" (2+ distinct roles verified), no
+                    // further verification is needed — hide the button.
+                    property.isVerified !== "completed" && (
+                      <button
+                        onClick={(e) => handleVerify(e, property.propertyId)}
+                        className="px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition"
+                      >
+                        {property.isVerified === "partial"
+                          ? "2nd Verify"
+                          : "Verify Now"}
+                      </button>
+                    )
                   )}
                 </>
               )}
@@ -1171,22 +1356,61 @@ const PropertyDetails = () => {
           {/* Left Column - Image & Quick Actions */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-              <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 relative">
-                {property?.media?.[0]?.fileUrl ? (
-                  <img
-                    src={property.media[0].fileUrl}
-                    alt="Property"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                    <FiImage size={64} className="mb-3 opacity-50" />
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] opacity-50">
-                      No Image Available
-                    </span>
-                  </div>
-                )}
-              </div>
+              {(() => {
+                const mediaList = Array.isArray(property?.media) ? property.media : [];
+                const current = mediaList[activeMedia] || mediaList[0];
+                return (
+                  <>
+                    <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 relative">
+                      {current?.fileUrl ? (
+                        current.mediaType === "video" ? (
+                          <video
+                            src={current.fileUrl}
+                            controls
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={current.fileUrl}
+                            alt="Property"
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                          />
+                        )
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                          <FiImage size={64} className="mb-3 opacity-50" />
+                          <span className="text-xs font-bold uppercase tracking-[0.2em] opacity-50">
+                            No Image Available
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Thumbnail strip — all images/videos for this property */}
+                    {mediaList.length > 1 && (
+                      <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                        {mediaList.map((m, i) => (
+                          <button
+                            key={m.mediaId || i}
+                            onClick={() => setActiveMedia(i)}
+                            className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${
+                              i === activeMedia ? "border-[#EE2529]" : "border-transparent opacity-70 hover:opacity-100"
+                            }`}
+                          >
+                            {m.mediaType === "video" ? (
+                              <div className="w-full h-full bg-gray-800 flex items-center justify-center text-white text-[10px] font-bold">
+                                VIDEO
+                              </div>
+                            ) : (
+                              <img src={m.fileUrl} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Quick Contact Card */}
@@ -1199,10 +1423,33 @@ const PropertyDetails = () => {
                   Have specific questions? Our property advisors are ready to
                   help you with viewing arrangements and negotiations.
                 </p>
-                <button className="w-full bg-[#EE2529] hover:bg-[#D32F2F] text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-red-100 text-sm uppercase tracking-wider">
+                <button
+                  onClick={() => {
+                    const phone = property.salesAgent?.mobileNumber;
+                    if (phone) {
+                      window.location.href = `tel:${phone}`;
+                    } else {
+                      showWarning("No agent is assigned to this property yet.");
+                    }
+                  }}
+                  className="w-full bg-[#EE2529] hover:bg-[#D32F2F] text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-red-100 text-sm uppercase tracking-wider"
+                >
                   <FiPhone /> Call Now
                 </button>
-                <button className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                <button
+                  onClick={() => {
+                    const email = property.salesAgent?.email;
+                    if (email) {
+                      const subject = encodeURIComponent(
+                        `Enquiry about property ${property.propertyId || ""}`,
+                      );
+                      window.location.href = `mailto:${email}?subject=${subject}`;
+                    } else {
+                      showWarning("No agent is assigned to this property yet.");
+                    }
+                  }}
+                  className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
+                >
                   <FiMessageSquare /> Message
                 </button>
               </div>
@@ -1218,11 +1465,25 @@ const PropertyDetails = () => {
                   { id: "lease", label: "Lease", icon: FiFileText },
                   { id: "analytics", label: "Analytics", icon: FaChartLine },
                   { id: "location", label: "Location", icon: FiMapPin },
-                  // user?.role === "Sales Executive - Property Manager" && {
-                  //   id: "notes",
-                  //   label: "Notes",
-                  //   icon: FiMessageSquare,
-                  // },
+                  // Notes are written by property managers and reviewed by the
+                  // staff who manage properties — show the tab to Admin/Super
+                  // Admin/Sales Manager and the Property Manager.
+                  (isAdminOrSuperAdmin ||
+                    isSalesManager ||
+                    user?.role === "Sales Executive - Property Manager") && {
+                    id: "notes",
+                    label: "Notes",
+                    icon: FiMessageSquare,
+                  },
+                  // Enquiry messages — for the Client Dealer who handles this
+                  // property's enquiries (and admins/managers).
+                  (isAdminOrSuperAdmin ||
+                    isSalesManager ||
+                    user?.role === "Sales Executive - Client Dealer") && {
+                    id: "messages",
+                    label: "Messages",
+                    icon: FiMessageSquare,
+                  },
                   { id: "faqs", label: "FAQs", icon: FiHelpCircle },
                 ]
                   .filter(Boolean)
@@ -1243,8 +1504,11 @@ const PropertyDetails = () => {
               {activeTab === "analytics" && renderAnalyticsContent()}
               {activeTab === "location" && renderLocationContent()}
               {activeTab === "notes" &&
-                user?.role === "Sales Executive - Property Manager" &&
+                (isAdminOrSuperAdmin ||
+                  isSalesManager ||
+                  user?.role === "Sales Executive - Property Manager") &&
                 renderNotesContent()}
+              {activeTab === "messages" && renderMessagesContent()}
               {activeTab === "faqs" && renderFaqContent()}
             </div>
           </div>
@@ -1339,6 +1603,21 @@ const PropertyDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Full Notes & Activity approval experience (opened from the Notes tab) */}
+      <NotesAndActivityModal
+        isOpen={isNotesActivityOpen}
+        onClose={() => setIsNotesActivityOpen(false)}
+        property={property}
+        onNoteAdded={() => fetchNotes()}
+      />
+
+      {/* Enquiry conversation (opened from the Messages tab) */}
+      <InquiryMessagesModal
+        isOpen={!!messageInquiry}
+        inquiry={messageInquiry}
+        onClose={() => setMessageInquiry(null)}
+      />
     </div>
   );
 };

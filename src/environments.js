@@ -22,9 +22,12 @@ const EMAILJS = {
 const ENV_CONFIG = {
   local: {
     BASE_URL: "http://localhost:3000/api/v1",
+    // Consumer (client-facing) frontend, used for share links.
+    CLIENT_URL: "http://localhost:8080",
   },
   prod: {
     BASE_URL: "https://pre-lease-server-1.onrender.com/api/v1",
+    CLIENT_URL: "https://p-grid-client.vercel.app",
   },
 };
 const env_ = 
@@ -37,6 +40,7 @@ const env_ =
 /* Final env object */
 export const env = {
   BASE_URL: ENV_CONFIG[env_].BASE_URL,
+  CLIENT_URL: ENV_CONFIG[env_].CLIENT_URL,
 
   cloudinary: CLOUDINARY_BASE_URL,
   CLOUD_NAME,
@@ -50,3 +54,4 @@ export const env = {
 };
 
 export const BASE_URL = env.BASE_URL;
+export const CLIENT_URL = env.CLIENT_URL;
