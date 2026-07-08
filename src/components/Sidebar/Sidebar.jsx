@@ -15,6 +15,7 @@ import {
   FiBriefcase,
   FiEdit3,
   FiCheckSquare,
+  FiImage,
 } from "react-icons/fi";
 import {
   MdDashboard,
@@ -100,6 +101,13 @@ const buildMenuItems = (role) => {
     title: "Leads",
     icon: <FiMail className="w-5 h-5" />,
     submenus: [{ title: "Contact Leads", link: "/leads/contact" }],
+  };
+
+  // Content — homepage content the admin manages (Explore-Categories cards).
+  const contentItem = {
+    title: "Content",
+    icon: <FiImage className="w-5 h-5" />,
+    submenus: [{ title: "Categories", link: "/content/categories" }],
   };
 
   // Approvals — dealer enquiry messages awaiting admin approval. `badgeKey`
@@ -304,6 +312,7 @@ const buildMenuItems = (role) => {
       advancedSettingsItem,
       reportsItem,
       leadsItem,
+      contentItem,
       approvalsItem,
       {
         title: "Property",

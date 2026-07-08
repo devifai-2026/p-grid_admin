@@ -33,6 +33,7 @@ import PrivacyPolicy from "./components/Sidebar/Pages/Legal/PrivacyPolicy";
 import EnquiryStages from "./components/Sidebar/Pages/AdvancedSettings/EnquiryStages";
 import EnquiryReport from "./components/Sidebar/Pages/Reports/EnquiryReport";
 import ContactLeads from "./components/Sidebar/Pages/Leads/ContactLeads";
+import Categories from "./components/Sidebar/Pages/Categories/Categories";
 import AllNotifications from "./components/Sidebar/Pages/Notifications/AllNotifications";
 import Enquiry from "./components/Sidebar/Pages/Enquiry/Enquiry";
 import AssignedEnquiries from "./components/Sidebar/Pages/Enquiry/AssignedEnquiries";
@@ -217,6 +218,7 @@ const AppRoutes = () => {
           <Route path="/settings/enquiry-stages" element={<EnquiryStages />} />
           <Route path="/reports/enquiries" element={<EnquiryReport />} />
           <Route path="/leads/contact" element={<ContactLeads />} />
+          <Route path="/content/categories" element={<Categories />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help-and-support" element={<HelpandSupport />} />
 
