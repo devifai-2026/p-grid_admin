@@ -35,8 +35,8 @@ const Login = ({ onLogin }) => {
 
   const handleSendOtp = () => {
     setError("");
-    if (formData.mobileNumber.length !== 10) {
-      setError("Please enter a valid 10-digit mobile number");
+    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber)) {
+      setError("Please enter a valid 10-digit mobile number starting with 6-9");
       return;
     }
 
